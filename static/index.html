@@ -15,38 +15,44 @@
   <div class="container">
     <div class="grid">
       <div class="card">
-        <h2>Devices (ip neigh / arp)</h2>
-        <div class="controls">
-          <button onclick="saveLog('devices')">Save Log</button>
-        </div>
-        <pre id="devices"></pre>
+        <details open>
+          <summary>▶ Devices (ip neigh / arp)</summary>
+          <div class="controls">
+            <button onclick="saveLog('devices')">Save Log</button>
+          </div>
+          <pre id="devices"></pre>
+        </details>
       </div>
       <div class="card">
-        <h2>Connections (ss/netstat)</h2>
-        <div class="controls">
-          <select id="connFilter">
-            <option value="">All</option>
-            <option value="ESTAB">ESTAB</option>
-            <option value="LISTEN">LISTEN</option>
-            <option value="udp">UDP</option>
-            <option value="tcp">TCP</option>
-          </select>
-          <button onclick="saveLog('connections')">Save Log</button>
-        </div>
-        <pre id="connections"></pre>
+        <details open>
+          <summary>▶ Connections (ss/netstat)</summary>
+          <div class="controls">
+            <select id="connFilter">
+              <option value="">All</option>
+              <option value="ESTAB">ESTAB</option>
+              <option value="LISTEN">LISTEN</option>
+              <option value="udp">UDP</option>
+              <option value="tcp">TCP</option>
+            </select>
+            <button onclick="saveLog('connections')">Save Log</button>
+          </div>
+          <pre id="connections"></pre>
+        </details>
       </div>
       <div class="card">
-        <h2>Processes (ps)</h2>
-        <div class="controls">
-          <select id="procFilter">
-            <option value="">All</option>
-            <option value="python">python</option>
-            <option value="ssh">ssh</option>
-            <option value="chrome|chromium">browser</option>
-          </select>
-          <button onclick="saveLog('processes')">Save Log</button>
-        </div>
-        <pre id="processes"></pre>
+        <details open>
+          <summary>▶ Processes (ps)</summary>
+          <div class="controls">
+            <select id="procFilter">
+              <option value="">All</option>
+              <option value="python">python</option>
+              <option value="ssh">ssh</option>
+              <option value="chrome|chromium">browser</option>
+            </select>
+            <button onclick="saveLog('processes')">Save Log</button>
+          </div>
+          <pre id="processes"></pre>
+        </details>
       </div>
     </div>
   </div>

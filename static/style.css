@@ -9,7 +9,9 @@ header h1 { margin: 0; font-size: 28px; letter-spacing: 2px; }
 .container::after { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: linear-gradient(to bottom, transparent 97%, var(--scan) 100%); background-size: 100% 22px; pointer-events: none; }
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .card { background: rgba(0,0,0,0.6); border: 2px solid var(--dim); border-radius: 2px; padding: 10px; min-height: 240px; }
-.card h2 { margin: 0 0 6px 0; font-size: 20px; }
+summary { cursor: pointer; font-size: 20px; }
+details[open] summary::marker { content: "▼ "; }
+details summary::marker { content: "▶ "; }
 pre { background: rgba(0,0,0,0.5); padding: 10px; border: 2px solid var(--dim); overflow: auto; max-height: 60vh; }
 select, button { background: #001900; color: var(--fg); border: 2px solid var(--dim); padding: 4px 8px; font-size: 18px; }
 button { cursor: pointer; }
