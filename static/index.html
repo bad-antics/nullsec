@@ -1,1 +1,94 @@
-x
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NullSec Network Manager</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <h1>⦿ NullSec Network Manager</h1>
+    <button id="refresh">Refresh</button>
+    <span class="status" id="status">Ready</span>
+  </header>
+  <div class="container">
+    <div class="grid">
+      <div class="card">
+        <h2>Devices (ip neigh / arp)</h2>
+        <div class="controls">
+          <button onclick="saveLog('devices')">Save Log</button>
+        </div>
+        <pre id="devices"></pre>
+      </div>
+      <div class="card">
+        <h2>Connections (ss/netstat)</h2>
+        <div class="controls">
+          <select id="connFilter">
+            <option value="">All</option>
+            <option value="ESTAB">ESTAB</option>
+            <option value="LISTEN">LISTEN</option>
+            <option value="udp">UDP</option>
+            <option value="tcp">TCP</option>
+          </select>
+          <button onclick="saveLog('connections')">Save Log</button>
+        </div>
+        <pre id="connections"></pre>
+      </div>
+      <div class="card">
+        <h2>Processes (ps)</h2>
+        <div class="controls">
+          <select id="procFilter">
+            <option value="">All</option>
+            <option value="python">python</option>
+            <option value="ssh">ssh</option>
+            <option value="chrome|chromium">browser</option>
+          </select>
+          <button onclick="saveLog('processes')">Save Log</button>
+        </div>
+        <pre id="processes"></pre>
+      </div>
+    </div>
+  </div>
+  <footer>Hosted locally. API: /api/devices, /api/connections, /api/processes</footer>
+  <script>
+    async function fetchAPI(path) {
+      const res = await fetch(path);
+      return res.json();
+    }
+    function renderLines(el, lines, filter=''){
+      if(filter){
+        const re = new RegExp(filter, 'i');
+        lines = lines.filter(l => re.test(l));
+      }
+      el.textContent = lines.join('\n');
+    }
+    async function refreshAll(){
+      status.textContent = 'Refreshing...';
+      const [dev, conn, proc] = await Promise.all([
+        fetchAPI('/api/devices'),
+        fetchAPI('/api/connections'),
+        fetchAPI('/api/processes')
+      ]);
+      renderLines(document.getElementById('devices'), dev.lines);
+      renderLines(document.getElementById('connections'), conn.lines, document.getElementById('connFilter').value);
+      renderLines(document.getElementById('processes'), proc.lines, document.getElementById('procFilter').value);
+      status.textContent = 'Updated ' + new Date().toLocaleTimeString();
+    }
+    async function saveLog(kind){
+      const el = document.getElementById(kind);
+      const blob = new Blob([el.textContent + '\n'], {type: 'text/plain'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = kind + '-' + new Date().toISOString().replace(/[:.]/g,'-') + '.log';
+      a.click();
+    }
+    document.getElementById('refresh').onclick = refreshAll;
+    document.getElementById('connFilter').onchange = refreshAll;
+    document.getElementById('procFilter').onchange = refreshAll;
+    const status = document.getElementById('status');
+    refreshAll();
+    setInterval(refreshAll, 10000);
+  </script>
+</body>
+</html>
