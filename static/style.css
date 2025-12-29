@@ -1,16 +1,18 @@
-/* Hacker-style dark theme */
-:root { --bg: #0b0f10; --fg: #c8facc; --muted: #8ab88e; --accent: #00ff9d; --danger: #ff5277; }
-* { box-sizing: border-box; font-family: "Fira Code", monospace; }
-body { margin: 0; background: var(--bg); color: var(--fg); }
-header { padding: 12px 16px; border-bottom: 1px solid #0f1416; display: flex; align-items: center; gap: 12px; }
-header h1 { margin: 0; font-size: 18px; letter-spacing: 1px; }
-.container { padding: 16px; }
+/* WarGames terminal aesthetic */
+@font-face { font-family: 'VT323'; font-style: normal; font-weight: 400; src: local('VT323'), url('https://fonts.gstatic.com/s/vt323/v17/pxiKyp0ihIEF2isfFJU.woff2') format('woff2'); }
+:root { --bg: #000; --fg: #33ff33; --dim: #1e7b1e; --scan: rgba(51,255,51,0.06); }
+* { box-sizing: border-box; font-family: VT323, monospace; }
+body { margin: 0; background: var(--bg); color: var(--fg); text-shadow: 0 0 6px #0f0; }
+header { padding: 8px 14px; border-bottom: 2px solid var(--dim); display: flex; align-items: center; gap: 12px; }
+header h1 { margin: 0; font-size: 28px; letter-spacing: 2px; }
+.container { padding: 12px; position: relative; }
+.container::after { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: linear-gradient(to bottom, transparent 97%, var(--scan) 100%); background-size: 100% 22px; pointer-events: none; }
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-.card { background: #0e1315; border: 1px solid #152025; border-radius: 8px; padding: 12px; min-height: 240px; }
-.card h2 { margin: 0 0 8px 0; font-size: 14px; color: var(--accent); }
-pre { background: #0a0e10; padding: 8px; border-radius: 6px; overflow: auto; max-height: 60vh; }
-select, button { background: #0a0e10; color: var(--fg); border: 1px solid #1a282e; border-radius: 6px; padding: 6px 8px; }
+.card { background: rgba(0,0,0,0.6); border: 2px solid var(--dim); border-radius: 2px; padding: 10px; min-height: 240px; }
+.card h2 { margin: 0 0 6px 0; font-size: 20px; }
+pre { background: rgba(0,0,0,0.5); padding: 10px; border: 2px solid var(--dim); overflow: auto; max-height: 60vh; }
+select, button { background: #001900; color: var(--fg); border: 2px solid var(--dim); padding: 4px 8px; font-size: 18px; }
 button { cursor: pointer; }
 .controls { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-.status { color: var(--muted); font-size: 12px; }
-footer { padding: 8px 16px; border-top: 1px solid #0f1416; color: var(--muted); font-size: 12px; }
+.status { color: var(--fg); font-size: 16px; }
+footer { padding: 6px 14px; border-top: 2px solid var(--dim); color: var(--fg); font-size: 16px; }
