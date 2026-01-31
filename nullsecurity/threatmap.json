@@ -1,0 +1,29 @@
+{
+  "name": "threatmap",
+  "display_name": "Threat Intelligence Mapper",
+  "description": "Real-time threat intelligence aggregation, IOC lookup, malware analysis, and threat correlation",
+  "category": "Intelligence",
+  "author": "bad-antics",
+  "version": "1.0.0",
+  "requires_root": false,
+  "external_tools": [],
+  "ai_enhanced": true,
+  "features": [
+    "Aggregate multiple threat feeds (URLhaus, PhishTank, AbuseIPDB, ThreatFox)",
+    "IOC lookup for IPs, domains, and file hashes",
+    "Malware analysis with MITRE ATT&CK mapping",
+    "Phishing URL detection with risk scoring",
+    "Threat actor tracking (APT groups, TTPs)",
+    "Blocklist generation (IP, domain, URL)",
+    "Real-time threat monitoring",
+    "Threat correlation engine",
+    "HTML report generation"
+  ],
+  "parameters": {
+    "feeds": "Threat intelligence feed sources",
+    "ioc": "Indicator of Compromise to lookup",
+    "output_dir": "Directory for reports and blocklists"
+  },
+  "tags": ["threat-intel", "ioc", "malware", "phishing", "apt", "blocklist"],
+  "repository": "https://github.com/bad-antics"
+}

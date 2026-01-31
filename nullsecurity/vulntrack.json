@@ -1,0 +1,29 @@
+{
+  "name": "vulntrack",
+  "display_name": "Vulnerability Tracker",
+  "description": "CVE monitoring, vulnerability assessment, CVSS scoring, exploit tracking, and patch management",
+  "category": "Vulnerability Management",
+  "author": "bad-antics",
+  "version": "1.0.0",
+  "requires_root": false,
+  "external_tools": [],
+  "ai_enhanced": true,
+  "features": [
+    "CVE database search and detailed lookup",
+    "Recent critical vulnerability monitoring",
+    "Software vulnerability scanning",
+    "CVSS v3.1 score calculator",
+    "Exploit database search (Exploit-DB, Metasploit, GitHub)",
+    "Patch availability tracking",
+    "CVE watch list with notifications",
+    "Vulnerability timeline visualization",
+    "HTML report generation"
+  ],
+  "parameters": {
+    "cve_id": "CVE identifier to lookup",
+    "software": "Software name and version to scan",
+    "keyword": "Search keyword for CVE/exploit lookup"
+  },
+  "tags": ["cve", "vulnerability", "cvss", "exploit", "patch", "security-assessment"],
+  "repository": "https://github.com/bad-antics"
+}
