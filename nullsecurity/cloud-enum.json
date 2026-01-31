@@ -1,0 +1,33 @@
+{
+  "name": "Cloud Enum",
+  "description": "NULLSEC Cloud Enumeration Module",
+  "category": "enum",
+  "author": "NullSec Team",
+  "version": "1.0",
+  "parameters": [
+    {
+      "name": "target",
+      "type": "ip",
+      "description": "Target IP address or hostname",
+      "required": true
+    },
+    {
+      "name": "output_format",
+      "type": "choice",
+      "description": "Output format",
+      "choices": [
+        "console",
+        "json",
+        "xml",
+        "html"
+      ],
+      "default": "console"
+    },
+    {
+      "name": "verbose",
+      "type": "boolean",
+      "description": "Enable verbose output",
+      "default": "false"
+    }
+  ]
+}

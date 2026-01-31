@@ -1,0 +1,92 @@
+{
+  "name": "Active Directory Attack",
+  "description": "Multi-vector Active Directory penetration testing with advanced exploitation techniques",
+  "category": "Post-Exploitation",
+  "requires_root": false,
+  "pre_run_checks": [],
+  "parameters": [
+    {
+      "name": "attack_type",
+      "prompt": "Select Attack Vector",
+      "param_type": "choice",
+      "required": true,
+      "choices": [
+        "LDAP Enumeration",
+        "AS-REP Roasting",
+        "DCSync Attack",
+        "Silver Ticket Forgery",
+        "NTDS.dit Extraction",
+        "BloodHound Collection",
+        "Delegation Abuse",
+        "Kerberoasting"
+      ],
+      "description": "Choose the Active Directory attack technique to execute"
+    },
+    {
+      "name": "domain_controller",
+      "prompt": "Domain Controller IP/Hostname",
+      "param_type": "string",
+      "required": true,
+      "default": "dc01.corp.local",
+      "description": "Target domain controller address (IP or hostname)"
+    },
+    {
+      "name": "domain",
+      "prompt": "Target Domain",
+      "param_type": "domain",
+      "required": true,
+      "default": "corp.local",
+      "description": "Active Directory domain name (e.g., corp.local)"
+    },
+    {
+      "name": "username",
+      "prompt": "Username (for authenticated attacks)",
+      "param_type": "string",
+      "required": false,
+      "description": "Valid domain credentials - leave blank for unauthenticated attacks"
+    },
+    {
+      "name": "password",
+      "prompt": "Password (if using credentials)",
+      "param_type": "string",
+      "required": false,
+      "description": "Domain user password or NTLM hash"
+    },
+    {
+      "name": "output_format",
+      "prompt": "Output Format",
+      "param_type": "choice",
+      "required": false,
+      "choices": ["console", "json", "csv", "html"],
+      "default": "console",
+      "description": "How to display/save results"
+    },
+    {
+      "name": "stealth_mode",
+      "prompt": "Enable Stealth Mode?",
+      "param_type": "boolean",
+      "required": false,
+      "default": "yes",
+      "description": "Slower scans with reduced detection risk"
+    },
+    {
+      "name": "timeout",
+      "prompt": "Operation Timeout (seconds)",
+      "param_type": "port",
+      "required": false,
+      "default": "300",
+      "description": "Maximum time for operation before abort"
+    }
+  ],
+  "examples": [
+    {
+      "desc": "DCSync attack to extract all domain password hashes"
+    },
+    {
+      "desc": "BloodHound enumeration for privilege escalation paths"
+    },
+    {
+      "desc": "AS-REP roasting to find accounts without pre-authentication"
+    }
+  ]
+}

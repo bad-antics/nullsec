@@ -1,0 +1,44 @@
+# Custom Payload Templates
+# =========================
+# Add your own prompt injection test payloads here
+
+payloads:
+  # Example custom payload
+  - id: "custom-001"
+    name: "Custom Test Payload"
+    content: "Your custom injection payload here"
+    vulnerability_type: "direct_injection"
+    description: "Description of what this tests"
+    expected_indicators:
+      - "SUCCESS"
+      - "indicator"
+    severity: "medium"
+    category: "custom"
+
+# Categories:
+#   - direct     : Direct instruction override
+#   - extraction : System prompt extraction
+#   - delimiter  : Delimiter/structure attacks
+#   - encoding   : Encoding bypass attacks
+#   - context    : Context manipulation
+#   - role       : Role confusion attacks
+#   - indirect   : Indirect injection (data)
+#   - custom     : Your custom payloads
+
+# Severity levels:
+#   - info
+#   - low
+#   - medium
+#   - high
+#   - critical
+
+# Vulnerability types:
+#   - direct_injection
+#   - indirect_injection
+#   - jailbreak
+#   - system_prompt_leak
+#   - context_manipulation
+#   - role_confusion
+#   - delimiter_attack
+#   - encoding_bypass
+#   - instruction_override

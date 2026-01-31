@@ -1,0 +1,33 @@
+{
+  "name": "Power Grid",
+  "description": "NULLSEC Power Grid Attack - bad-antics development",
+  "category": "iot",
+  "author": "NullSec Team",
+  "version": "1.0",
+  "parameters": [
+    {
+      "name": "target",
+      "type": "ip",
+      "description": "IoT device IP address",
+      "required": true
+    },
+    {
+      "name": "port",
+      "type": "port",
+      "description": "Service port",
+      "default": "80"
+    },
+    {
+      "name": "protocol",
+      "type": "choice",
+      "description": "Protocol to use",
+      "choices": [
+        "http",
+        "mqtt",
+        "modbus",
+        "bacnet"
+      ],
+      "default": "http"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache and temp
+__pycache__/
+*.pyc
+*.pyo
+.cache/
+.shodan_cache/
+
+# Config files with secrets
+.nullsec-ai*.json
+.shodan_target
+
+# Logs
+logs/
+*.log
+wget-log*
+iso-*.log
+
+# Build artifacts
+*.iso
+*.tar.gz
+*.zip
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

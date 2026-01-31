@@ -1,0 +1,32 @@
+{
+  "name": "Mobile Attack",
+  "description": "NULLSEC Mobile Attack Module",
+  "category": "mobile",
+  "author": "NullSec Team",
+  "version": "1.0",
+  "parameters": [
+    {
+      "name": "target_app",
+      "type": "file",
+      "description": "APK/IPA file to analyze",
+      "required": true
+    },
+    {
+      "name": "device_ip",
+      "type": "ip",
+      "description": "Target device IP",
+      "required": false
+    },
+    {
+      "name": "analysis_depth",
+      "type": "choice",
+      "description": "Analysis depth",
+      "choices": [
+        "quick",
+        "standard",
+        "deep"
+      ],
+      "default": "standard"
+    }
+  ]
+}

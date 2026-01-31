@@ -1,0 +1,32 @@
+{
+  "name": "Check Enhancements",
+  "description": "Check which modules are enhanced",
+  "category": "generic",
+  "author": "NullSec Team",
+  "version": "1.0",
+  "parameters": [
+    {
+      "name": "target",
+      "type": "string",
+      "description": "Primary target (IP, domain, or file)",
+      "required": true
+    },
+    {
+      "name": "output_format",
+      "type": "choice",
+      "description": "Output format",
+      "choices": [
+        "console",
+        "json",
+        "xml"
+      ],
+      "default": "console"
+    },
+    {
+      "name": "verbose",
+      "type": "boolean",
+      "description": "Enable verbose output",
+      "default": "false"
+    }
+  ]
+}

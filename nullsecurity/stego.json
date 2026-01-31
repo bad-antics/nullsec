@@ -1,0 +1,40 @@
+{
+  "name": "Stego",
+  "description": "NULLSEC Steganography - bad-antics development",
+  "category": "password",
+  "author": "NullSec Team",
+  "version": "1.0",
+  "parameters": [
+    {
+      "name": "target",
+      "type": "ip",
+      "description": "Target IP address or hostname",
+      "required": true
+    },
+    {
+      "name": "username",
+      "type": "string",
+      "description": "Username to attack",
+      "required": false
+    },
+    {
+      "name": "wordlist",
+      "type": "file",
+      "description": "Password wordlist",
+      "default": "/usr/share/wordlists/rockyou.txt"
+    },
+    {
+      "name": "service",
+      "type": "choice",
+      "description": "Service to attack",
+      "choices": [
+        "ssh",
+        "ftp",
+        "http",
+        "smb",
+        "rdp"
+      ],
+      "default": "ssh"
+    }
+  ]
+}

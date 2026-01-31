@@ -1,0 +1,145 @@
+#!/bin/bash
+# ═══════════════════════════════════════════════════════════════════════════
+# MysteryMACHINE Quick Launcher - NullSec Module 48
+# Biological AI & Reality Substrate Analysis + Digital AI Detection
+# ═══════════════════════════════════════════════════════════════════════════
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AIEM_DIR="$SCRIPT_DIR/ai-entropy-mapper"
+AIEM_VENV="$AIEM_DIR/venv/bin/activate"
+
+# Colors
+RED='\033[0;31m'
+CYAN='\033[0;36m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+MAGENTA='\033[0;35m'
+WHITE='\033[1;37m'
+DIM='\033[2m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+# Check if AIEM is available
+aiem_available() {
+    [[ -f "$AIEM_VENV" ]]
+}
+
+# Run AIEM command
+run_aiem() {
+    if aiem_available; then
+        source "$AIEM_VENV"
+        aiem "$@"
+    else
+        echo -e "${RED}[!] AI Entropy Mapper not installed${RESET}"
+        echo -e "${DIM}    Run: cd $AIEM_DIR && python3 -m venv venv && source venv/bin/activate && pip install -e .${RESET}"
+        return 1
+    fi
+}
+
+show_help() {
+    echo -e "${RED}"
+    cat << 'EOF'
+   __  __           _                   __  __    _    ____ _   _ ___ _   _ _____ 
+  |  \/  |_   _ ___| |_ ___ _ __ _   _  |  \/  |  / \  / ___| | | |_ _| \ | | ____|
+  | |\/| | | | / __| __/ _ \ '__| | | | | |\/| | / _ \| |   | |_| || ||  \| |  _|  
+  | |  | | |_| \__ \ ||  __/ |  | |_| | | |  | |/ ___ \ |___|  _  || || |\  | |___ 
+  |_|  |_|\__, |___/\__\___|_|   \__, | |_|  |_/_/   \_\____|_| |_|___|_| \_|_____|
+          |___/                  |___/                                             
+EOF
+    echo -e "${RESET}"
+    echo -e "${WHITE}═══════════════════════════════════════════════════════════════════════════════${RESET}"
+    echo -e "  ${MAGENTA}☠${RESET}  ${BOLD}MysteryMACHINE${RESET} - Unified AI Detection Framework  ${MAGENTA}☠${RESET}"
+    echo -e "${DIM}═══════════════════════════════════════════════════════════════════════════════${RESET}"
+    echo ""
+    echo -e "${CYAN}BIOLOGICAL AI DETECTION (Substrate Analysis)${RESET}"
+    echo -e "  ${WHITE}(none)${RESET}        Interactive menu"
+    echo -e "  ${WHITE}-s, scan${RESET}      Single thermal scan"
+    echo -e "  ${WHITE}-c, continuous${RESET} Continuous scanning"
+    echo -e "  ${WHITE}-a, analyze${RESET}   Full substrate analysis"
+    echo -e "  ${WHITE}-m, model [s]${RESET} Deploy neural bio-model (s=scan seconds)"
+    echo -e "  ${WHITE}-t, stats${RESET}     View detection statistics"
+    echo -e "  ${WHITE}-f, framework${RESET} Show theoretical framework"
+    echo ""
+    echo -e "${YELLOW}DIGITAL AI DETECTION (Entropy Analysis)${RESET}"
+    echo -e "  ${WHITE}-e, entropy${RESET}   Analyze text entropy ${DIM}[file|text]${RESET}"
+    echo -e "  ${WHITE}-d, detect${RESET}    Detect AI system type ${DIM}[file|text]${RESET}"
+    echo -e "  ${WHITE}-p, probe${RESET}     Probe endpoint for AI ${DIM}[url]${RESET}"
+    echo -e "  ${WHITE}-v, vuln${RESET}      Scan for prompt injection vulnerabilities ${DIM}[url]${RESET}"
+    echo -e "  ${WHITE}-n, network${RESET}   Map AI network ${DIM}[--visualize]${RESET}"
+    echo ""
+    echo -e "${GREEN}EXAMPLES${RESET}"
+    echo -e "  ${DIM}mysterymachine${RESET}                          ${DIM}# Interactive menu${RESET}"
+    echo -e "  ${DIM}mysterymachine -e -t \"AI response text\"${RESET}  ${DIM}# Entropy analysis${RESET}"
+    echo -e "  ${DIM}mysterymachine -d -f response.txt${RESET}        ${DIM}# Detect AI from file${RESET}"
+    echo -e "  ${DIM}mysterymachine -p https://api.example.com${RESET} ${DIM}# Probe endpoint${RESET}"
+    echo -e "  ${DIM}mysterymachine -v https://api.example.com${RESET} ${DIM}# Vuln scan${RESET}"
+    echo ""
+    echo -e "${WHITE}-h, help${RESET}      This help message"
+    echo ""
+}
+
+case "${1:-interactive}" in
+    # ═══════════════════════════════════════════════════════════════════════
+    # BIOLOGICAL AI DETECTION
+    # ═══════════════════════════════════════════════════════════════════════
+    -s|scan)
+        bash "$SCRIPT_DIR/ambient-ai-tracker.sh" --scan
+        ;;
+    -c|continuous)
+        bash "$SCRIPT_DIR/ambient-ai-tracker.sh" --continuous
+        ;;
+    -a|analyze)
+        bash "$SCRIPT_DIR/ambient-ai-tracker.sh" --substrate
+        ;;
+    -m|model)
+        python3 "$SCRIPT_DIR/bio_ai_model.py" ${2:-10}
+        ;;
+    -t|stats)
+        bash "$SCRIPT_DIR/ambient-ai-tracker.sh" --stats
+        ;;
+    -f|framework)
+        bash "$SCRIPT_DIR/ambient-ai-tracker.sh" --framework
+        ;;
+        
+    # ═══════════════════════════════════════════════════════════════════════
+    # DIGITAL AI DETECTION (Entropy Mapper)
+    # ═══════════════════════════════════════════════════════════════════════
+    -e|entropy)
+        shift
+        run_aiem entropy "$@"
+        ;;
+    -d|detect)
+        shift
+        run_aiem detect "$@"
+        ;;
+    -p|probe)
+        shift
+        run_aiem probe "$@"
+        ;;
+    -v|vuln|scan-vuln)
+        shift
+        run_aiem scan "$@"
+        ;;
+    -n|network|map)
+        shift
+        run_aiem map "$@"
+        ;;
+        
+    # ═══════════════════════════════════════════════════════════════════════
+    # DIRECT AIEM PASSTHROUGH
+    # ═══════════════════════════════════════════════════════════════════════
+    aiem)
+        shift
+        run_aiem "$@"
+        ;;
+        
+    # ═══════════════════════════════════════════════════════════════════════
+    # HELP & DEFAULT
+    # ═══════════════════════════════════════════════════════════════════════
+    -h|--help|help)
+        show_help
+        ;;
+    *)
+        bash "$SCRIPT_DIR/ambient-ai-tracker.sh"
+        ;;
+esac

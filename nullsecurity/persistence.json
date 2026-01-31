@@ -1,0 +1,33 @@
+{
+  "name": "Persistence",
+  "description": "\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593\u2593",
+  "category": "network",
+  "author": "NullSec Team",
+  "version": "1.0",
+  "parameters": [
+    {
+      "name": "target",
+      "type": "ip",
+      "description": "Target IP address or hostname",
+      "required": true
+    },
+    {
+      "name": "ports",
+      "type": "string",
+      "description": "Port range to scan (e.g., 1-1000, 80,443)",
+      "default": "1-65535"
+    },
+    {
+      "name": "timeout",
+      "type": "port",
+      "description": "Scan timeout in seconds",
+      "default": "300"
+    },
+    {
+      "name": "stealth_mode",
+      "type": "boolean",
+      "description": "Use slower, stealthier scanning",
+      "default": "false"
+    }
+  ]
+}

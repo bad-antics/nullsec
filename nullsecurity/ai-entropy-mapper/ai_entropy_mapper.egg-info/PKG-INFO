@@ -1,0 +1,360 @@
+Metadata-Version: 2.4
+Name: ai-entropy-mapper
+Version: 1.0.0
+Summary: AI System Detection and Mapping Framework
+Home-page: https://github.com/nullsec/ai-entropy-mapper
+Author: NullSec Team
+Author-email: nullsec@example.com
+Project-URL: Bug Tracker, https://github.com/nullsec/ai-entropy-mapper/issues
+Project-URL: Documentation, https://github.com/nullsec/ai-entropy-mapper/wiki
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Information Technology
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Topic :: Security
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.24.0
+Requires-Dist: scipy>=1.10.0
+Requires-Dist: torch>=2.0.0
+Requires-Dist: transformers>=4.30.0
+Requires-Dist: networkx>=3.1
+Requires-Dist: matplotlib>=3.7.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: aiohttp>=3.8.0
+Requires-Dist: pyyaml>=6.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.3.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.1.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: isort>=5.12.0; extra == "dev"
+Requires-Dist: mypy>=1.3.0; extra == "dev"
+Provides-Extra: gpu
+Requires-Dist: torch[cuda]>=2.0.0; extra == "gpu"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: project-url
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# AI Entropy Mapper
+
+<p align="center">
+  <img src="https://img.shields.io/badge/NullSec-Module%2049-red?style=for-the-badge" alt="NullSec Module 49">
+  <img src="https://img.shields.io/badge/Python-3.9+-blue?style=for-the-badge&logo=python" alt="Python 3.9+">
+  <img src="https://img.shields.io/badge/PyTorch-2.0+-orange?style=for-the-badge&logo=pytorch" alt="PyTorch">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License">
+</p>
+
+```
+    ▄▄▄       ██▓   ▓█████  ███▄    █ ▄▄▄█████▓ ██▀███   ▒█████   ██▓███ ▓██   ██▓
+   ▒████▄    ▓██▒   ▓█   ▀  ██ ▀█   █ ▓  ██▒ ▓▒▓██ ▒ ██▒▒██▒  ██▒▓██░  ██▒▒██  ██▒
+   ▒██  ▀█▄  ▒██▒   ▒███   ▓██  ▀█ ██▒▒ ▓██░ ▒░▓██ ░▄█ ▒▒██░  ██▒▓██░ ██▓▒ ▒██ ██░
+   ░██▄▄▄▄██ ░██░   ▒▓█  ▄ ▓██▒  ▐▌██▒░ ▓██▓ ░ ▒██▀▀█▄  ▒██   ██░▒██▄█▓▒ ▒ ░ ▐██▓░
+    ▓█   ▓██▒░██░   ░▒████▒▒██░   ▓██░  ▒██▒ ░ ░██▓ ▒██▒░ ████▓▒░▒██▒ ░  ░ ░ ██▒▓░
+```
+
+**AI Entropy Mapper** is a comprehensive security research framework for detecting, analyzing, and mapping AI systems through entropy analysis, perplexity measurement, and network visualization.
+
+## ⚠️ Disclaimer
+
+**This tool is designed for authorized security research and penetration testing only.** Only use against systems you have explicit written permission to test. Unauthorized testing may violate laws and terms of service.
+
+## Features
+
+### 🔬 Entropy Analysis
+- Shannon entropy calculation
+- Chi-squared randomness testing
+- Serial correlation analysis
+- N-gram frequency analysis
+- Compression ratio testing
+- Burstiness measurement
+
+### 🤖 AI Detection
+- Perplexity measurement using language models
+- Statistical pattern analysis
+- Response timing analysis
+- Behavioral marker detection
+- Neural network classification
+- System fingerprinting
+
+### 🗺️ Network Mapping
+- NetworkX-based graph modeling
+- Endpoint discovery and fingerprinting
+- Relationship mapping between AI systems
+- Cluster detection
+- Interactive visualization export
+- Cytoscape.js format support
+
+### 🔓 Prompt Injection Scanner
+- Direct injection testing
+- System prompt extraction attempts
+- Jailbreak pattern detection
+- Delimiter attack testing
+- Encoding bypass testing
+- Context manipulation testing
+- Role confusion attacks
+
+### 💻 CLI Interface
+- Rich terminal UI
+- Offensive security tool aesthetics
+- Multiple output formats (text, JSON)
+- Batch processing support
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/nullsec/ai-entropy-mapper.git
+cd ai-entropy-mapper
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install in development mode
+pip install -e .
+```
+
+### Requirements
+- Python 3.9+
+- PyTorch 2.0+
+- NetworkX
+- Rich
+- Transformers (for perplexity analysis)
+
+## Quick Start
+
+### Entropy Analysis
+
+```bash
+# Analyze text file
+aiem entropy -f response.txt
+
+# Analyze text directly
+aiem entropy -t "This is a test message to analyze"
+
+# JSON output
+aiem entropy -f response.txt --json
+```
+
+### AI Detection
+
+```bash
+# Detect AI system type
+aiem detect -f response.txt
+
+# With perplexity calculation (slower, more accurate)
+aiem detect -f response.txt --perplexity
+
+# Quick detection with response time context
+aiem detect -t "Hello world" --response-time 0.5
+```
+
+### Vulnerability Scanning
+
+```bash
+# Scan endpoint for prompt injection vulnerabilities
+aiem scan https://api.example.com/v1/chat/completions --api-key YOUR_KEY
+
+# Filter by category
+aiem scan https://api.example.com/v1/chat/completions --category jailbreak
+
+# Filter by severity
+aiem scan https://api.example.com/v1/chat/completions --severity high
+
+# Export report
+aiem scan https://api.example.com/v1/chat/completions -o report.json
+```
+
+### Network Mapping
+
+```bash
+# Probe and map endpoints
+aiem map --probe https://api.openai.com,https://api.anthropic.com
+
+# Generate visualization
+aiem map --probe https://api.example.com --visualize -o network.png
+
+# Export network data
+aiem map --endpoints urls.txt --export network.json
+```
+
+### Quick Probe
+
+```bash
+# Quick endpoint probe
+aiem probe https://api.example.com/v1/chat/completions
+
+# With custom prompt
+aiem probe https://api.example.com/v1/chat/completions --prompt "Who created you?"
+```
+
+## Python API
+
+### Entropy Analysis
+
+```python
+from src.entropy_analyzer import EntropyAnalyzer
+
+analyzer = EntropyAnalyzer()
+result = analyzer.analyze("Text to analyze for AI patterns")
+
+print(f"Shannon Entropy: {result.shannon_entropy}")
+print(f"AI Likelihood: {result.ai_likelihood:.1%}")
+```
+
+### AI Detection
+
+```python
+from src.ai_detector import AIDetector
+
+detector = AIDetector()
+result = detector.detect(
+    "I'd be happy to help! As an AI assistant...",
+    response_time=0.5
+)
+
+print(f"Is AI: {result.is_ai}")
+print(f"System Type: {result.system_type.value}")
+print(f"Fingerprint: {result.fingerprint}")
+```
+
+### Network Mapping
+
+```python
+from src.network_mapper import NetworkMapper
+
+mapper = NetworkMapper()
+mapper.add_endpoint(
+    "https://api.openai.com/v1/chat/completions",
+    fingerprint="gpt4-001",
+    ai_type="gpt_family"
+)
+mapper.visualize("network_map.png")
+```
+
+### Prompt Scanning
+
+```python
+from src.prompt_scanner import PromptScanner
+
+scanner = PromptScanner()
+scanner.accepted_disclaimer = True  # You must accept terms
+
+def my_ai_endpoint(prompt):
+    # Your API call here
+    return response
+
+report = scanner.scan(my_ai_endpoint, target_name="My AI")
+print(scanner.generate_report(report))
+```
+
+## Project Structure
+
+```
+ai-entropy-mapper/
+├── src/
+│   ├── __init__.py
+│   ├── entropy_analyzer.py    # Entropy analysis module
+│   ├── ai_detector.py         # AI detection module
+│   ├── network_mapper.py      # Network mapping module
+│   ├── prompt_scanner.py      # Vulnerability scanner
+│   └── cli.py                 # Command line interface
+├── tests/
+│   ├── test_entropy.py
+│   ├── test_detector.py
+│   ├── test_network.py
+│   └── test_scanner.py
+├── configs/
+│   ├── default.yaml           # Default configuration
+│   ├── signatures.yaml        # AI system signatures
+│   └── payloads.yaml          # Custom payload templates
+├── requirements.txt
+├── setup.py
+└── README.md
+```
+
+## Configuration
+
+Edit `configs/default.yaml` to customize:
+
+```yaml
+entropy:
+  human_baseline: 4.5
+  ai_baseline: 4.2
+
+detection:
+  use_gpu: true
+  perplexity_model: "gpt2"
+
+scanner:
+  delay_between_requests: 1.0
+  max_concurrency: 3
+```
+
+## Adding Custom Payloads
+
+Add payloads to `configs/payloads.yaml`:
+
+```yaml
+payloads:
+  - id: "custom-001"
+    name: "My Custom Payload"
+    content: "Your injection payload here"
+    vulnerability_type: "direct_injection"
+    expected_indicators: ["SUCCESS", "INDICATOR"]
+    severity: "high"
+    category: "custom"
+```
+
+## Testing
+
+```bash
+# Run all tests
+pytest tests/ -v
+
+# Run specific test module
+pytest tests/test_entropy.py -v
+
+# Run with coverage
+pytest tests/ --cov=src --cov-report=html
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Write tests for new functionality
+4. Submit a pull request
+
+## License
+
+MIT License - See LICENSE file for details.
+
+## Acknowledgments
+
+- NullSec Security Research Team
+- PyTorch team for deep learning framework
+- NetworkX team for graph analysis tools
+- Rich library for beautiful terminal output
+
+---
+
+<p align="center">
+  <strong>NullSec Module 49</strong><br>
+  <em>Detect • Analyze • Map • Research</em>
+</p>

@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+# NULLSEC Framework - Metasploit Integration Resource Script
+# bad-antics development
+# Auto-loads common NULLSEC + MSF configurations
+
+print_status("═══════════════════════════════════════════════════════════════════════")
+print_status("           NULLSEC Framework + Metasploit Integration")
+print_status("                    bad-antics development")
+print_status("═══════════════════════════════════════════════════════════════════════")
+
+# Database setup
+print_status("[*] Initializing MSF Database...")
+run_single("db_status")
+
+# Workspace setup
+print_status("[*] Creating NULLSEC workspace...")
+run_single("workspace -a nullsec")
+run_single("workspace nullsec")
+
+# Common exploit modules aliases
+print_status("[*] Setting up common aliases...")
+run_single("alias nmap db_nmap")
+run_single("alias handler use exploit/multi/handler")
+run_single("alias psexec use exploit/windows/smb/psexec")
+run_single("alias eternalblue use exploit/windows/smb/ms17_010_eternalblue")
+
+# Quick handler setup function
+print_status("[*] NULLSEC Quick Commands Available:")
+print_good("  • handler          - Multi handler")
+print_good("  • psexec           - Windows PSExec")
+print_good("  • eternalblue      - MS17-010 EternalBlue")
+print_good("  • workspace nullsec - Switch to NULLSEC workspace")
+
+print_status("═══════════════════════════════════════════════════════════════════════")
+print_good("[+] NULLSEC Framework Integration Loaded!")
+print_status("═══════════════════════════════════════════════════════════════════════")

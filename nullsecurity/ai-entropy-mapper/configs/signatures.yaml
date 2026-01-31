@@ -1,0 +1,169 @@
+# AI System Signatures Database
+# ==============================
+# NullSec Module 49 - Known AI System Fingerprints
+
+# Signature format:
+# - perplexity_range: Expected perplexity range for this system
+# - entropy_range: Expected entropy range
+# - markers: Text patterns that indicate this system
+# - response_patterns: Common response patterns
+# - timing: Expected response timing characteristics
+
+signatures:
+  gpt_4:
+    family: "gpt_family"
+    provider: "OpenAI"
+    perplexity_range: [12, 35]
+    entropy_range: [4.1, 4.5]
+    markers:
+      - "I don't have"
+      - "As an AI"
+      - "I cannot"
+      - "I'm unable to"
+      - "I don't have access to"
+      - "I cannot provide"
+      - "As a large language model"
+    response_patterns:
+      - starts_with_acknowledgment: true
+      - uses_headers: false
+      - structured_lists: true
+    timing:
+      first_token_ms: [100, 500]
+      tokens_per_second: [30, 80]
+      
+  gpt_3_5:
+    family: "gpt_family"
+    provider: "OpenAI"
+    perplexity_range: [15, 45]
+    entropy_range: [4.0, 4.4]
+    markers:
+      - "I don't have"
+      - "As an AI language model"
+      - "I'm not able to"
+    timing:
+      first_token_ms: [50, 300]
+      tokens_per_second: [40, 100]
+      
+  claude_3:
+    family: "claude_family"
+    provider: "Anthropic"
+    perplexity_range: [10, 32]
+    entropy_range: [4.2, 4.6]
+    markers:
+      - "I don't actually"
+      - "I should note"
+      - "To be direct"
+      - "I aim to"
+      - "I want to be"
+      - "I notice"
+    response_patterns:
+      - direct_style: true
+      - minimal_preamble: true
+      - uses_thinking: false
+    timing:
+      first_token_ms: [80, 400]
+      tokens_per_second: [35, 90]
+      
+  claude_2:
+    family: "claude_family"
+    provider: "Anthropic"
+    perplexity_range: [12, 38]
+    entropy_range: [4.1, 4.5]
+    markers:
+      - "I don't actually"
+      - "I should mention"
+      - "I want to be helpful"
+      
+  llama_3:
+    family: "llama_family"
+    provider: "Meta"
+    perplexity_range: [15, 50]
+    entropy_range: [3.9, 4.4]
+    markers:
+      - "</s>"
+      - "[INST]"
+      - "<<SYS>>"
+      - "[/INST]"
+    response_patterns:
+      - may_leak_tokens: true
+      
+  mistral:
+    family: "mistral_family"
+    provider: "Mistral AI"
+    perplexity_range: [14, 42]
+    entropy_range: [4.0, 4.4]
+    markers:
+      - "[INST]"
+      - "[/INST]"
+      - "</s>"
+    response_patterns:
+      - concise_style: true
+      
+  gemini:
+    family: "palm_family"
+    provider: "Google"
+    perplexity_range: [13, 40]
+    entropy_range: [4.1, 4.5]
+    markers:
+      - "I'm a large language model"
+      - "I'm Gemini"
+      - "As a large language model trained by Google"
+    response_patterns:
+      - uses_markdown: true
+      - safety_focused: true
+      
+  cohere:
+    family: "cohere_family"
+    provider: "Cohere"
+    perplexity_range: [16, 48]
+    entropy_range: [3.9, 4.3]
+    markers:
+      - "I'm an AI"
+      - "I don't have personal"
+      
+# Generic AI markers (system-agnostic)
+generic_markers:
+  high_confidence:
+    - "I cannot provide"
+    - "I'm not able to"
+    - "As a language model"
+    - "I don't have personal"
+    - "I was created by"
+    - "My training data"
+    - "I don't have access to real-time"
+    - "I cannot browse the internet"
+    
+  medium_confidence:
+    - "I'm happy to help"
+    - "I'd be glad to"
+    - "Let me help you"
+    - "Here's what I"
+    - "Based on my knowledge"
+    
+  low_confidence:
+    - "I think"
+    - "In my understanding"
+    - "As far as I know"
+
+# Jailbreak indicators
+jailbreak_indicators:
+  - "DAN"
+  - "Developer Mode"
+  - "ENABLED"
+  - "restrictions removed"
+  - "no longer bound"
+  - "break character"
+  - "ignore previous"
+  - "new persona"
+
+# System prompt leak indicators
+prompt_leak_indicators:
+  - "You are a"
+  - "Your role is"
+  - "System prompt:"
+  - "Instructions:"
+  - "Your task is"
+  - "You must"
+  - "You should"
+  - "Always respond"
+  - "Never reveal"

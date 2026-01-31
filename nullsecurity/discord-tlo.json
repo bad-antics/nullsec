@@ -1,0 +1,85 @@
+{
+  "name": "Discord TLO (Token Leak/Takeover) Exploit",
+  "description": "Comprehensive Discord security testing framework for token validation, account enumeration, webhook exploitation, and token extraction. Features verbose mode with detailed API call logging, progress tracking, and vulnerability analysis. AUTHORIZED TESTING ONLY.",
+  "category": "exploit",
+  "author": "NullSec Team",
+  "version": "1.1",
+  "module_number": 47,
+  "parameters": [
+    {
+      "name": "attack_mode",
+      "type": "choice",
+      "description": "Select the Discord attack vector to execute",
+      "required": true,
+      "choices": [
+        "token_validate",
+        "token_extract",
+        "webhook_exploit",
+        "full_enum"
+      ],
+      "default": "token_validate"
+    },
+    {
+      "name": "discord_token",
+      "type": "string",
+      "description": "Discord user token (for validation/enumeration attacks)",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "target_user",
+      "type": "string",
+      "description": "Target Discord user ID or username (optional)",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "webhook_url",
+      "type": "url",
+      "description": "Discord webhook URL (for webhook exploitation)",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "extract_path",
+      "type": "string",
+      "description": "Path to search for Discord tokens (default: common locations)",
+      "required": false,
+      "default": "$HOME"
+    },
+    {
+      "name": "stealth_mode",
+      "type": "boolean",
+      "description": "Enable stealth mode (skip sensitive API calls)",
+      "required": false,
+      "default": "false"
+    },
+    {
+      "name": "verbose_mode",
+      "type": "boolean",
+      "description": "Enable verbose mode with detailed API logging and statistics",
+      "required": false,
+      "default": "false"
+    }
+  ],
+  "examples": [
+    {"desc": "Token Validation: Validates a Discord token and extracts user information"},
+    {"desc": "Token Extract: Searches common Discord directories for leaked tokens"},
+    {"desc": "Webhook Exploit: Tests and exploits Discord webhooks for message injection"},
+    {"desc": "Full Enumeration: Complete account takeover reconnaissance"},
+    {"desc": "Verbose Mode: Run any attack with detailed API logging (options 5-8)"}
+  ],
+  "pre_run_checks": [
+    "curl",
+    "grep"
+  ],
+  "requires_root": false,
+  "verbose_features": [
+    "Real-time API call tracking",
+    "HTTP request/response logging",
+    "Progress indicators",
+    "Vulnerability severity ratings",
+    "Execution statistics summary",
+    "Data extraction counters"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "Nfc Attack",
+  "description": "NULLSEC NFC Exploitation Module",
+  "category": "wireless",
+  "author": "NullSec Team",
+  "version": "1.0",
+  "parameters": [
+    {
+      "name": "interface",
+      "type": "string",
+      "description": "Wireless interface (e.g., wlan0)",
+      "required": true
+    },
+    {
+      "name": "target_bssid",
+      "type": "string",
+      "description": "Target BSSID/MAC address",
+      "required": false
+    },
+    {
+      "name": "channel",
+      "type": "port",
+      "description": "Wireless channel (1-14)",
+      "default": "0"
+    },
+    {
+      "name": "capture_time",
+      "type": "port",
+      "description": "Capture duration in seconds",
+      "default": "300"
+    }
+  ]
+}

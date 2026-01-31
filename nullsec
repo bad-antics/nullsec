@@ -1,0 +1,89 @@
+#!/bin/bash
+# NULLSEC Launcher Wrapper
+# Quick launch script for the simulation suite
+# Requires root privileges for full functionality
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# Colors
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+CYAN='\033[1;36m'
+WHITE='\033[1;37m'
+RESET='\033[0m'
+
+# Check if running as root
+check_root() {
+    if [[ $EUID -ne 0 ]]; then
+        echo ""
+        echo -e "${RED}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${RESET}"
+        echo -e "${RED}█${RESET}     ${WHITE}NULLSEC Framework - Root Access Required${RESET}"
+        echo -e "${RED}█${RESET}              ${CYAN}[ bad-antics development ]${RESET}"
+        echo -e "${RED}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${RESET}"
+        echo ""
+        echo -e "${CYAN}[*]${RESET} Requesting root privileges..."
+        echo ""
+        
+        # Re-execute with sudo, passing all arguments
+        exec sudo -E "$0" "$@"
+        exit $?
+    fi
+}
+
+# Request root access
+check_root "$@"
+
+# Now running as root
+export NULLSEC_ROOT=1
+
+# Check for desktop/GUI argument
+if [[ "$1" == "desktop" ]] || [[ "$1" == "gui" ]]; then
+    # For GUI, we need to allow X access
+    if [[ -n "$SUDO_USER" ]]; then
+        export HOME="/home/$SUDO_USER"
+        export XAUTHORITY="/home/$SUDO_USER/.Xauthority"
+    fi
+    exec "$SCRIPT_DIR/nullsec-desktop/launcher.sh"
+elif [[ "$1" == "web" ]]; then
+    python3 app.py
+elif [[ "$1" == "help" ]] || [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+    echo ""
+    echo -e "${RED}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${RESET}"
+    echo -e "${RED}█${RESET}  ${WHITE}NULLSEC Framework - Launcher Options${RESET}                    ${RED}█${RESET}"
+    echo -e "${RED}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${RESET}"
+    echo ""
+    echo -e "  ${WHITE}Usage:${RESET} nullsec [option]"
+    echo ""
+    echo -e "  ${WHITE}Options:${RESET}"
+    echo -e "    ${GREEN}(none)${RESET}    Launch the terminal-based menu interface"
+    echo -e "    ${GREEN}desktop${RESET}   Launch NULLSEC Desktop (GTK GUI)"
+    echo -e "    ${GREEN}gui${RESET}       Alias for desktop"
+    echo -e "    ${GREEN}ai${RESET}        Launch NULLSEC Framework CLI (AI Console)"
+    echo -e "    ${GREEN}pentester${RESET} Launch NULLSEC AI Pentester"
+    echo -e "    ${GREEN}flipper${RESET}   Launch Flipper Zero Control Panel"
+    echo -e "    ${GREEN}pineapple${RESET} Launch WiFi Pineapple Control"
+    echo -e "    ${GREEN}web${RESET}       Launch web interface (Flask)"
+    echo -e "    ${GREEN}help${RESET}      Show this help message"
+    echo ""
+    echo -e "  ${CYAN}Note:${RESET} Root privileges are required for full functionality."
+    echo ""
+elif [[ "$1" == "ai" ]]; then
+    # Launch AI console
+    python3 "$SCRIPT_DIR/nullsec-ai.py"
+elif [[ "$1" == "pentester" ]]; then
+    # Launch AI Pentester
+    shift
+    bash "$SCRIPT_DIR/nullsec-pentester/nullsec-pentester.sh" "$@"
+elif [[ "$1" == "flipper" ]]; then
+    # Launch Flipper Zero Control
+    shift
+    python3 "$SCRIPT_DIR/nullsec-flipper/flipper_zero.py" "$@"
+elif [[ "$1" == "pineapple" ]]; then
+    # Launch WiFi Pineapple Control
+    shift
+    python3 "$SCRIPT_DIR/nullsec-pineapple/pineapple_control.py" "$@"
+else
+    # Default: launch terminal menu
+    python3 nullsec-launcher.py
+fi

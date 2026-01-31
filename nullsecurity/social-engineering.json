@@ -1,0 +1,27 @@
+{
+  "name": "Social Engineering",
+  "description": "NULLSEC Social Engineering - bad-antics development",
+  "category": "social",
+  "author": "NullSec Team",
+  "version": "1.0",
+  "parameters": [
+    {
+      "name": "target_email",
+      "type": "string",
+      "description": "Target email address or phone",
+      "required": true
+    },
+    {
+      "name": "template",
+      "type": "file",
+      "description": "Email/SMS template file",
+      "required": false
+    },
+    {
+      "name": "sender",
+      "type": "string",
+      "description": "Sender address/name",
+      "required": false
+    }
+  ]
+}

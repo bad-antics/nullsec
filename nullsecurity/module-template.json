@@ -1,0 +1,53 @@
+{
+  "name": "Your Module Name",
+  "description": "Detailed description of what this attack module does and its purpose",
+  "category": "Choose: Reconnaissance/Exploitation/Post-Exploitation/Web/Network/Wireless/etc",
+  "requires_root": false,
+  "pre_run_checks": ["command1", "command2"],
+  "parameters": [
+    {
+      "name": "target",
+      "prompt": "Target IP Address or Hostname",
+      "param_type": "ip",
+      "required": true,
+      "description": "The primary target for this attack"
+    },
+    {
+      "name": "port",
+      "prompt": "Target Port",
+      "param_type": "port",
+      "required": false,
+      "default": "80",
+      "description": "Service port number (1-65535)"
+    },
+    {
+      "name": "attack_mode",
+      "prompt": "Select Attack Mode",
+      "param_type": "choice",
+      "required": true,
+      "choices": ["Fast", "Normal", "Stealth", "Aggressive"],
+      "description": "Speed vs stealth tradeoff"
+    },
+    {
+      "name": "wordlist",
+      "prompt": "Wordlist Path",
+      "param_type": "file",
+      "required": false,
+      "default": "/usr/share/wordlists/rockyou.txt",
+      "description": "Path to wordlist file for brute forcing"
+    },
+    {
+      "name": "verbose",
+      "prompt": "Enable Verbose Output?",
+      "param_type": "boolean",
+      "required": false,
+      "default": "no",
+      "description": "Show detailed execution information"
+    }
+  ],
+  "examples": [
+    {"desc": "Example 1: Quick vulnerability scan of target"},
+    {"desc": "Example 2: Deep exploitation with persistence"},
+    {"desc": "Example 3: Stealth reconnaissance mode"}
+  ]
+}

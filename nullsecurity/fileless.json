@@ -1,0 +1,33 @@
+{
+  "name": "Fileless",
+  "description": "NULLSEC Fileless Malware - bad-antics development",
+  "category": "web",
+  "author": "NullSec Team",
+  "version": "1.0",
+  "parameters": [
+    {
+      "name": "target_url",
+      "type": "url",
+      "description": "Target URL to attack",
+      "required": true
+    },
+    {
+      "name": "wordlist",
+      "type": "file",
+      "description": "Wordlist for fuzzing/brute force",
+      "default": "/usr/share/wordlists/rockyou.txt"
+    },
+    {
+      "name": "threads",
+      "type": "port",
+      "description": "Number of concurrent threads",
+      "default": "10"
+    },
+    {
+      "name": "user_agent",
+      "type": "string",
+      "description": "Custom User-Agent string",
+      "default": "Mozilla/5.0"
+    }
+  ]
+}

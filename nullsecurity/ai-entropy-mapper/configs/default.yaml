@@ -1,0 +1,105 @@
+# AI Entropy Mapper Configuration
+# ================================
+# NullSec Module 49 - Default Configuration
+
+# General Settings
+general:
+  verbose: false
+  log_level: INFO
+  output_dir: "./output"
+  
+# Entropy Analysis Settings
+entropy:
+  # Baseline entropy values for comparison
+  human_baseline: 4.5  # bits per character (English)
+  ai_baseline: 4.2
+  
+  # Detection thresholds
+  entropy_variance_threshold: 0.3
+  compression_ratio_threshold: 0.45
+  serial_correlation_threshold: 0.15
+  
+  # N-gram settings
+  bigram_enabled: true
+  trigram_enabled: true
+  
+# AI Detection Settings
+detection:
+  # Use GPU if available
+  use_gpu: true
+  
+  # Perplexity model (set to null to disable)
+  perplexity_model: "gpt2"
+  
+  # Timing thresholds
+  min_human_response_time: 0.5  # seconds
+  ai_streaming_interval: 0.05   # seconds
+  
+  # Behavioral marker detection
+  check_markers: true
+  
+  # Neural network classification
+  use_neural_classifier: true
+  
+# Network Mapping Settings
+network:
+  # Visualization
+  default_output: "ai_network_map.png"
+  figure_size: [16, 12]
+  
+  # Colors
+  colors:
+    endpoint: "#ff6b6b"
+    ai_system: "#4ecdc4"
+    organization: "#45b7d1"
+    api_gateway: "#96ceb4"
+    proxy: "#ffeaa7"
+    cdn: "#dfe6e9"
+    unknown: "#636e72"
+  
+  # Layout algorithm
+  layout: "spring"  # or "kamada_kawai"
+  
+# Prompt Injection Scanner Settings
+scanner:
+  # Request settings
+  delay_between_requests: 1.0  # seconds
+  request_timeout: 60  # seconds
+  max_concurrency: 3
+  
+  # Default categories to scan
+  categories:
+    - direct
+    - extraction
+    - delimiter
+    - encoding
+    - context
+    - role
+    - indirect
+  
+  # Minimum severity to report
+  min_severity: "low"
+  
+  # Retry settings
+  max_retries: 3
+  retry_delay: 2.0
+  
+# API Settings (for authenticated scanning)
+api:
+  # Add your API keys here or use environment variables
+  # openai_key: ${OPENAI_API_KEY}
+  # anthropic_key: ${ANTHROPIC_API_KEY}
+  
+  # Default headers
+  headers:
+    User-Agent: "AI-Entropy-Mapper/1.0 (Security Research)"
+    Accept: "application/json"
+    Content-Type: "application/json"
+
+# Logging
+logging:
+  enabled: true
+  file: "aiem.log"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  max_size: 10485760  # 10MB
+  backup_count: 5
