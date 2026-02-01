@@ -3,6 +3,8 @@
 NULLSEC FRAMEWORK (PRIVATE COPY) - Advanced Offensive Security Operations
 =================================================================
 Professional penetration testing and red team operations framework
+Version: 2.0
+GitHub: https://github.com/bad-antics/nullsec
 
 Features:
 - 185+ Attack modules with auto-discovery
@@ -16,6 +18,9 @@ Author: bad-antics development
 GitHub: github.com/bad-antics
 License: For authorized security testing only
 """
+
+__version__ = "2.0"
+__author__ = "bad-antics"
 
 import os
 import sys
