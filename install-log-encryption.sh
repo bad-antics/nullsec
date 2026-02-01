@@ -1,7 +1,8 @@
 #!/bin/bash
 
 #############################################################################
-#                 NULLSEC LINUX - LOG ENCRYPTION INSTALLER                 #
+#           NULLSEC LINUX - LOG ENCRYPTION INSTALLER v1.1                  #
+#           Repository: https://github.com/bad-antics/nullsec             #
 #############################################################################
 # Installs log encryption utility and dependencies
 #############################################################################
