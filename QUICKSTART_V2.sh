@@ -1,5 +1,8 @@
 #!/bin/bash
-# NULLSEC Framework v2.0 - Quick Start Guide
+#
+# NULLSEC Framework v2.0 - Quick Start Guide v1.1
+# Repository: https://github.com/bad-antics/nullsec
+#
 
 cat << 'EOF'
 ═══════════════════════════════════════════════════════════════════════
