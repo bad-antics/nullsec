@@ -1,6 +1,9 @@
 #!/bin/bash
-# Demo External Script for NULLSEC Command Console
+#
+# Demo External Script for NULLSEC Command Console v1.1
 # This demonstrates how any external script can be executed from within NULLSEC
+# Repository: https://github.com/bad-antics/nullsec
+#
 
 RED='\033[1;31m'
 GREEN='\033[1;32m'
