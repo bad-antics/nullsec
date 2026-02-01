@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-NullSec Linux - Log Encryption Utility v1.1
+NullSec Linux - Log Encryption Utility v1.2
 Encrypts sensitive logs using AES-256 encryption via Fernet.
 Supports password-based key derivation with PBKDF2-HMAC-SHA256.
+
+GitHub: https://github.com/bad-antics/nullsec
 """
 
-__version__ = "1.1"
+__version__ = "1.2"
 __author__ = "bad-antics"
 
 import os
