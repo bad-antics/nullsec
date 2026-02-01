@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
+"""
+NullSec Network Manager v1.2
+A curses-based network and process monitoring utility for NullSec Linux.
+Provides real-time connection monitoring, process listing, and logging.
+"""
 import curses
 import subprocess
 import time
 import os
 from datetime import datetime
+
+__version__ = "1.2"
+__author__ = "bad-antics"
 
 # Helpers
 
