@@ -1,6 +1,9 @@
 #!/bin/bash
-# NullSec Linux - Screensaver Installer
+#
+# NullSec Linux - Screensaver Installer v1.1
 # Configures the custom NullSec screensaver for the system
+# Repository: https://github.com/bad-antics/nullsec
+#
 
 RED='\033[1;31m'
 GREEN='\033[1;32m'
