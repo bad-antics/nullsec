@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """
 Generate comprehensive module catalog for enhanced NullSec framework
+
+NullSec Framework - Module Catalog Generator v1.0
+https://github.com/bad-antics/nullsec
+
+Generates markdown documentation for all security modules
 """
+
+__version__ = "1.0"
+__author__ = "bad-antics"
 
 import json
 from pathlib import Path
