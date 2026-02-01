@@ -1,7 +1,8 @@
 #!/bin/bash
 #
-# NullSec Linux Boot Theme & Updater Setup
+# NullSec Linux Boot Theme & Updater Setup v1.1
 # Creates custom Plymouth theme and rebrands update notifications
+# Repository: https://github.com/bad-antics/nullsec
 #
 
 set -e
