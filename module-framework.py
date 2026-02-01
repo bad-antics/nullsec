@@ -645,3 +645,25 @@ if __name__ == "__main__":
         )
     
     framework.run_interactive_module(module_script, config)
+
+# v2.1 Enhancement - Added performance monitoring
+import time
+
+class PerformanceMonitor:
+    """Monitor module execution performance"""
+    def __init__(self):
+        self.metrics = {}
+    
+    def start_timer(self, module_name):
+        self.metrics[module_name] = {'start': time.time()}
+    
+    def stop_timer(self, module_name):
+        if module_name in self.metrics:
+            self.metrics[module_name]['end'] = time.time()
+            self.metrics[module_name]['duration'] = self.metrics[module_name]['end'] - self.metrics[module_name]['start']
+    
+    def get_report(self):
+        return {k: v.get('duration', 0) for k, v in self.metrics.items()}
+
+# Global performance monitor instance
+perf_monitor = PerformanceMonitor()
