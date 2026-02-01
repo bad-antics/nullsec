@@ -1,6 +1,10 @@
 #!/bin/bash
-
+#
+# NullSec Module Validator v1.1
 # Quick module functionality validator
+# Repository: https://github.com/bad-antics/nullsec
+#
+
 echo "╭─ NULLSEC MODULE VALIDATION"
 echo "│"
 
