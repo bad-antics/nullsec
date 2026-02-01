@@ -1,7 +1,10 @@
 #!/bin/bash
-# NullSec Linux - NULLSEC AI v3.0 Installation Script
+#
+# NullSec Linux - NULLSEC AI v3.0 Installation Script v1.1
 # Installs Ollama and recommended AI models for pentesting
 # Part of NullSec Linux 1.0 (void)
+# Repository: https://github.com/bad-antics/nullsec
+#
 
 RED='\033[1;31m'
 GREEN='\033[1;32m'
