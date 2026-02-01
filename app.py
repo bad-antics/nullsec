@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+"""
+NullSec Web Dashboard
+Flask API server for network monitoring and security tools
+Version: 1.1
+Author: bad-antics
+GitHub: https://github.com/bad-antics/nullsec
+"""
+
+__version__ = "1.1"
+__author__ = "bad-antics"
+
 from flask import Flask, jsonify, send_from_directory, request
 import subprocess
 import os
