@@ -1,7 +1,8 @@
 #!/bin/bash
 
 #############################################################################
-#                    NULLSEC LINUX - TOOLS MENU SETUP                      #
+#               NULLSEC LINUX - TOOLS MENU SETUP v1.1                      #
+#               Repository: https://github.com/bad-antics/nullsec         #
 #############################################################################
 # Creates "NullSec Tools" menu with all modules grouped by exploit type
 # Each module gets its own quick-launch entry
