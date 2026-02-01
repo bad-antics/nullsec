@@ -1,11 +1,14 @@
 #!/bin/bash
 
 #############################################################################
-#                NULLSEC LINUX - MODULE RESOURCE PROVISIONER               #
+#                NULLSEC LINUX - MODULE RESOURCE PROVISIONER v1.1          #
 #############################################################################
 # Populates all 188 modules with necessary wordlists, scripts, and tools
 # Supports: Python, Ruby, Go, PowerShell, and Bash helper scripts
+# GitHub: github.com/bad-antics/nullsec-linux
 #############################################################################
+
+VERSION="1.1"
 
 set -e
 
