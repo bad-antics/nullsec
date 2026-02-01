@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 """
-NullSec Linux - Custom Animated Screensaver
+NullSec Linux - Custom Animated Screensaver v1.1
 AI-Generated Matrix-Style Visual with NullSec Branding
+
+GitHub: https://github.com/bad-antics/nullsec
 """
+
+__version__ = "1.1"
+__author__ = "bad-antics"
 
 import sys
 import random
