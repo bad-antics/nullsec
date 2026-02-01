@@ -1,0 +1,5 @@
+*.log
+*.pcap
+*.cap
+*.csv
+.DS_Store
