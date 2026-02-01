@@ -38,3 +38,6 @@ class PerformanceMonitor:
 if __name__ == '__main__':
     monitor = PerformanceMonitor()
     print("NullSec Performance Monitor v1.0")
+
+# Updated: Sun 01 Feb 2026 02:13:07 PM PST
+VERSION = '1.1'
