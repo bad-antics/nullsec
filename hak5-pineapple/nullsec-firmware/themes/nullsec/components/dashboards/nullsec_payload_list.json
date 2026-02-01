@@ -1,0 +1,124 @@
+{
+  "screen_name": "nullsec_payload_list",
+  "status_bar": "default",
+  "windowed_canvas": false,
+  "cache_canvases": true,
+  "button_map": {
+    "a": "select",
+    "b": "back",
+    "up": "previous",
+    "down": "next",
+    "left": "back",
+    "right": "noop"
+  },
+  "background": {
+    "layers": [
+      { "image_path": "assets/dashboard/nullsec_bg.png", "x": 0, "y": 0 },
+      { "text": "NULLSEC PAYLOADS", "x": 10, "y": 30, "text_size": "large", "text_color_palette": "bright_red" },
+      { "text": "Select payload to launch", "x": 10, "y": 195, "text_size": "small", "text_color_palette": "dark_gray" }
+    ]
+  },
+  "pages": [
+    {
+      "page_index": 0,
+      "menu_items": [
+        {
+          "id": "AutoPwn",
+          "x": 170,
+          "y": 55,
+          "layers": [
+            { "image_path": "assets/dashboard/nullsec_tools.png", "x": -20, "y": 2, "recolor_palette": "red" },
+            { "text": "AutoPwn", "x": 10, "text_color_palette": "gray" }
+          ],
+          "selected_layers": [
+            { "image_path": "assets/dashboard/nullsec_tools.png", "x": -20, "y": 2, "recolor_palette": "bright_red" },
+            { "text": "AutoPwn", "x": 10, "text_color_palette": "bright_red" },
+            { "text": ">", "x": -30, "text_color_palette": "bright_red" }
+          ],
+          "target": "run_payload",
+          "variable": "/root/payloads/nullsec/AutoPwn/payload.sh"
+        },
+        {
+          "id": "DeauthStorm",
+          "x": 170,
+          "y": 80,
+          "layers": [
+            { "image_path": "assets/dashboard/pineap.png", "x": -20, "y": 2, "recolor_palette": "red" },
+            { "text": "Deauth Storm", "x": 10, "text_color_palette": "gray" }
+          ],
+          "selected_layers": [
+            { "image_path": "assets/dashboard/pineap.png", "x": -20, "y": 2, "recolor_palette": "cyan" },
+            { "text": "Deauth Storm", "x": 10, "text_color_palette": "cyan" },
+            { "text": ">", "x": -30, "text_color_palette": "cyan" }
+          ],
+          "target": "run_payload",
+          "variable": "/root/payloads/nullsec/DeauthStorm/payload.sh"
+        },
+        {
+          "id": "KarmaAttack",
+          "x": 170,
+          "y": 105,
+          "layers": [
+            { "image_path": "assets/dashboard/alerts.png", "x": -20, "y": 2, "recolor_palette": "red" },
+            { "text": "Karma Attack", "x": 10, "text_color_palette": "gray" }
+          ],
+          "selected_layers": [
+            { "image_path": "assets/dashboard/alerts.png", "x": -20, "y": 2, "recolor_palette": "orange" },
+            { "text": "Karma Attack", "x": 10, "text_color_palette": "orange" },
+            { "text": ">", "x": -30, "text_color_palette": "orange" }
+          ],
+          "target": "run_payload",
+          "variable": "/root/payloads/nullsec/KarmaAttack/payload.sh"
+        },
+        {
+          "id": "PMKIDCapture",
+          "x": 170,
+          "y": 130,
+          "layers": [
+            { "image_path": "assets/dashboard/recon.png", "x": -20, "y": 2, "recolor_palette": "red" },
+            { "text": "PMKID Capture", "x": 10, "text_color_palette": "gray" }
+          ],
+          "selected_layers": [
+            { "image_path": "assets/dashboard/recon.png", "x": -20, "y": 2, "recolor_palette": "hacker_green" },
+            { "text": "PMKID Capture", "x": 10, "text_color_palette": "hacker_green" },
+            { "text": ">", "x": -30, "text_color_palette": "hacker_green" }
+          ],
+          "target": "run_payload",
+          "variable": "/root/payloads/nullsec/PMKIDCapture/payload.sh"
+        },
+        {
+          "id": "ProbeHunter",
+          "x": 170,
+          "y": 155,
+          "layers": [
+            { "image_path": "assets/dashboard/recon.png", "x": -20, "y": 2, "recolor_palette": "red" },
+            { "text": "Probe Hunter", "x": 10, "text_color_palette": "gray" }
+          ],
+          "selected_layers": [
+            { "image_path": "assets/dashboard/recon.png", "x": -20, "y": 2, "recolor_palette": "magenta" },
+            { "text": "Probe Hunter", "x": 10, "text_color_palette": "magenta" },
+            { "text": ">", "x": -30, "text_color_palette": "magenta" }
+          ],
+          "target": "run_payload",
+          "variable": "/root/payloads/nullsec/ProbeHunter/payload.sh"
+        },
+        {
+          "id": "WiFiAudit",
+          "x": 170,
+          "y": 180,
+          "layers": [
+            { "image_path": "assets/dashboard/settings.png", "x": -20, "y": 2, "recolor_palette": "red" },
+            { "text": "WiFi Audit", "x": 10, "text_color_palette": "gray" }
+          ],
+          "selected_layers": [
+            { "image_path": "assets/dashboard/settings.png", "x": -20, "y": 2, "recolor_palette": "yellow" },
+            { "text": "WiFi Audit", "x": 10, "text_color_palette": "yellow" },
+            { "text": ">", "x": -30, "text_color_palette": "yellow" }
+          ],
+          "target": "run_payload",
+          "variable": "/root/payloads/nullsec/WiFiAudit/payload.sh"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+# NullSec Pager Configuration
+# This file configures automatic payload execution
+
+# Auto-run on boot
+AUTORUN=true
+
+# WiFi settings
+WIFI_MODE=monitor
+WIFI_CHANNEL=auto
+
+# Exfiltration settings
+EXFIL_ENABLED=true
+EXFIL_SERVER=192.168.1.100
+EXFIL_PORT=9999
+EXFIL_METHOD=tcp
+
+# Logging
+LOG_LEVEL=debug
+LOG_TO_FILE=true
+
+# Stealth mode
+STEALTH=false
+LED_ENABLED=true

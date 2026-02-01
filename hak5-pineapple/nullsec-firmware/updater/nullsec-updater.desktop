@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=NullSec Firmware Updater
+Comment=Install NullSec firmware on Hak5 WiFi Pineapple Pager
+Exec=python3 /opt/nullsec/updater/nullsec-updater.py
+Icon=/opt/nullsec/updater/icon.png
+Terminal=false
+Type=Application
+Categories=Network;Security;System;
+Keywords=hak5;pineapple;pager;wifi;security;firmware;
+StartupNotify=true

@@ -1,0 +1,179 @@
+{
+  "screen_name": "nullsec_tools_menu",
+  "status_bar": "default",
+  "windowed_canvas": false,
+  "cache_canvases": true,
+  "button_map": {
+    "a": "select",
+    "b": "back",
+    "up": "previous",
+    "down": "next",
+    "left": "back",
+    "right": "next_page"
+  },
+  "background": {
+    "layers": [
+      { "image_path": "assets/dashboard/nullsec_bg.png", "x": 0, "y": 0 },
+      { "image_path": "assets/dashboard/nullsec_logo.png", "x": 20, "y": 51 },
+      { "text": "NULLSEC ARSENAL", "x": 10, "y": 30, "text_size": "large", "text_color_palette": "bright_red" },
+      { "text": "bad-antics // page 1/2", "x": 10, "y": 195, "text_size": "small", "text_color_palette": "dark_gray" }
+    ]
+  },
+  "pages": [
+    {
+      "page_index": 0,
+      "menu_items": [
+        {
+          "id": "AutoPwn",
+          "x": 170,
+          "y": 55,
+          "layers": [
+            { "image_path": "assets/dashboard/nullsec_tools.png", "x": -20, "y": 2, "recolor_palette": "red" },
+            { "text": "AutoPwn", "x": 10, "text_color_palette": "gray" },
+            { "text": "Full attack chain", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "dark_gray" }
+          ],
+          "selected_layers": [
+            { "image_path": "assets/dashboard/nullsec_tools.png", "x": -20, "y": 2, "recolor_palette": "bright_red" },
+            { "text": "AutoPwn", "x": 10, "text_color_palette": "bright_red" },
+            { "text": "Full attack chain", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "red" },
+            { "text": ">", "x": -30, "text_color_palette": "bright_red" }
+          ],
+          "target": "nullsec_launch_autopwn"
+        },
+        {
+          "id": "DeauthStorm",
+          "x": 170,
+          "y": 90,
+          "layers": [
+            { "image_path": "assets/dashboard/pineap.png", "x": -20, "y": 2, "recolor_palette": "red" },
+            { "text": "Deauth Storm", "x": 10, "text_color_palette": "gray" },
+            { "text": "Mass disconnection", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "dark_gray" }
+          ],
+          "selected_layers": [
+            { "image_path": "assets/dashboard/pineap.png", "x": -20, "y": 2, "recolor_palette": "cyan" },
+            { "text": "Deauth Storm", "x": 10, "text_color_palette": "cyan" },
+            { "text": "Mass disconnection", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "blue" },
+            { "text": ">", "x": -30, "text_color_palette": "cyan" }
+          ],
+          "target": "nullsec_launch_deauth"
+        },
+        {
+          "id": "KarmaAttack",
+          "x": 170,
+          "y": 125,
+          "layers": [
+            { "image_path": "assets/dashboard/alerts.png", "x": -20, "y": 2, "recolor_palette": "red" },
+            { "text": "Karma Attack", "x": 10, "text_color_palette": "gray" },
+            { "text": "Rogue AP + creds", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "dark_gray" }
+          ],
+          "selected_layers": [
+            { "image_path": "assets/dashboard/alerts.png", "x": -20, "y": 2, "recolor_palette": "orange" },
+            { "text": "Karma Attack", "x": 10, "text_color_palette": "orange" },
+            { "text": "Rogue AP + creds", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "yellow" },
+            { "text": ">", "x": -30, "text_color_palette": "orange" }
+          ],
+          "target": "nullsec_launch_karma"
+        },
+        {
+          "id": "PMKIDCapture",
+          "x": 170,
+          "y": 160,
+          "layers": [
+            { "image_path": "assets/dashboard/recon.png", "x": -20, "y": 2, "recolor_palette": "red" },
+            { "text": "PMKID Capture", "x": 10, "text_color_palette": "gray" },
+            { "text": "Clientless WPA", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "dark_gray" }
+          ],
+          "selected_layers": [
+            { "image_path": "assets/dashboard/recon.png", "x": -20, "y": 2, "recolor_palette": "hacker_green" },
+            { "text": "PMKID Capture", "x": 10, "text_color_palette": "hacker_green" },
+            { "text": "Clientless WPA", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "green" },
+            { "text": ">", "x": -30, "text_color_palette": "hacker_green" }
+          ],
+          "target": "nullsec_launch_pmkid"
+        }
+      ]
+    },
+    {
+      "page_index": 1,
+      "background": {
+        "layers": [
+          { "image_path": "assets/dashboard/nullsec_bg.png", "x": 0, "y": 0 },
+          { "image_path": "assets/dashboard/nullsec_logo.png", "x": 20, "y": 51 },
+          { "text": "NULLSEC ARSENAL", "x": 10, "y": 30, "text_size": "large", "text_color_palette": "bright_red" },
+          { "text": "bad-antics // page 2/2", "x": 10, "y": 195, "text_size": "small", "text_color_palette": "dark_gray" }
+        ]
+      },
+      "menu_items": [
+        {
+          "id": "ProbeHunter",
+          "x": 170,
+          "y": 55,
+          "layers": [
+            { "image_path": "assets/dashboard/recon.png", "x": -20, "y": 2, "recolor_palette": "red" },
+            { "text": "Probe Hunter", "x": 10, "text_color_palette": "gray" },
+            { "text": "SSID discovery", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "dark_gray" }
+          ],
+          "selected_layers": [
+            { "image_path": "assets/dashboard/recon.png", "x": -20, "y": 2, "recolor_palette": "magenta" },
+            { "text": "Probe Hunter", "x": 10, "text_color_palette": "magenta" },
+            { "text": "SSID discovery", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "magenta" },
+            { "text": ">", "x": -30, "text_color_palette": "magenta" }
+          ],
+          "target": "nullsec_launch_probe"
+        },
+        {
+          "id": "WiFiAudit",
+          "x": 170,
+          "y": 90,
+          "layers": [
+            { "image_path": "assets/dashboard/settings.png", "x": -20, "y": 2, "recolor_palette": "red" },
+            { "text": "WiFi Audit", "x": 10, "text_color_palette": "gray" },
+            { "text": "Security report", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "dark_gray" }
+          ],
+          "selected_layers": [
+            { "image_path": "assets/dashboard/settings.png", "x": -20, "y": 2, "recolor_palette": "yellow" },
+            { "text": "WiFi Audit", "x": 10, "text_color_palette": "yellow" },
+            { "text": "Security report", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "yellow" },
+            { "text": ">", "x": -30, "text_color_palette": "yellow" }
+          ],
+          "target": "nullsec_launch_audit"
+        },
+        {
+          "id": "AllPayloads",
+          "x": 170,
+          "y": 125,
+          "layers": [
+            { "image_path": "assets/dashboard/payloads.png", "x": -20, "y": 2, "recolor_palette": "red" },
+            { "text": "All Payloads", "x": 10, "text_color_palette": "gray" },
+            { "text": "Browse all categories", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "dark_gray" }
+          ],
+          "selected_layers": [
+            { "image_path": "assets/dashboard/payloads.png", "x": -20, "y": 2, "recolor_palette": "soft_white" },
+            { "text": "All Payloads", "x": 10, "text_color_palette": "soft_white" },
+            { "text": "Browse all categories", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "gray" },
+            { "text": ">", "x": -30, "text_color_palette": "soft_white" }
+          ],
+          "target": "payloads_dashboard",
+          "variable": "$_PAYLOAD_CATEGORIES"
+        },
+        {
+          "id": "PineAP",
+          "x": 170,
+          "y": 160,
+          "layers": [
+            { "image_path": "assets/dashboard/pineap.png", "x": -20, "y": 2, "recolor_palette": "red" },
+            { "text": "PineAP Menu", "x": 10, "text_color_palette": "gray" },
+            { "text": "WiFi attack suite", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "dark_gray" }
+          ],
+          "selected_layers": [
+            { "image_path": "assets/dashboard/pineap.png", "x": -20, "y": 2, "recolor_palette": "cyan" },
+            { "text": "PineAP Menu", "x": 10, "text_color_palette": "cyan" },
+            { "text": "WiFi attack suite", "x": 10, "y": 18, "text_size": "small", "text_color_palette": "blue" },
+            { "text": ">", "x": -30, "text_color_palette": "cyan" }
+          ],
+          "target": "pineap_menu"
+        }
+      ]
+    }
+  ]
+}

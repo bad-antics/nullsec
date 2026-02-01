@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=NULLSEC Desktop
+Comment=Armitage-style Attack Framework GUI
+Exec=/home/antics/nullsec/nullsec-desktop/launcher.sh
+Icon=/home/antics/nullsec/static/skull.png
+Terminal=false
+Type=Application
+Categories=Security;System;
+Keywords=security;hacking;pentest;attack;
+StartupWMClass=nullsec-desktop

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=NullSec GitHub Bot
+Comment=GitHub automation and PR review control panel
+Exec=/home/antics/nullsec/github-bot-panel/github_bot_panel.py
+Icon=github
+Terminal=false
+Type=Application
+Categories=Development;Utility;
+Keywords=github;git;bot;automation;pr;review;
+StartupNotify=true

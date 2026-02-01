@@ -1,0 +1,187 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                  NULLSEC LINUX 1.0 - QUICK REFERENCE CARD                     ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+ ███▄    █  █    ██  ██▓     ██▓      ██████ ▓█████  ▄████▄
+ ██ ▀█   █  ██  ▓██▒▓██▒    ▓██▒    ▒██    ▒ ▓█   ▀ ▒██▀ ▀█
+▓██  ▀█ ██▒▓██  ▒██░▒██░    ▒██░    ░ ▓██▄   ▒███   ▒▓█    ▄
+▓██▒  ▐▌██▒▓▓█  ░██░▒██░    ▒██░      ▒   ██▒▒▓█  ▄ ▒▓▓▄ ▄██▒
+▒██░   ▓██░▒▒█████▓ ░██████▒░██████▒▒██████▒▒░▒████▒▒ ▓███▀ ░
+░ ▒░   ▒ ▒ ░▒▓▒ ▒ ▒ ░ ▒░▓  ░░ ▒░▓  ░▒ ▒▓▒ ▒ ░░░ ▒░ ░░ ░▒ ▒  ░
+░ ░░   ░ ▒░░░▒░ ░ ░ ░ ░ ▒  ░░ ░ ▒  ░░ ░▒  ░ ░ ░ ░  ░  ░  ▒
+   ░   ░ ░  ░░░ ░ ░   ░ ░     ░ ░   ░  ░  ░     ░   ░
+         ░    ░         ░  ░    ░  ░      ░     ░  ░░ ░
+                                                    ░
+
+═══════════════════════════════════════════════════════════════════════════════
+ SYSTEM INFO
+═══════════════════════════════════════════════════════════════════════════════
+
+OS:           NullSec Linux 1.0 (void)
+Hostname:     nullsec-workstation
+Terminal:     NullSec Console
+Boot Theme:   nullsec (Plymouth)
+Status:       ✅ 100% Rebranded
+
+═══════════════════════════════════════════════════════════════════════════════
+ NULLSEC FRAMEWORK
+═══════════════════════════════════════════════════════════════════════════════
+
+Version:      2.0
+Modules:      185 attack modules
+Categories:   22 categories
+Launcher:     cd ~/nullsec && python3 nullsec-launcher.py
+
+═══════════════════════════════════════════════════════════════════════════════
+ NULLSEC AI
+═══════════════════════════════════════════════════════════════════════════════
+
+Version:      3.0
+Launch:       cd ~/nullsec && python3 nullsec-ai.py
+Models:       12 local AI models (73GB)
+Prompt:       ┌──(nullsec-ai)-[category]-[target]
+              └─$ 
+
+Models List:
+  • deepseek-coder:6.7b    • codellama:13b      • mistral:7b
+  • mixtral:8x7b           • openhermes         • solar:10.7b
+  • phi:2.7b               • orca2:13b          • neural-chat:7b
+  • wizardlm2:7b           • starling-lm:7b     • (1 more)
+
+═══════════════════════════════════════════════════════════════════════════════
+ QUICK COMMANDS
+═══════════════════════════════════════════════════════════════════════════════
+
+# Check System Info
+lsb_release -a                    # Show OS version
+hostname                          # Show hostname
+cat /etc/os-release              # OS details
+
+# Launch Tools
+python3 ~/nullsec/nullsec-launcher.py     # Framework launcher
+python3 ~/nullsec/nullsec-ai.py           # AI assistant
+python3 ~/nullsec/nullsec-desktop.py      # Desktop GUI
+
+# AI Model Management
+ollama list                       # List installed models
+ollama run deepseek-coder        # Run specific model
+ollama ps                        # Show running models
+
+# Create ISO
+cd ~/nullsec
+sudo bash create-nullsec-iso.sh
+
+# File Transfer (Windows)
+cd ~/nullsec/windows
+python3 -m http.server 8080
+# Access: http://192.168.40.129:8080/
+
+═══════════════════════════════════════════════════════════════════════════════
+ ATTACK CATEGORIES (22)
+═══════════════════════════════════════════════════════════════════════════════
+
+01. Wireless Attacks          12. Post Exploitation
+02. Web Applications          13. Mobile Security
+03. Exploitation              14. Database Assessment
+04. Forensics                 15. SCADA/ICS
+05. Reverse Engineering       16. Cloud Security
+06. Information Gathering     17. Reporting
+07. Password Attacks          18. Utilities
+08. Sniffing & Spoofing       19. Anonymity
+09. Vulnerability Analysis    20. Malware Analysis
+10. Hardware Hacking          21. Cryptography
+11. Social Engineering        22. Custom Tools
+
+═══════════════════════════════════════════════════════════════════════════════
+ POPULAR TOOLS
+═══════════════════════════════════════════════════════════════════════════════
+
+Network:      nmap, masscan, wireshark, ettercap
+Web:          burpsuite, sqlmap, nikto, zap
+Exploit:      metasploit, armitage, beef, set
+Password:     john, hashcat, hydra, medusa
+Wireless:     aircrack-ng, wifite, reaver, kismet
+Forensics:    autopsy, volatility, sleuth-kit
+Reverse:      ghidra, radare2, ida-free
+
+═══════════════════════════════════════════════════════════════════════════════
+ FILES & DOCUMENTATION
+═══════════════════════════════════════════════════════════════════════════════
+
+~/nullsec/NULLSEC_COMMANDS_REFERENCE.md      - All 185 modules
+~/nullsec/NULLSEC_AI_V3_GUIDE.md             - AI usage guide
+~/nullsec/NULLSEC_LINUX_REBRANDING.md        - Rebrand guide
+~/nullsec/REBRAND_COMPLETE_REPORT.md         - Full report
+~/nullsec/APPLICATION_REBRAND_COMPLETE.md    - App scan results
+~/nullsec/README.md                          - Framework docs
+
+═══════════════════════════════════════════════════════════════════════════════
+ WINDOWS VERSIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+Location:     ~/nullsec/windows/
+Files:        nullsec-launcher-windows.py
+              nullsec-ai-windows.py
+              nullsec-desktop-windows.py
+              install-windows.bat
+              README-WINDOWS.md
+
+Transfer:     http://192.168.40.129:8080/nullsec-windows.zip
+
+═══════════════════════════════════════════════════════════════════════════════
+ BACKUP LOCATIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+Primary:      /home/antics/parrot-backup-20260113-214218/
+Secondary:    /home/antics/nullsec/rebrand-20260113-222758/
+ASCII:        /home/antics/nullsec/ascii-backup-20260113-221136/
+Images:       /home/antics/nullsec/image-backup-20260113-220030/
+
+═══════════════════════════════════════════════════════════════════════════════
+ ISO CREATION
+═══════════════════════════════════════════════════════════════════════════════
+
+Command:      cd ~/nullsec && sudo bash create-nullsec-iso.sh
+Output:       /home/antics/nullsec-iso/nullsec-linux-1.0-amd64.iso
+Size:         ~3-5GB
+Time:         30-60 minutes
+Format:       Hybrid ISO (USB/DVD bootable)
+
+Features:     ✅ Full NullSec branding
+              ✅ Custom Plymouth boot
+              ✅ 185 security modules
+              ✅ 12 AI models
+              ✅ 1,148 tools included
+
+═══════════════════════════════════════════════════════════════════════════════
+ REBRAND STATUS
+═══════════════════════════════════════════════════════════════════════════════
+
+Desktop Files:        ✅ 445 files rebranded
+Menu Entries:         ✅ 703 files rebranded
+System Files:         ✅ 14 files updated
+Boot Screens:         ✅ GRUB + Plymouth
+Terminal:             ✅ NullSec Console
+Update Notifier:      ✅ Wrapped
+ASCII Headers:        ✅ All replaced
+Total Changed:        ✅ 1,242+ files
+
+Parrot References:    ✅ 0 (user-facing)
+ISO Ready:            ✅ YES
+Production Ready:     ✅ YES
+
+═══════════════════════════════════════════════════════════════════════════════
+ SUPPORT
+═══════════════════════════════════════════════════════════════════════════════
+
+Framework Help:    python3 nullsec-launcher.py --help
+AI Help:           Type 'help' in NULLSEC AI
+Documentation:     ~/nullsec/*.md files
+Logs:              ~/nullsec/logs/
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    NullSec Linux 1.0 (void) - Ready to Deploy!
+                           Built for Security Professionals
+
+═══════════════════════════════════════════════════════════════════════════════

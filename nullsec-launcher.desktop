@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=NULLSEC Launcher
+Comment=Hacking Simulation Suite
+Exec=mate-terminal --title="☠ NULLSEC ☠" --geometry=100x45 -e "/home/antics/nullsec/nullsec"
+Icon=/home/antics/nullsec/static/nullsec-icon.png
+Terminal=false
+Type=Application
+Categories=Security;System;
+Keywords=hacking;security;pentest;simulation;
+StartupNotify=true

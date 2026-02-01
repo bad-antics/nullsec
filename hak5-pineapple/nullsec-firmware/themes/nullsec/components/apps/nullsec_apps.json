@@ -1,0 +1,73 @@
+{
+    "apps": {
+        "name": "nullsec_apps",
+        "display_name": "NullSec Apps",
+        "version": "1.0.0"
+    },
+    "style": {
+        "background": "#000000",
+        "text_color": "#FFFFFF",
+        "accent_color": "#FF0000",
+        "border_color": "#330000",
+        "header_bg": "#1A0000",
+        "header_text": "#FF0000",
+        "selected_bg": "#FF0000",
+        "selected_text": "#000000",
+        "disabled_color": "#444444",
+        "success_color": "#00FF00",
+        "warning_color": "#FFFF00",
+        "error_color": "#FF0000"
+    },
+    "input": {
+        "background": "#0A0000",
+        "text_color": "#FFFFFF",
+        "cursor_color": "#FF0000",
+        "placeholder_color": "#666666",
+        "border_color": "#330000",
+        "focus_border": "#FF0000"
+    },
+    "buttons": {
+        "primary": {
+            "background": "#FF0000",
+            "text_color": "#000000",
+            "border_color": "#CC0000"
+        },
+        "secondary": {
+            "background": "#330000",
+            "text_color": "#FFFFFF",
+            "border_color": "#660000"
+        },
+        "danger": {
+            "background": "#990000",
+            "text_color": "#FFFFFF",
+            "border_color": "#FF0000"
+        }
+    },
+    "lists": {
+        "item_height": 24,
+        "divider_color": "#1A0000",
+        "alternate_bg": "#050000"
+    },
+    "dialogs": {
+        "background": "#0A0000",
+        "border_color": "#FF0000",
+        "overlay_color": "rgba(0, 0, 0, 0.8)",
+        "title_color": "#FF0000"
+    },
+    "progress": {
+        "background": "#1A0000",
+        "fill_color": "#FF0000",
+        "text_color": "#FFFFFF"
+    },
+    "notifications": {
+        "background": "#1A0000",
+        "text_color": "#FFFFFF",
+        "border_color": "#FF0000",
+        "duration_ms": 3000
+    },
+    "scrollbar": {
+        "track_color": "#0A0000",
+        "thumb_color": "#330000",
+        "hover_color": "#660000"
+    }
+}

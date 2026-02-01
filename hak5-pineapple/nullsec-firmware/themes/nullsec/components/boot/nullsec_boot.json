@@ -1,0 +1,51 @@
+{
+    "boot_sequence": {
+        "name": "nullsec_boot",
+        "display_name": "NullSec Boot",
+        "version": "1.0.0",
+        "type": "animated",
+        "duration_ms": 3000
+    },
+    "animation": {
+        "type": "text_sequence",
+        "frames": [
+            {
+                "text": "NULLSEC",
+                "style": "bold",
+                "color": "#FF0000",
+                "duration_ms": 500,
+                "effect": "fade_in"
+            },
+            {
+                "text": "INITIALIZING...",
+                "style": "normal",
+                "color": "#CC0000",
+                "duration_ms": 800,
+                "effect": "typewriter"
+            },
+            {
+                "text": "SYSTEMS ONLINE",
+                "style": "bold",
+                "color": "#00FF00",
+                "duration_ms": 500,
+                "effect": "flash"
+            }
+        ]
+    },
+    "progress_bar": {
+        "enabled": true,
+        "style": "segmented",
+        "fill_color": "#FF0000",
+        "empty_color": "#330000",
+        "border_color": "#CC0000"
+    },
+    "logo": {
+        "enabled": true,
+        "type": "ascii",
+        "content": "    _   __      ____\n   / | / /_  __/ / /\n  /  |/ / / / / / / \n / /|  / /_/ / / /  \n/_/ |_/\\__,_/_/_/   \n   S E C U R I T Y  "
+    },
+    "sounds": {
+        "boot_start": true,
+        "boot_complete": true
+    }
+}
