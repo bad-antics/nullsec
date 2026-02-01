@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-NULLSEC FRAMEWORK AI v3.0 - Offline-First AI-Powered Security Operations
+NULLSEC FRAMEWORK AI v3.1 - Offline-First AI-Powered Security Operations
 ==============================================================================
 Advanced AI integration with NO API KEY REQUIRED - Works 100% offline
 
@@ -13,6 +13,7 @@ Features:
 - Specialized pentesting AI models
 - Knowledge base learning from attack results
 - Autonomous exploit chain generation
+- Enhanced token limit handling and context management
 
 Supported Models (All Free & Open Source):
 - DeepSeek Coder 6.7B - Code generation specialist
@@ -28,8 +29,12 @@ Supported Models (All Free & Open Source):
 
 Author: bad-antics development
 GitHub: github.com/bad-antics
+Version: 3.1
 License: For authorized security testing only
 """
+
+__version__ = "3.1"
+__author__ = "bad-antics"
 
 import os
 import sys
