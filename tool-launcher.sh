@@ -1,6 +1,9 @@
 #!/bin/bash
-# NULLSEC Tool Launcher - Auto-launch security tools
+# NULLSEC Tool Launcher v1.1 - Auto-launch security tools
 # Integrates with framework modules
+# GitHub: github.com/bad-antics/nullsec-linux
+
+VERSION="1.1"
 
 RED='\033[1;31m'; GREEN='\033[1;32m'; YELLOW='\033[1;33m'; CYAN='\033[1;36m'
 WHITE='\033[1;37m'; DIM='\033[2m'; RESET='\033[0m'
