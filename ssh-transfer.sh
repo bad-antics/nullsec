@@ -1,7 +1,8 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════════════════════════════
-# NULLSEC SSH TRANSFER UTILITY v2.0
+# NULLSEC SSH TRANSFER UTILITY v2.1
 # Advanced file transfer for NULLSEC deployments
+# GitHub: https://github.com/bad-antics/nullsec
 # ═══════════════════════════════════════════════════════════════════════════════
 # 
 # Features:
@@ -13,6 +14,7 @@
 #   - Auto-detection of remote OS
 #
 # Author: bad-antics development
+# Version: 2.1
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # Colors
