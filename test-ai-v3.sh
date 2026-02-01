@@ -1,5 +1,9 @@
 #!/bin/bash
+#
+# NullSec AI v3.0 Test Suite v1.1
 # Test NULLSEC AI v3.0
+# Repository: https://github.com/bad-antics/nullsec
+#
 
 echo "═══════════════════════════════════════════════════════════════════════"
 echo "  NULLSEC AI v3.0 - COMPREHENSIVE TEST"
