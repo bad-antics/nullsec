@@ -1,6 +1,8 @@
 #!/bin/bash
-# WiFi Pineapple Pager CLI Interface
+# WiFi Pineapple Pager CLI Interface v1.1
 # bad-antics Development Team
+# GitHub: https://github.com/bad-antics/nullsec
+# Version: 1.1
 
 PAGER_IP="172.16.52.1"
 PAGER_USER="root"
