@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """
 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-█  NULLSEC FRAMEWORK - Automatic Enhancement Script               █
+█  NULLSEC FRAMEWORK - Automatic Enhancement Script v1.0          █
 █                    [ bad-antics development ]                    █
+█                https://github.com/bad-antics/nullsec             █
 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 This script automatically enhances all NULLSEC framework components.
 """
+
+__version__ = "1.0"
+__author__ = "bad-antics"
 
 import os
 import sys
