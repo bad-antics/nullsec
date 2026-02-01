@@ -1,8 +1,10 @@
 #!/bin/bash
 #
 # NullSec GitHub Community Helper
+# Version: 1.1
 # Finds open issues you can answer and generates response templates
 # Author: bad-antics
+# Repository: https://github.com/bad-antics/nullsec
 #
 
 RED='\033[0;31m'
