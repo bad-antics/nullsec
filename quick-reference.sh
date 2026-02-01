@@ -1,6 +1,9 @@
 #!/bin/bash
-# NULLSEC Framework Quick Reference
+#
+# NULLSEC Framework Quick Reference v1.1
 # bad-antics development
+# Repository: https://github.com/bad-antics/nullsec
+#
 
 RED='\033[1;31m'
 GREEN='\033[1;32m'
