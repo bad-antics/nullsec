@@ -1,4 +1,9 @@
 #!/bin/bash
+# NullSec System Audit Script v1.1
+# Comprehensive security audit for NullSec Linux
+# GitHub: github.com/bad-antics/nullsec-linux
+
+VERSION="1.1"
 
 echo "===="
 echo "|       FINAL AUDIT - NullSec Linux Complete System Scan               |"
