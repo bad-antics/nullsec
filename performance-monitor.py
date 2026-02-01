@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """
-NullSec Performance Monitor v1.0
+NullSec Performance Monitor v1.1
 Monitor and optimize module execution
+
+GitHub: https://github.com/bad-antics/nullsec
 """
 import time
 import psutil
 import json
 from datetime import datetime
+
+__version__ = "1.1"
+__author__ = "bad-antics"
 
 class PerformanceMonitor:
     def __init__(self):
