@@ -1,7 +1,9 @@
 #!/bin/bash
-# Flipper Zero CLI Interface
+# Flipper Zero CLI Interface v1.2
 # bad-antics Development Team
+# GitHub: github.com/bad-antics/nullsec-linux
 
+VERSION="1.2"
 FLIPPER_DEV="/dev/ttyACM0"
 FLIPPER_DIR="/home/antics/flipper"
 SCRIPTS_DIR="$FLIPPER_DIR/scripts"
