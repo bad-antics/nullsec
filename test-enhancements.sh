@@ -1,6 +1,10 @@
 #!/bin/bash
-
+#
+# NullSec Enhancement Test Suite v1.1
 # Quick test of enhanced modules
+# Repository: https://github.com/bad-antics/nullsec
+#
+
 echo "╭─ TESTING ENHANCED MODULES"
 echo "│"
 
