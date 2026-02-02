@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 """
-NullSec Interactive Module Framework
-Enhanced module execution with rich interactive prompts and logging
+NullSec Interactive Module Framework v2.0
+Enhanced module execution with rich interactive prompts, logging,
+and automated input handling for security testing workflows.
+
+GitHub: https://github.com/bad-antics/nullsec
 """
+
+__version__ = "2.0"
+__author__ = "bad-antics"
 
 import os
 import sys
