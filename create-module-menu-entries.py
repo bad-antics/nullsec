@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
+"""
+NullSec Linux - Module Desktop Entry Generator v1.0
+Creates .desktop files for all modules grouped by exploit type.
+Generates proper freedesktop.org compliant desktop entries.
 
+GitHub: https://github.com/bad-antics/nullsec
 """
-NullSec Linux - Module Desktop Entry Generator
-Creates .desktop files for all modules grouped by exploit type
-"""
+
+__version__ = "1.0"
+__author__ = "bad-antics"
 
 import os
 import json
