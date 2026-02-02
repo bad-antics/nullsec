@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 """
-Batch Enhancement Script for NullSec Modules
+Batch Enhancement Script for NullSec Modules v1.0
+https://github.com/bad-antics/nullsec
+
 Automatically generates JSON configs and enhances modules with logging
 """
+
+__version__ = "1.0"
+__author__ = "bad-antics"
 
 import os
 import re
