@@ -2,6 +2,8 @@
 """
 NULLSEC FRAMEWORK AI v3.1 - Offline-First AI-Powered Security Operations
 ==============================================================================
+https://github.com/bad-antics/nullsec
+
 Advanced AI integration with NO API KEY REQUIRED - Works 100% offline
 
 Features:
@@ -32,6 +34,9 @@ GitHub: github.com/bad-antics
 Version: 3.1
 License: For authorized security testing only
 """
+
+__version__ = "3.1"
+__author__ = "bad-antics"
 
 __version__ = "3.1"
 __author__ = "bad-antics"
