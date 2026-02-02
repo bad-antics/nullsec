@@ -151,3 +151,6 @@ MIT License - See [LICENSE](LICENSE) for details.
   <strong>bad-antics development</strong><br>
   <a href="https://github.com/bad-antics">github.com/bad-antics</a>
 </p>
+
+---
+*For authorized security testing only.*
