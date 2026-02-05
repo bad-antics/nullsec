@@ -132,7 +132,7 @@ Contributors will be:
 ## Questions?
 
 - Open a GitHub Discussion
-- Join our Discord server
+- Follow us on Twitter @AnonAntics
 - Check the FAQ in the wiki
 
 ---

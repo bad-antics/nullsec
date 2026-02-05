@@ -145,7 +145,7 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) for deta
 
 - **NullSec GitHub**: https://github.com/nullsec
 - **Documentation**: https://docs.nullsec.dev/pager
-- **Discord**: https://discord.gg/nullsec
+- **Twitter**: https://twitter.com/AnonAntics
 - **Hak5 Forums Thread**: [Coming Soon]
 
 ---
