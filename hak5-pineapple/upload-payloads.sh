@@ -4,7 +4,7 @@
 # Developed by: bad-antics
 #═══════════════════════════════════════════════════════════════════════════════
 
-PINEAPPLE_IP="${PINEAPPLE_IP:-172.16.42.1}"
+PINEAPPLE_IP="${PINEAPPLE_IP:-172.16.52.1}"
 REMOTE_PATH="/root/payloads/user/nullsec"
 LIB_PATH="/mmc/nullsec/lib"
 LOCAL_DIR="$(dirname "$0")/payloads"

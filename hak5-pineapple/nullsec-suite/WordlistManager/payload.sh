@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #═══════════════════════════════════════════════════════════════════════════════
 # NullSec Wordlist Manager
 # Developed by: bad-antics

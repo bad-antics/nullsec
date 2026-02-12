@@ -1,90 +1,81 @@
-#!/bin/sh
-#####################################################
-# NullSec GhostNetwork Payload
-# Creates hidden covert network for stealthy C2
-#####################################################
-# Author: NullSec Team
-# Target: WiFi Pineapple Pager
-# Category: Stealth/Covert
-#####################################################
+#!/bin/bash
+# Title: Ghost Network
+# Author: NullSec
+# Description: Create hidden covert network for stealth ops
+# Category: nullsec/stealth
 
-PAYLOAD_NAME="GhostNetwork"
-source /root/payloads/library/nullsec-lib.sh 2>/dev/null || true
-
-# Configuration
-GHOST_SSID="\x00\x00\x00\x00\x00\x00\x00\x00"  # Null bytes - invisible
-GHOST_CHANNEL="${TARGET_CHANNEL:-6}"
-GHOST_INTERFACE="wlan1"
-BEACON_INTERVAL="1000"  # Less frequent = harder to detect
-LOOT_DIR="/root/loot/ghost"
-LOG_FILE="$LOOT_DIR/ghost_$(date +%Y%m%d_%H%M%S).log"
-
+LOOT_DIR="/mmc/nullsec/ghost"
 mkdir -p "$LOOT_DIR"
 
-log() {
-    echo "[$(date '+%H:%M:%S')] $1" | tee -a "$LOG_FILE"
-}
+PROMPT "GHOST NETWORK
 
-cleanup() {
-    log "[!] Cleaning up ghost network..."
-    killall hostapd 2>/dev/null
-    ifconfig "$GHOST_INTERFACE" down 2>/dev/null
-    log "[*] Ghost network terminated"
-    exit 0
-}
+Create an invisible hidden
+WiFi network for covert
+operations.
 
-trap cleanup INT TERM
+Network will not appear
+in normal WiFi scans.
 
-log "=========================================="
-log "   NullSec GhostNetwork v1.0"
-log "=========================================="
-log "[*] Creating invisible covert network..."
+Press OK to configure."
 
-# Check interface
-if ! ifconfig "$GHOST_INTERFACE" >/dev/null 2>&1; then
-    log "[!] Interface $GHOST_INTERFACE not found"
-    exit 1
-fi
+GHOST_CH=$(NUMBER_PICKER "Channel (1-11):" 6)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) GHOST_CH=6 ;; esac
 
-# Create hostapd config for hidden network
-HOSTAPD_CONF="/tmp/ghost_hostapd.conf"
-cat > "$HOSTAPD_CONF" << EOF
-interface=$GHOST_INTERFACE
+DURATION=$(NUMBER_PICKER "Duration (minutes):" 30)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) DURATION=30 ;; esac
+DURATION_SEC=$((DURATION * 60))
+
+resp=$(CONFIRMATION_DIALOG "DEPLOY GHOST NETWORK?
+
+Channel: $GHOST_CH
+Duration: ${DURATION} min
+SSID: (hidden)
+
+Clients need SSID to connect.
+
+Press OK to deploy.")
+[ "$resp" != "$DUCKYSCRIPT_USER_CONFIRMED" ] && exit 0
+
+GHOST_IF="wlan1"
+# Stop monitor mode to use AP mode
+airmon-ng stop wlan1mon 2>/dev/null
+sleep 1
+
+LOG_FILE="$LOOT_DIR/ghost_$(date +%Y%m%d_%H%M).log"
+
+cat > /tmp/ghost_hostapd.conf << EOF
+interface=$GHOST_IF
 driver=nl80211
-ssid=$GHOST_SSID
-channel=$GHOST_CHANNEL
+ssid=nullsec_ghost
+channel=$GHOST_CH
 hw_mode=g
 ieee80211n=1
 ignore_broadcast_ssid=2
-beacon_int=$BEACON_INTERVAL
+beacon_int=1000
 auth_algs=1
-wpa=0
+wpa=2
+wpa_passphrase=nullsec_ghost_key
+wpa_key_mgmt=WPA-PSK
+rsn_pairwise=CCMP
 EOF
 
-# Start ghost AP
-log "[*] Starting ghost AP on channel $GHOST_CHANNEL..."
-ifconfig "$GHOST_INTERFACE" up
-hostapd -B "$HOSTAPD_CONF" 2>/dev/null
+ifconfig "$GHOST_IF" up 2>/dev/null
+hostapd /tmp/ghost_hostapd.conf -B 2>/dev/null
+sleep 2
+ifconfig "$GHOST_IF" 10.66.66.1 netmask 255.255.255.0
 
-if [ $? -eq 0 ]; then
-    log "[+] Ghost network active (hidden SSID)"
-    log "[*] Pre-shared key for clients: nullsec_ghost"
-    log "[*] Clients must know SSID to connect"
-    
-    # Setup simple DHCP
-    ifconfig "$GHOST_INTERFACE" 10.66.66.1 netmask 255.255.255.0
-    
-    # Monitor connections
-    log "[*] Monitoring for ghost clients..."
-    while true; do
-        CLIENTS=$(iw dev "$GHOST_INTERFACE" station dump 2>/dev/null | grep Station | wc -l)
-        if [ "$CLIENTS" -gt 0 ]; then
-            log "[+] Ghost clients connected: $CLIENTS"
-            iw dev "$GHOST_INTERFACE" station dump >> "$LOG_FILE" 2>/dev/null
-        fi
-        sleep 30
-    done
-else
-    log "[!] Failed to start ghost network"
-    exit 1
-fi
+LOG "Ghost network active on CH:$GHOST_CH"
+
+# Run for duration
+sleep "$DURATION_SEC"
+
+killall hostapd 2>/dev/null
+airmon-ng start wlan1 2>/dev/null
+
+PROMPT "GHOST NETWORK STOPPED
+
+Channel: $GHOST_CH
+Duration: ${DURATION} min
+Log: $LOG_FILE
+
+Press OK to exit."

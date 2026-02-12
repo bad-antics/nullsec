@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: Quick Scan
 # Author: bad-antics
 # Description: Fast 30-second WiFi environment scan

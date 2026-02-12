@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: Hotspot Hijack
 # Author: bad-antics
 # Description: Target mobile hotspots specifically

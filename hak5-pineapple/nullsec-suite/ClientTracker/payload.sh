@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: Client Tracker
 # Author: bad-antics
 # Description: Track a specific device across networks

@@ -1,125 +1,105 @@
-#!/bin/sh
-#####################################################
-# NullSec Honeypot Payload
-# Decoy AP that logs all connection attempts
-#####################################################
-# Author: NullSec Team
-# Target: WiFi Pineapple Pager
-# Category: Defense/Counter-Intel
-#####################################################
+#!/bin/bash
+# Title: Honeypot
+# Author: NullSec
+# Description: Decoy AP that logs all connection attempts
+# Category: nullsec/defense
 
-PAYLOAD_NAME="Honeypot"
-source /root/payloads/library/nullsec-lib.sh 2>/dev/null || true
-
-# Configuration
-HONEYPOT_SSID="${1:-Free_WiFi_Secure}"
-HONEYPOT_CHANNEL="${TARGET_CHANNEL:-6}"
-HONEYPOT_INTERFACE="wlan1"
-LOOT_DIR="/root/loot/honeypot"
-LOG_FILE="$LOOT_DIR/honeypot_$(date +%Y%m%d_%H%M%S).log"
-ALERT_FILE="$LOOT_DIR/attackers.txt"
-
+LOOT_DIR="/mmc/nullsec/honeypot"
 mkdir -p "$LOOT_DIR"
 
-log() {
-    echo "[$(date '+%H:%M:%S')] $1" | tee -a "$LOG_FILE"
-}
+PROMPT "HONEYPOT AP
 
-alert() {
-    echo "[ALERT $(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$ALERT_FILE"
-    log "[!] ALERT: $1"
-}
+Deploy a decoy access point
+with weak credentials to
+detect and log attackers.
 
-cleanup() {
-    log "[!] Shutting down honeypot..."
-    killall hostapd tcpdump 2>/dev/null
-    ifconfig "$HONEYPOT_INTERFACE" down 2>/dev/null
-    log "[*] Honeypot terminated"
-    log "[*] Logs saved to: $LOOT_DIR"
-    exit 0
-}
+Monitors:
+- Connection attempts
+- Authentication tries
+- Client behavior
 
-trap cleanup INT TERM
+Press OK to configure."
 
-log "=========================================="
-log "   NullSec Honeypot v1.0"
-log "=========================================="
-log "[*] Deploying honeypot: $HONEYPOT_SSID"
-log "[*] Channel: $HONEYPOT_CHANNEL"
+SSID=$(TEXT_PICKER "Honeypot SSID:" "Free_WiFi_Secure")
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) SSID="Free_WiFi_Secure" ;; esac
 
-# Honeypot config - intentionally weak
-HOSTAPD_CONF="/tmp/honeypot_hostapd.conf"
-cat > "$HOSTAPD_CONF" << EOF
-interface=$HONEYPOT_INTERFACE
+HP_PASS=$(TEXT_PICKER "Weak password:" "password123")
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) HP_PASS="password123" ;; esac
+
+DURATION=$(NUMBER_PICKER "Duration (minutes):" 30)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) DURATION=30 ;; esac
+DURATION_SEC=$((DURATION * 60))
+
+resp=$(CONFIRMATION_DIALOG "DEPLOY HONEYPOT?
+
+SSID: $SSID
+Password: $HP_PASS
+Duration: ${DURATION} min
+
+All activity will be logged.
+
+Press OK to deploy.")
+[ "$resp" != "$DUCKYSCRIPT_USER_CONFIRMED" ] && exit 0
+
+HP_IF="wlan1"
+airmon-ng stop wlan1mon 2>/dev/null
+sleep 1
+
+LOG_FILE="$LOOT_DIR/honeypot_$(date +%Y%m%d_%H%M).log"
+ALERT_FILE="$LOOT_DIR/alerts_$(date +%Y%m%d_%H%M).txt"
+
+cat > /tmp/hp_hostapd.conf << EOF
+interface=$HP_IF
 driver=nl80211
-ssid=$HONEYPOT_SSID
-channel=$HONEYPOT_CHANNEL
+ssid=$SSID
+channel=6
 hw_mode=g
-ieee80211n=1
 auth_algs=1
 wpa=2
-wpa_passphrase=password123
+wpa_passphrase=$HP_PASS
 wpa_key_mgmt=WPA-PSK
 rsn_pairwise=CCMP
-logger_syslog=-1
-logger_syslog_level=2
 logger_stdout=-1
 logger_stdout_level=2
 EOF
 
-# Start honeypot AP
-ifconfig "$HONEYPOT_INTERFACE" up
-hostapd "$HOSTAPD_CONF" > /tmp/honeypot_hostapd.log 2>&1 &
-HOSTAPD_PID=$!
+ifconfig "$HP_IF" up
+hostapd /tmp/hp_hostapd.conf > /tmp/hp_log.txt 2>&1 &
+HP_PID=$!
 sleep 2
 
-if kill -0 $HOSTAPD_PID 2>/dev/null; then
-    log "[+] Honeypot AP active"
-else
-    log "[!] Failed to start honeypot"
-    exit 1
-fi
+ifconfig "$HP_IF" 192.168.99.1 netmask 255.255.255.0 2>/dev/null
 
-# Setup IP
-ifconfig "$HONEYPOT_INTERFACE" 192.168.99.1 netmask 255.255.255.0
+# Capture traffic
+tcpdump -i "$HP_IF" -w "$LOOT_DIR/hp_capture_$(date +%Y%m%d_%H%M).pcap" 2>/dev/null &
+TCP_PID=$!
 
-# Start packet capture
-tcpdump -i "$HONEYPOT_INTERFACE" -w "$LOOT_DIR/capture_$(date +%Y%m%d_%H%M%S).pcap" 2>/dev/null &
-log "[*] Packet capture started"
+LOG "Honeypot deployed: $SSID"
 
-# Fake services banner
-log "[*] Starting fake service listeners..."
-
-# Fake SSH honeypot
-while true; do
-    echo "SSH-2.0-OpenSSH_7.4" | nc -l -p 22 -q 1 2>/dev/null | while read line; do
-        alert "SSH probe from client - attempt: $line"
-    done
-done &
-
-# Fake HTTP
-while true; do
-    echo -e "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Router Login</h1><form method=post><input name=user><input name=pass type=password><input type=submit></form></body></html>" | nc -l -p 80 -q 1 2>/dev/null | while read line; do
-        if echo "$line" | grep -qi "pass"; then
-            alert "HTTP credential capture: $line"
-        fi
-    done
-done &
-
-log "[+] Honeypot fully deployed and monitoring"
-log "[*] Known weak password: password123"
-log "[*] Attackers will be logged to: $ALERT_FILE"
-
-# Monitor hostapd logs for connections
-tail -f /tmp/honeypot_hostapd.log 2>/dev/null | while read line; do
-    if echo "$line" | grep -qi "associated"; then
-        MAC=$(echo "$line" | grep -oE '([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}')
-        alert "New client associated: $MAC"
+# Monitor for the duration
+END=$(($(date +%s) + DURATION_SEC))
+while [ $(date +%s) -lt $END ]; do
+    # Check for new associations
+    if [ -f /tmp/hp_log.txt ]; then
+        grep -i "associated\|authenticated\|deauth" /tmp/hp_log.txt 2>/dev/null | tail -5 >> "$ALERT_FILE"
+        > /tmp/hp_log.txt
     fi
-    if echo "$line" | grep -qi "authenticated"; then
-        alert "Client authenticated (got password!)"
-    fi
-    if echo "$line" | grep -qi "deauthenticated\|disassociated"; then
-        alert "Client disconnected - possible attack detection"
-    fi
+    CLIENTS=$(iw dev "$HP_IF" station dump 2>/dev/null | grep -c "Station")
+    [ "$CLIENTS" -gt 0 ] && echo "$(date) Active clients: $CLIENTS" >> "$LOG_FILE"
+    sleep 10
 done
+
+kill $HP_PID $TCP_PID 2>/dev/null
+killall hostapd tcpdump 2>/dev/null
+airmon-ng start wlan1 2>/dev/null
+
+ALERT_COUNT=$(wc -l < "$ALERT_FILE" 2>/dev/null || echo 0)
+
+PROMPT "HONEYPOT STOPPED
+
+SSID: $SSID
+Duration: ${DURATION} min
+Alerts: $ALERT_COUNT
+Log: $LOG_FILE
+
+Press OK to exit."

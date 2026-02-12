@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: Targeted Deauth
 # Author: bad-antics
 # Description: Deauthenticate a specific MAC address from any network

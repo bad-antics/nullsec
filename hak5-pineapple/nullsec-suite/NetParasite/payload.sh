@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: Net Parasite
 # Author: bad-antics
 # Description: Bandwidth hog to slow down target network

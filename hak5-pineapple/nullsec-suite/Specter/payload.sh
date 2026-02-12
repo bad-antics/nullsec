@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #═══════════════════════════════════════════════════════════════════════════════
 # SPECTER - Silent Passive Electronic Collection & Tracking Extraction Recon
 # Developed by: bad-antics

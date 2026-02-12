@@ -4,8 +4,8 @@
 #  Connects to Hak5 device via USB without losing internet
 #===============================================================================
 
-PINEAPPLE_IP="${PINEAPPLE_IP:-172.16.42.1}"  # Default Pineapple IP
-PINEAPPLE_NET="172.16.42.0/24"
+PINEAPPLE_IP="${PINEAPPLE_IP:-172.16.52.1}"  # Default Pineapple Pager IP
+PINEAPPLE_NET="172.16.52.0/24"
 PINEAPPLE_USER="${PINEAPPLE_USER:-root}"
 
 GREEN='\033[0;32m'

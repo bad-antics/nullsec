@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: Fake Update Portal
 # Author: bad-antics
 # Description: Captive portal disguised as software update

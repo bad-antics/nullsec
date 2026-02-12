@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: Portal Master
 # Author: bad-antics
 # Description: All-in-one portal launcher with 15+ templates

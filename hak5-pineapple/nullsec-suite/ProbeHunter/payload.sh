@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: NullSec Probe Hunter  
 # Author: bad-antics
 # Description: Passive probe request collection for SSID discovery

@@ -33,7 +33,7 @@
 # CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════════
 
-PINEAPPLE_IP="172.16.42.1"
+PINEAPPLE_IP="172.16.52.1"
 PINEAPPLE_USER="root"
 PINEAPPLE_WIFI="Pineapple-Pager"
 HOME_WIFI="lulzboat"

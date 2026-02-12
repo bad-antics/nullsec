@@ -6,8 +6,8 @@
 # Source this file in payloads to get auto-scan and target selection UI
 #═══════════════════════════════════════════════════════════════════════════════
 
-SCANNER_VERSION="1.0"
-SCANNER_INTERFACE="${SCANNER_INTERFACE:-wlan0}"
+SCANNER_VERSION="1.1"
+SCANNER_INTERFACE="${SCANNER_INTERFACE:-wlan1mon}"
 
 # Check for monitor mode, enable if needed
 nullsec_ensure_monitor() {

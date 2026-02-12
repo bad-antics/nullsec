@@ -1,39 +1,68 @@
-#!/bin/sh
+#!/bin/bash
 # Title: Beacon Spam
-# Author: NullSec  
-# Description: Flood area with fake WiFi networks using beacon frames
-# Category: WiFi Chaos
+# Author: NullSec
+# Description: Flood area with fake WiFi networks
+# Category: nullsec/chaos
 
 LOOT_DIR="/mmc/nullsec/beaconspam"
 mkdir -p "$LOOT_DIR"
 
-echo "📡 BEACON SPAM"
-echo "━━━━━━━━━━━━━━━"
+PROMPT "BEACON SPAM
 
-[ ! -d "/sys/class/net/wlan0" ] && { echo "[!] wlan0 not found!"; exit 1; }
+Flood the area with fake
+WiFi network names.
 
-# Predefined SSID lists
-FUNNY_SSIDS="FBI_Surveillance_Van
+Choose from themed lists
+or enter custom SSIDs.
+
+Press OK to configure."
+
+MON_IF=""
+for iface in wlan1mon wlan2mon wlan0mon; do
+    [ -d "/sys/class/net/$iface" ] && MON_IF="$iface" && break
+done
+[ -z "$MON_IF" ] && { ERROR_DIALOG "No monitor interface!
+
+Run: airmon-ng start wlan1"; exit 1; }
+
+PROMPT "SELECT SSID THEME:
+
+1. Funny Names
+2. Scary/Warning
+3. Tech Humor
+4. Custom SSID List
+
+Select on next screen."
+
+THEME=$(NUMBER_PICKER "Theme (1-4):" 1)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) THEME=1 ;; esac
+
+SSID_FILE="/tmp/beacon_ssids.txt"
+rm -f "$SSID_FILE"
+
+case $THEME in
+    1)
+        cat > "$SSID_FILE" << 'SSIDLIST'
+FBI_Surveillance_Van
 NSA_Mobile_Unit
-Free_Virus_Download
-DefinitelyNotAHacker
 Pretty_Fly_for_a_WiFi
 Wu-Tang_LAN
-The_Promised_LAN
 Bill_Wi_the_Science_Fi
 Drop_It_Like_Its_Hotspot
 LAN_Solo
-GetOffMyLAN
-Router_I_Hardly_Know_Her
+The_Promised_LAN
 Loading...
-Searching...
-No_Internet_Access
-Connecting...
 Error_404_WiFi_Not_Found
 Virus_Distribution_Center
-Click_Here_for_Free_WiFi"
-
-SCARY_SSIDS="POLICE_SURVEILLANCE
+Free_Virus_Download
+DefinitelyNotAHacker
+GetOffMyLAN
+It_Hurts_When_IP
+SSIDLIST
+        ;;
+    2)
+        cat > "$SSID_FILE" << 'SSIDLIST'
+POLICE_SURVEILLANCE
 FBI_VAN_4827
 DEA_MONITORING
 IRS_AUDIT_UNIT
@@ -42,82 +71,83 @@ SYSTEM_COMPROMISED
 MALWARE_DETECTED
 SECURITY_BREACH
 VIRUS_ALERT
-HACK_IN_PROGRESS"
-
-echo "Select SSID theme:"
-echo "1) Funny SSIDs"
-echo "2) Scary SSIDs"
-echo "3) Custom list"
-echo "4) Single SSID spam"
-echo ""
-echo -n "Choice [1]: "
-read CHOICE
-CHOICE=${CHOICE:-1}
-
-case "$CHOICE" in
-    1) SSID_LIST="$FUNNY_SSIDS" ;;
-    2) SSID_LIST="$SCARY_SSIDS" ;;
-    3) 
-        echo "Enter SSIDs (one per line, empty line to finish):"
-        SSID_LIST=""
-        while read line; do
-            [ -z "$line" ] && break
-            SSID_LIST="$SSID_LIST
-$line"
-        done
+DO_NOT_CONNECT
+QUARANTINE_ZONE
+SSIDLIST
+        ;;
+    3)
+        cat > "$SSID_FILE" << 'SSIDLIST'
+127.0.0.1
+localhost
+/dev/null
+rm_-rf_slash
+sudo_make_sandwich
+DROP_TABLE_wifi
+SELECT_*_FROM_users
+Buffer_Overflow
+Kernel_Panic
+SEGFAULT
+SSIDLIST
         ;;
     4)
-        echo -n "Enter SSID to spam: "
-        read SINGLE_SSID
-        SSID_LIST="$SINGLE_SSID"
+        CUSTOM=$(TEXT_PICKER "Enter SSID name:" "NullSec_WiFi")
+        echo "$CUSTOM" > "$SSID_FILE"
         ;;
 esac
 
-echo -n "Duration in seconds [60]: "
-read DURATION
-DURATION=${DURATION:-60}
+DURATION=$(NUMBER_PICKER "Duration (seconds):" 60)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) DURATION=60 ;; esac
 
-echo ""
-echo "[*] Enabling monitor mode..."
-airmon-ng start wlan0 >/dev/null 2>&1
-MON_IF=$(iw dev | grep -oE "wlan[0-9]mon" | head -1)
-[ -z "$MON_IF" ] && MON_IF="wlan0mon"
+resp=$(CONFIRMATION_DIALOG "START BEACON SPAM?
 
-echo "[*] Starting beacon spam..."
+Theme: $THEME
+Duration: ${DURATION}s
+Interface: $MON_IF
+
+Area will be flooded
+with fake networks.
+
+Press OK to start.")
+[ "$resp" != "$DUCKYSCRIPT_USER_CONFIRMED" ] && exit 0
+
+LOG "Starting beacon spam..."
 LOG_FILE="$LOOT_DIR/spam_$(date +%Y%m%d_%H%M).log"
-echo "Beacon Spam Log - $(date)" > "$LOG_FILE"
 
-# Create fake APs using hostapd (one at a time, cycling)
-END_TIME=$(($(date +%s) + DURATION))
-COUNT=0
+# Use mdk4 if available (proper beacon injection), otherwise mdk3
+if command -v mdk4 >/dev/null 2>&1; then
+    timeout "$DURATION" mdk4 "$MON_IF" b -f "$SSID_FILE" -s 100 2>&1 | tee "$LOG_FILE" &
+elif command -v mdk3 >/dev/null 2>&1; then
+    timeout "$DURATION" mdk3 "$MON_IF" b -f "$SSID_FILE" -s 100 2>&1 | tee "$LOG_FILE" &
+else
+    # Fallback: use aireplay-ng beacon frames per SSID
+    END_TIME=$(($(date +%s) + DURATION))
+    COUNT=0
+    while [ $(date +%s) -lt $END_TIME ]; do
+        while read SSID; do
+            [ -z "$SSID" ] && continue
+            [ $(date +%s) -ge $END_TIME ] && break
+            CH=$(( (RANDOM % 11) + 1 ))
+            iwconfig "$MON_IF" channel $CH 2>/dev/null
+            # Send probe response which acts as beacon
+            aireplay-ng -9 -e "$SSID" "$MON_IF" 2>/dev/null &
+            sleep 0.3
+            killall aireplay-ng 2>/dev/null
+            COUNT=$((COUNT + 1))
+            echo "$(date +%H:%M:%S) $SSID CH:$CH" >> "$LOG_FILE"
+        done < "$SSID_FILE"
+    done &
+fi
 
-while [ $(date +%s) -lt $END_TIME ]; do
-    echo "$SSID_LIST" | while read SSID; do
-        [ -z "$SSID" ] && continue
-        [ $(date +%s) -ge $END_TIME ] && break
-        
-        # Generate random MAC
-        FAKE_MAC=$(printf '02:%02X:%02X:%02X:%02X:%02X' $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)))
-        CHANNEL=$((RANDOM % 11 + 1))
-        
-        # Quick beacon burst using aireplay
-        echo "[+] Spoofing: $SSID (CH:$CHANNEL)"
-        echo "$(date +%H:%M:%S) $SSID @ $FAKE_MAC CH:$CHANNEL" >> "$LOG_FILE"
-        
-        # Change channel and send probe response (acts like beacon)
-        iwconfig "$MON_IF" channel $CHANNEL 2>/dev/null
-        
-        COUNT=$((COUNT + 1))
-        sleep 0.5
-    done
-done
+BEACON_PID=$!
+sleep "$DURATION"
+kill $BEACON_PID 2>/dev/null
+killall mdk4 mdk3 aireplay-ng 2>/dev/null
 
-# Cleanup
-airmon-ng stop "$MON_IF" >/dev/null 2>&1
+rm -f "$SSID_FILE"
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "📡 BEACON SPAM COMPLETE"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "SSIDs broadcast: $COUNT"
-echo "Log: $LOG_FILE"
+PROMPT "BEACON SPAM COMPLETE
+
+Duration: ${DURATION}s
+Log: $LOG_FILE
+
+Press OK to exit."

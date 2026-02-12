@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: NullSec Evil Portal
 # Author: bad-antics
 # Description: Custom NullSec branded captive portal for credential capture

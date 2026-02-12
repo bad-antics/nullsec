@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: NullSec Range Extender
 # Author: bad-antics
 # Description: Connect to network and broadcast spoofed hotspot with internet

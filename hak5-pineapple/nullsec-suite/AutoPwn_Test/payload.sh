@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: NullSec AutoPwn TEST MODE
 # Author: bad-antics
 # Description: Safe test mode for home network - NO DEAUTH, just monitoring

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: DNS Hijack
 # Author: bad-antics
 # Description: Redirect DNS queries to capture portals

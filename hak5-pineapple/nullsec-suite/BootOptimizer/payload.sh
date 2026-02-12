@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #═══════════════════════════════════════════════════════════════════════════════
 # NullSec Boot Optimizer
 # Developed by: bad-antics

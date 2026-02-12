@@ -1,132 +1,102 @@
-#!/bin/sh
+#!/bin/bash
 # Title: SSID Pranks
 # Author: NullSec
-# Description: Broadcast funny/offensive WiFi names
-# Category: WiFi Chaos/Prank
+# Description: Broadcast funny WiFi names
+# Category: nullsec/prank
 
 LOOT_DIR="/mmc/nullsec/pranks"
 mkdir -p "$LOOT_DIR"
 
-echo "😈 SSID PRANKS"
-echo "━━━━━━━━━━━━━━"
+PROMPT "SSID PRANKS
 
-[ ! -d "/sys/class/net/wlan0" ] && { echo "[!] wlan0 not found!"; exit 1; }
+Broadcast funny or scary
+WiFi network names that
+show up on nearby devices.
 
-# Prank SSID categories
-echo "Select prank category:"
-echo "1) Funny names"
-echo "2) Scary/Warning names"
-echo "3) Trolling names"
-echo "4) Tech humor"
-echo "5) Custom message"
-echo ""
-echo -n "Choice [1]: "
-read CHOICE
-CHOICE=${CHOICE:-1}
+Uses hostapd to create
+real visible networks.
 
-case "$CHOICE" in
-    1)
-        SSIDS="Pretty_Fly_For_A_WiFi
-WiFi_Art_Thou_Romeo
-Bill_Wi_The_Science_Fi
-The_LAN_Before_Time
-Drop_It_Like_Its_Hotspot
-Wu_Tang_LAN
-LAN_Solo
-Silence_of_the_LANs
-The_Ping_in_the_North
-It_Hurts_When_IP
-Lord_of_the_Pings
-Hogwarts_Great_Hall_WiFi
-Nacho_WiFi"
-        ;;
-    2)
-        SSIDS="FBI_Surveillance_Van_7
-NSA_Field_Unit
-Police_Stakeout
-IRS_Audit_Mobile
-VIRUS_INFECTED
-MALWARE_DISTRIBUTION
-YOUR_DATA_IS_OURS
-SYSTEM_COMPROMISED
-DO_NOT_CONNECT
-QUARANTINE_ZONE"
-        ;;
-    3)
-        SSIDS="Yell_PENIS_for_password
-Hack_Me_If_You_Can
-Loading...
-Searching...
-No_Internet_Connection
-Error_404_WiFi_Not_Found
-Connecting...
-Please_Wait...
-Network_Not_Found
-Access_Denied"
-        ;;
-    4)
-        SSIDS="127.0.0.1
-localhost
-/dev/null
-rm_-rf_slash
-sudo_rm_-rf
-DROP_TABLE_wifi
-SELECT_*_FROM_users
-Buffer_Overflow
-Stack_Smash_WiFi
-Kernel_Panic"
-        ;;
-    5)
-        echo "Enter your custom message (will be SSID):"
-        read CUSTOM_MSG
-        SSIDS="$CUSTOM_MSG"
-        ;;
+Press OK to configure."
+
+PROMPT "PRANK CATEGORY:
+
+1. Funny Names
+2. Scary/Warning
+3. Trolling Names
+4. Tech Humor
+5. Custom Message
+
+Select on next screen."
+
+CHOICE=$(NUMBER_PICKER "Category (1-5):" 1)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) CHOICE=1 ;; esac
+
+SSID_FILE="/tmp/prank_ssids.txt"
+case $CHOICE in
+    1) printf "Pretty_Fly_For_A_WiFi\nWu_Tang_LAN\nBill_Wi_The_Science_Fi\nDrop_It_Like_Its_Hotspot\nLAN_Solo\nThe_Promised_LAN\nGetOffMyLAN\nIt_Hurts_When_IP\nLoading...\nError_404_WiFi_Not_Found" > "$SSID_FILE" ;;
+    2) printf "FBI_Surveillance_Van_7\nNSA_Field_Unit\nPolice_Stakeout\nVIRUS_INFECTED\nYOUR_FILES_ENCRYPTED\nSYSTEM_COMPROMISED\nMALWARE_DETECTED\nDO_NOT_CONNECT\nQUARANTINE_ZONE" > "$SSID_FILE" ;;
+    3) printf "Loading...\nSearching...\nConnecting...\nNo_Internet_Connection\nError_404_WiFi_Not_Found\nPlease_Wait...\nNetwork_Not_Found\nAccess_Denied\nHack_Me_If_You_Can" > "$SSID_FILE" ;;
+    4) printf "127.0.0.1\nlocalhost\n/dev/null\nrm_-rf_slash\nDROP_TABLE_wifi\nSELECT_*_FROM_users\nBuffer_Overflow\nKernel_Panic\nSEGFAULT" > "$SSID_FILE" ;;
+    5) CUSTOM=$(TEXT_PICKER "Enter SSID:" "NullSec_Was_Here")
+       echo "$CUSTOM" > "$SSID_FILE" ;;
 esac
 
-echo -n "Duration in seconds [60]: "
-read DURATION
-DURATION=${DURATION:-60}
+DURATION=$(NUMBER_PICKER "Duration (seconds):" 60)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) DURATION=60 ;; esac
 
-echo ""
-echo "[*] Starting SSID prank broadcast..."
+resp=$(CONFIRMATION_DIALOG "START SSID PRANKS?
+
+Category: $CHOICE
+Duration: ${DURATION}s
+
+SSIDs will be visible
+on all nearby devices.
+
+Press OK to prank.")
+[ "$resp" != "$DUCKYSCRIPT_USER_CONFIRMED" ] && exit 0
+
+LOG "Starting SSID pranks..."
 LOG_FILE="$LOOT_DIR/prank_$(date +%Y%m%d_%H%M).log"
 
-# Use hostapd to create actual visible networks
-END_TIME=$(($(date +%s) + DURATION))
-COUNT=0
-
-echo "$SSIDS" | while read SSID; do
-    [ -z "$SSID" ] && continue
-    [ $(date +%s) -ge $END_TIME ] && break
-    
-    CH=$((RANDOM % 11 + 1))
-    
-    echo "[+] Broadcasting: $SSID (CH:$CH)"
-    echo "$(date +%H:%M:%S) $SSID CH:$CH" >> "$LOG_FILE"
-    
-    # Create temp hostapd config
-    cat > /tmp/prank_ap.conf << APEOF
-interface=wlan0
+# Use mdk4/mdk3 for proper beacon spam
+if command -v mdk4 >/dev/null 2>&1; then
+    timeout "$DURATION" mdk4 wlan1mon b -f "$SSID_FILE" -s 50 2>&1 | tee "$LOG_FILE" &
+    wait $!
+elif command -v mdk3 >/dev/null 2>&1; then
+    timeout "$DURATION" mdk3 wlan1mon b -f "$SSID_FILE" -s 50 2>&1 | tee "$LOG_FILE" &
+    wait $!
+else
+    # Fallback: hostapd rotation
+    END_TIME=$(($(date +%s) + DURATION))
+    COUNT=0
+    while [ $(date +%s) -lt $END_TIME ]; do
+        while read SSID; do
+            [ -z "$SSID" ] && continue
+            [ $(date +%s) -ge $END_TIME ] && break
+            CH=$((RANDOM % 11 + 1))
+            cat > /tmp/prank_ap.conf << APEOF
+interface=wlan1
 ssid=$SSID
 channel=$CH
 hw_mode=g
 auth_algs=1
 wpa=0
 APEOF
-    
-    # Run briefly
-    timeout 5 hostapd /tmp/prank_ap.conf 2>/dev/null &
-    sleep 5
-    killall hostapd 2>/dev/null
-    
-    COUNT=$((COUNT + 1))
-done
+            timeout 4 hostapd /tmp/prank_ap.conf 2>/dev/null &
+            sleep 4
+            killall hostapd 2>/dev/null
+            COUNT=$((COUNT + 1))
+            echo "$(date +%H:%M:%S) $SSID CH:$CH" >> "$LOG_FILE"
+        done < "$SSID_FILE"
+    done
+fi
 
-rm -f /tmp/prank_ap.conf 2>/dev/null
+killall mdk4 mdk3 hostapd 2>/dev/null
+rm -f "$SSID_FILE" /tmp/prank_ap.conf
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━"
-echo "😈 PRANK COMPLETE"
-echo "━━━━━━━━━━━━━━━━━━━━━━"
-echo "SSIDs broadcast: $COUNT"
-echo "Log: $LOG_FILE"
+PROMPT "PRANK COMPLETE
+
+Duration: ${DURATION}s
+Log: $LOG_FILE
+
+Press OK to exit."

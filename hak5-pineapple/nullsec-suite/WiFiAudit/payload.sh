@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: NullSec WiFi Audit
 # Author: bad-antics
 # Description: Comprehensive WiFi security assessment

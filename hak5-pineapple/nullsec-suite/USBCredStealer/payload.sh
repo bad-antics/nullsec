@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #═══════════════════════════════════════════════════════════════════════════════
 # NullSec USB Credential Stealer
 # Developed by: bad-antics

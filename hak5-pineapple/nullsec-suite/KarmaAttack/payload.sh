@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: NullSec Karma Attack
 # Author: bad-antics
 # Description: Rogue AP that responds to all probe requests

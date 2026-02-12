@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: Stealth Recon
 # Author: bad-antics
 # Description: Completely passive WiFi reconnaissance

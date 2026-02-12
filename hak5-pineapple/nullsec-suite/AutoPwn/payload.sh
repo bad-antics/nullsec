@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: NullSec AutoPwn
 # Author: bad-antics
 # Description: Automated WiFi attack - scans, selects targets, captures

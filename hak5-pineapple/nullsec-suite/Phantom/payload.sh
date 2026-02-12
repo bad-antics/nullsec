@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #═══════════════════════════════════════════════════════════════════════════════
 # PHANTOM - Packet Handler & Network Traffic Observer Module
 # Developed by: bad-antics

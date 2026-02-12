@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: NullSec Deface Portal
 # Author: bad-antics
 # Description: Hacker-style deface page with credential capture

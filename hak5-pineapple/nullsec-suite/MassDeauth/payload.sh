@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Title: Mass Deauth
 # Author: bad-antics
 # Description: Simultaneous deauth attack on all networks

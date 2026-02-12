@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #═══════════════════════════════════════════════════════════════════════════════
 # WRAITH - Wireless Reconnaissance & Automated Information Tracking Hunter
 # Developed by: bad-antics

