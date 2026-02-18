@@ -1,0 +1,16 @@
+{
+  "name": "WiFiTimeMachine",
+  "author": "bad-antics",
+  "description": "WiFiTimeMachine - Historical WiFi Attack Replay System",
+  "version": "1.0.0",
+  "category": "nullsec/misc",
+  "device": "WiFi Pineapple Mark VII",
+  "framework": "nullsec-suite",
+  "tags": [],
+  "requirements": [],
+  "loot_dir": "/mmc/nullsec/wifitimemachine",
+  "legal_disclaimer": "Authorized testing only. Obtain written permission before use.",
+  "min_firmware": "2.0.0",
+  "max_firmware": "",
+  "repository": "https://github.com/bad-antics/nullsec"
+}

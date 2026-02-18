@@ -1,0 +1,16 @@
+{
+  "name": "Proximity Hunter",
+  "author": "bad-antics",
+  "description": "Track and profile devices by WiFi/BLE proximity patterns",
+  "version": "1.0.0",
+  "category": "nullsec/recon",
+  "device": "WiFi Pineapple Mark VII",
+  "framework": "nullsec-suite",
+  "tags": [],
+  "requirements": [],
+  "loot_dir": "/mmc/nullsec/proximityhunter",
+  "legal_disclaimer": "Authorized testing only. Obtain written permission before use.",
+  "min_firmware": "2.0.0",
+  "max_firmware": "",
+  "repository": "https://github.com/bad-antics/nullsec"
+}

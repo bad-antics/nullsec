@@ -1,0 +1,16 @@
+{
+  "name": "WPA3 Dragonblood",
+  "author": "bad-antics",
+  "description": "Test WPA3 networks for Dragonblood vulnerabilities",
+  "version": "1.0.0",
+  "category": "nullsec/attack",
+  "device": "WiFi Pineapple Mark VII",
+  "framework": "nullsec-suite",
+  "tags": [],
+  "requirements": [],
+  "loot_dir": "/mmc/nullsec/wpa3dragonblood",
+  "legal_disclaimer": "Authorized testing only. Obtain written permission before use.",
+  "min_firmware": "2.0.0",
+  "max_firmware": "",
+  "repository": "https://github.com/bad-antics/nullsec"
+}

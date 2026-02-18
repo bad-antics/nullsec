@@ -39,6 +39,9 @@ node_modules/
 cluster-output/
 nullsec-suite-backup/
 
+# Legacy flat payload files (all payloads live in nullsec-suite/)
+payloads/*_payload.sh
+
 # Firmware build outputs (keep source, ignore builds)
 nullsec-firmware/build/output/
 nullsec-firmware/build/*.bin

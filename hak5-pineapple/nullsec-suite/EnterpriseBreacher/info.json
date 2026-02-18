@@ -1,0 +1,16 @@
+{
+  "name": "Enterprise Breacher",
+  "author": "bad-antics",
+  "description": "WPA2/3 Enterprise (802.1X) credential harvesting via rogue RADIUS",
+  "version": "1.0.0",
+  "category": "nullsec/enterprise",
+  "device": "WiFi Pineapple Mark VII",
+  "framework": "nullsec-suite",
+  "tags": [],
+  "requirements": [],
+  "loot_dir": "/mmc/nullsec/enterprisebreacher",
+  "legal_disclaimer": "Authorized testing only. Obtain written permission before use.",
+  "min_firmware": "2.0.0",
+  "max_firmware": "",
+  "repository": "https://github.com/bad-antics/nullsec"
+}

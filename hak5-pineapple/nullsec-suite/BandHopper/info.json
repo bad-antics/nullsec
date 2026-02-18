@@ -1,0 +1,16 @@
+{
+  "name": "Band Hopper",
+  "author": "bad-antics",
+  "description": "Rapidly hop between 2.4/5/6GHz bands for comprehensive reconnaissance",
+  "version": "1.0.0",
+  "category": "nullsec/recon",
+  "device": "WiFi Pineapple Mark VII",
+  "framework": "nullsec-suite",
+  "tags": [],
+  "requirements": [],
+  "loot_dir": "/mmc/nullsec/bandhopper",
+  "legal_disclaimer": "Authorized testing only. Obtain written permission before use.",
+  "min_firmware": "2.0.0",
+  "max_firmware": "",
+  "repository": "https://github.com/bad-antics/nullsec"
+}
