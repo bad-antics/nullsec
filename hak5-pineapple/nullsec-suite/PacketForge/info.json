@@ -1,0 +1,10 @@
+{
+    "name": "PacketForge",
+    "author": "bad-antics",
+    "description": "Crafts and injects custom 802.11 frames including deauth storms, beacon floods, probe storms, and chaos mode rotations",
+    "category": "attack",
+    "version": "1.0",
+    "tags": ["injection", "deauth", "beacon", "probe", "802.11", "wireless", "jam"],
+    "platform": "pineapple",
+    "requirements": ["mdk4", "aireplay-ng", "tcpdump", "python3", "scapy"]
+}

@@ -1,0 +1,10 @@
+{
+    "name": "MeshRelay",
+    "author": "bad-antics",
+    "description": "Deploys a mesh relay node that bridges isolated networks through the Pineapple, creating persistent covert tunnels between segmented VLANs",
+    "category": "attack",
+    "version": "1.0",
+    "tags": ["mesh", "relay", "tunnel", "bridge", "vlan", "pivot"],
+    "platform": "pineapple",
+    "requirements": ["socat", "iptables", "tcpdump"]
+}

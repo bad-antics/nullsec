@@ -1,0 +1,10 @@
+{
+    "name": "ZeroDayTemplate",
+    "author": "bad-antics",
+    "description": "Framework for rapidly weaponizing new CVEs against WiFi infrastructure. Includes management interface scanner, default credential checker, exploit staging, and loot exfiltration.",
+    "category": "exploit",
+    "version": "1.0",
+    "tags": ["exploit", "cve", "zeroday", "framework", "router", "firmware", "credential"],
+    "platform": "pineapple",
+    "requirements": ["curl", "tcpdump"]
+}

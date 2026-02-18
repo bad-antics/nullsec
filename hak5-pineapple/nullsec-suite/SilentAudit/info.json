@@ -1,0 +1,10 @@
+{
+    "name": "SilentAudit",
+    "author": "bad-antics",
+    "description": "Passive-only network security auditor that generates professional HTML reports without transmitting a single packet. Detects open networks, WEP, WPS, rogue APs, and active attacks.",
+    "category": "recon",
+    "version": "1.0",
+    "tags": ["passive", "audit", "stealth", "recon", "compliance", "report", "security"],
+    "platform": "pineapple",
+    "requirements": ["tcpdump"]
+}

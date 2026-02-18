@@ -1,0 +1,10 @@
+{
+    "name": "WiFiKarma2",
+    "author": "bad-antics",
+    "description": "Advanced KARMA attack with intelligent SSID targeting, client profiling, and auto-generated captive portals customized per target network type",
+    "category": "attack",
+    "version": "2.0",
+    "tags": ["karma", "evil-twin", "captive-portal", "credential-harvest", "probe", "phishing"],
+    "platform": "pineapple",
+    "requirements": ["airmon-ng", "hostapd", "dnsmasq", "tcpdump", "python3"]
+}

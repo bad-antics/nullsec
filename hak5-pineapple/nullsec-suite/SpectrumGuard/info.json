@@ -1,0 +1,10 @@
+{
+    "name": "SpectrumGuard",
+    "author": "bad-antics",
+    "description": "Defensive WiFi monitoring that continuously watches the RF spectrum for deauth attacks, evil twins, rogue APs, beacon floods, and probe storms with real-time alerts",
+    "category": "defense",
+    "version": "1.0",
+    "tags": ["defense", "monitoring", "ids", "deauth-detection", "rogue-ap", "threat-intel", "wireless"],
+    "platform": "pineapple",
+    "requirements": ["tcpdump", "python3"]
+}
