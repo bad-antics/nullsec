@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Captive Portal
-# Author: NullSec
+# Author: bad-antics
 # Description: Creates custom captive portal for credential harvesting
 # Category: nullsec/attack
 

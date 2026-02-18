@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Speed Test
-# Author: NullSec
+# Author: bad-antics
 # Description: Tests internet connection speed through the Pineapple
 # Category: nullsec/utility
 

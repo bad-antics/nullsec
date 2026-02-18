@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Beacon Spam
-# Author: NullSec
+# Author: bad-antics
 # Description: Flood area with fake WiFi networks
 # Category: nullsec/chaos
 

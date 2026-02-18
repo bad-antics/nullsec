@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: MITM Proxy
-# Author: NullSec
+# Author: bad-antics
 # Description: Transparent HTTP/HTTPS proxy with request logging
 # Category: nullsec/interception
 

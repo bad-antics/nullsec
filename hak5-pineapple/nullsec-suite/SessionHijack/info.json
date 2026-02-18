@@ -1,0 +1,15 @@
+{
+    "name": "SessionHijack",
+    "title": "Session Hijack",
+    "description": "Active session hijacking with real-time injection and takeover capabilities",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "capture",
+    "platform": "pineapple-pager",
+    "lines": 435,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

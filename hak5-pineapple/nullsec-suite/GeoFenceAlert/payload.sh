@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: GeoFence Alert
-# Author: NullSec
+# Author: bad-antics
 # Description: GPS-based geofence monitoring with device enter/leave alerts
 # Category: nullsec/alerts
 

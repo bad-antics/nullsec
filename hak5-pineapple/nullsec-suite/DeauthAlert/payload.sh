@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Deauth Alert
-# Author: NullSec
+# Author: bad-antics
 # Description: Monitor for deauthentication frames and alert the user
 # Category: nullsec/alerts
 

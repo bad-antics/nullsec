@@ -1,0 +1,15 @@
+{
+    "name": "Siren",
+    "title": "Siren - Social Infrastructure Reconnaissance",
+    "description": "Advanced captive portal with multiple lures",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "attack",
+    "platform": "pineapple-pager",
+    "lines": 178,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

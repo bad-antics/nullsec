@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: C2 Beacon
-# Author: NullSec
+# Author: bad-antics
 # Description: Command & control beacon with periodic check-in and remote execution
 # Category: nullsec/remote
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: TimeBomb - Scheduled Payload Execution
-# Author: NullSec
+# Author: bad-antics
 # Description: Schedule delayed payload execution
 # Category: nullsec/util
 

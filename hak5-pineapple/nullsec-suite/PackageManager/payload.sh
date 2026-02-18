@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Package Manager
-# Author: NullSec
+# Author: bad-antics
 # Description: Manage opkg packages from the Pager UI
 # Category: nullsec/utility
 

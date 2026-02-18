@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: PenReport
-# Author: bad-antics (NullSec)
+# Author: bad-antics
 # Description: Automated wireless pentest report generator
 # Category: nullsec/reporting
 # Version: 1.0.0
@@ -12,7 +12,7 @@
 #
 # No external dependencies — pure bash.
 
-LOOT_DIR="/root/loot/penreport"
+LOOT_DIR="/mmc/nullsec/penreport"
 REPORT="$LOOT_DIR/wireless-pentest-report.html"
 LOG="$LOOT_DIR/penreport.log"
 mkdir -p "$LOOT_DIR"

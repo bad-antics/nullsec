@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: SegmentShark
-# Author: bad-antics (NullSec)
+# Author: bad-antics
 # Description: Network segmentation & VLAN boundary validator
 # Category: nullsec/compliance
 # Version: 1.0.0
@@ -12,7 +12,7 @@
 #
 # LEGAL: For authorized penetration testing only.
 
-LOOT_DIR="/root/loot/segmentshark"
+LOOT_DIR="/mmc/nullsec/segmentshark"
 LOG="$LOOT_DIR/segmentshark.log"
 REPORT="$LOOT_DIR/segmentation-report.html"
 mkdir -p "$LOOT_DIR"

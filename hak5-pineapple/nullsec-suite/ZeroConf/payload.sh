@@ -16,7 +16,7 @@
 # License: MIT
 ###############################################################################
 
-LOOT_DIR="/root/loot/zeroconf"
+LOOT_DIR="/mmc/nullsec/zeroconf"
 LOG_FILE="$LOOT_DIR/zeroconf.log"
 REPORT_FILE="$LOOT_DIR/zeroconf_report.html"
 SERVICES_FILE="$LOOT_DIR/services.json"

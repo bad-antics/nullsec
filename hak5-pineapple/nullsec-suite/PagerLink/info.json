@@ -1,0 +1,15 @@
+{
+    "name": "PagerLink",
+    "title": "Pager Link",
+    "description": "Creates SSH tunnel for remote Pager UI access",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "stealth",
+    "platform": "pineapple-pager",
+    "lines": 190,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

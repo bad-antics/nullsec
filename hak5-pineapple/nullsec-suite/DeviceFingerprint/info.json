@@ -1,0 +1,15 @@
+{
+    "name": "DeviceFingerprint",
+    "title": "Device Fingerprint",
+    "description": "Identify device types from MAC addresses and probes",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 111,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

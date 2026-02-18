@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: SAE Probe
-# Author: bad-antics (NullSec)
+# Author: bad-antics
 # Description: WPA3-SAE transition mode downgrade analyzer (Dragonblood)
 # Category: nullsec/wpa3
 # Version: 1.0.0
@@ -11,7 +11,7 @@
 #
 # LEGAL: For authorized penetration testing only.
 
-LOOT_DIR="/root/loot/sae-probe"
+LOOT_DIR="/mmc/nullsec/saeprobe"
 LOG="$LOOT_DIR/sae-probe.log"
 REPORT="$LOOT_DIR/wpa3-report.html"
 mkdir -p "$LOOT_DIR"

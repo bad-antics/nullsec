@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Pager Link
-# Author: NullSec
+# Author: bad-antics
 # Description: Creates SSH tunnel for remote Pager UI access
 # Category: nullsec/remote
 

@@ -1,0 +1,15 @@
+{
+    "name": "CaptivePortal",
+    "title": "Captive Portal",
+    "description": "Creates custom captive portal for credential harvesting",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "attack",
+    "platform": "pineapple-pager",
+    "lines": 255,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Packet Replay
-# Author: NullSec
+# Author: bad-antics
 # Description: Capture and replay WiFi packets
 # Category: nullsec/attack
 

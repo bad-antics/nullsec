@@ -16,7 +16,7 @@
 # License: MIT
 ###############################################################################
 
-LOOT_DIR="/root/loot/threatmap"
+LOOT_DIR="/mmc/nullsec/threatmap"
 LOG_FILE="$LOOT_DIR/threatmap.log"
 DASHBOARD="$LOOT_DIR/dashboard.html"
 THREAT_DB="$LOOT_DIR/threats.json"

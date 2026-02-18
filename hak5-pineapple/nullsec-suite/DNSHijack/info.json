@@ -1,0 +1,15 @@
+{
+    "name": "DNSHijack",
+    "title": "DNS Hijack",
+    "description": "Redirect DNS queries to capture portals",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "attack",
+    "platform": "pineapple-pager",
+    "lines": 146,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

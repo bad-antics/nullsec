@@ -1,0 +1,15 @@
+{
+    "name": "QuickScan",
+    "title": "Quick Scan",
+    "description": "Fast 30-second WiFi environment scan",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 61,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

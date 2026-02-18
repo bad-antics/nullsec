@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Bluetooth Scanner
-# Author: NullSec
+# Author: bad-antics
 # Description: Bluetooth and BLE device scanner with fingerprinting
 # Category: nullsec/recon
 

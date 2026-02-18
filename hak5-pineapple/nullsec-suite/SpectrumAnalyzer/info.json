@@ -1,0 +1,15 @@
+{
+    "name": "SpectrumAnalyzer",
+    "title": "Spectrum Analyzer",
+    "description": "WiFi spectrum analysis with channel utilization and signal mapping",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 222,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "name": "LootSync",
+    "title": "Loot Sync",
+    "description": "Syncs all captured loot files to USB storage",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "exfiltration",
+    "platform": "pineapple-pager",
+    "lines": 173,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

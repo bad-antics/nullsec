@@ -1,0 +1,15 @@
+{
+    "name": "SAEProbe",
+    "title": "SAE Probe",
+    "description": "WPA3-SAE transition mode downgrade analyzer (Dragonblood)",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "wpa3",
+    "platform": "pineapple-pager",
+    "lines": 491,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

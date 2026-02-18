@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Schedule Task
-# Author: NullSec
+# Author: bad-antics
 # Description: Schedule payloads to run at specific times via cron
 # Category: nullsec/utility
 

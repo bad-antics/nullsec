@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: ARP Spoof
-# Author: NullSec
+# Author: bad-antics
 # Description: ARP poisoning for MITM attacks with target selection
 # Category: nullsec/interception
 

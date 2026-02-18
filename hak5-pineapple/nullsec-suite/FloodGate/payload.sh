@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: FloodGate
-# Author: NullSec
+# Author: bad-antics
 # Description: Multi-vector DoS combining deauth, beacon, and auth flood
 # Category: nullsec/attack
 

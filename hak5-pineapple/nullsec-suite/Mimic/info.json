@@ -1,0 +1,15 @@
+{
+    "name": "Mimic",
+    "title": "Mimic - MAC Cloner",
+    "description": "Clone any device MAC address",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "stealth",
+    "platform": "pineapple-pager",
+    "lines": 140,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Auth Flood Attack
-# Author: NullSec
+# Author: bad-antics
 # Description: Authentication flood using aireplay-ng
 # Category: nullsec/attack
 

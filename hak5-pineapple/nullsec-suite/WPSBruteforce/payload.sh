@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: WPS Bruteforce
-# Author: NullSec
+# Author: bad-antics
 # Description: WPS PIN brute force using reaver/bully with Pixie Dust support
 # Category: nullsec/attack
 

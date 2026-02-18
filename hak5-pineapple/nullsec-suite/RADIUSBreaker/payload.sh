@@ -15,7 +15,7 @@
 
 # ── NullSec Framework ──────────────────────────────────────────────────────
 PAYLOAD_DIR="/root/payloads/RADIUSBreaker"
-LOOT_DIR="/root/loot/radiusbreaker"
+LOOT_DIR="/mmc/nullsec/radiusbreaker"
 LOG_FILE="$LOOT_DIR/radiusbreaker.log"
 REPORT_FILE="$LOOT_DIR/radius_report.html"
 CRED_FILE="$LOOT_DIR/credentials.txt"

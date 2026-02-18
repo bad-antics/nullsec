@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Rogue AP Alert
-# Author: NullSec
+# Author: bad-antics
 # Description: Detect rogue/evil twin access points and SSID spoofing
 # Category: nullsec/alerts
 

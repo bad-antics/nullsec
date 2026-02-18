@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Loot Sync
-# Author: NullSec
+# Author: bad-antics
 # Description: Syncs all captured loot files to USB storage
 # Category: nullsec/exfiltration
 

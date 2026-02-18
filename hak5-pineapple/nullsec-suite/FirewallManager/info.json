@@ -1,0 +1,15 @@
+{
+    "name": "FirewallManager",
+    "title": "Firewall Manager",
+    "description": "Manage iptables firewall rules from the Pager UI",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "utility",
+    "platform": "pineapple-pager",
+    "lines": 312,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

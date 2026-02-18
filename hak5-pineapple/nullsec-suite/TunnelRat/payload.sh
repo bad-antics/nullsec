@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Tunnel Rat
-# Author: NullSec
+# Author: bad-antics
 # Description: Establishes reverse SSH tunnel for persistent remote access
 # Category: nullsec/remote
 

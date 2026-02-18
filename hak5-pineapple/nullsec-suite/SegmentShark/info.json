@@ -1,0 +1,15 @@
+{
+    "name": "SegmentShark",
+    "title": "SegmentShark",
+    "description": "Network segmentation & VLAN boundary validator",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "compliance",
+    "platform": "pineapple-pager",
+    "lines": 450,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

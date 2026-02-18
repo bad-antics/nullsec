@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Social Mapper
-# Author: NullSec
+# Author: bad-antics
 # Description: Map device relationships and network patterns
 # Category: nullsec/recon
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: WPS Scanner
-# Author: NullSec
+# Author: bad-antics
 # Description: Scan for WPS-enabled networks and identify vulnerable implementations
 # Category: nullsec/recon
 

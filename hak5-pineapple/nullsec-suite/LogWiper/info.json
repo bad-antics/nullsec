@@ -1,0 +1,15 @@
+{
+    "name": "LogWiper",
+    "title": "Log Wiper",
+    "description": "Securely wipes operation logs with selective or total options",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "stealth",
+    "platform": "pineapple-pager",
+    "lines": 238,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

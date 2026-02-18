@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Data Vacuum
-# Author: NullSec
+# Author: bad-antics
 # Description: Captures and extracts interesting data from network traffic
 # Category: nullsec/exfiltration
 

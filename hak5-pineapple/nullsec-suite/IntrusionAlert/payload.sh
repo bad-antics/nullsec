@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Intrusion Alert
-# Author: NullSec
+# Author: bad-antics
 # Description: Network intrusion detection for port scans, ARP spoofing, and suspicious traffic
 # Category: nullsec/alerts
 

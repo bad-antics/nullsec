@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: ZeroClick - Automated Attack Chain
-# Author: NullSec
+# Author: bad-antics
 # Description: Automated scan, identify, and capture
 # Category: nullsec/auto
 

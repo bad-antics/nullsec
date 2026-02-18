@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Reaper - Hash Harvester
-# Author: NullSec
+# Author: bad-antics
 # Description: Automated WPA handshake and PMKID capture
 # Category: nullsec/capture
 

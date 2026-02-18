@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: IsoBreaker
-# Author: bad-antics (NullSec)
+# Author: bad-antics
 # Description: Client/AP isolation bypass tester for compliance validation
 # Category: nullsec/compliance
 # Version: 1.0.0
@@ -12,7 +12,7 @@
 #
 # LEGAL: For authorized penetration testing only.
 
-LOOT_DIR="/root/loot/isobreaker"
+LOOT_DIR="/mmc/nullsec/isobreaker"
 LOG="$LOOT_DIR/isobreaker.log"
 REPORT="$LOOT_DIR/isolation-report.html"
 mkdir -p "$LOOT_DIR"

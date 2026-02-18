@@ -1,0 +1,15 @@
+{
+    "name": "WPSBruteforce",
+    "title": "WPS Bruteforce",
+    "description": "WPS PIN brute force using reaver/bully with Pixie Dust support",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "attack",
+    "platform": "pineapple-pager",
+    "lines": 244,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

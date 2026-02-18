@@ -1,0 +1,15 @@
+{
+    "name": "Honeypot",
+    "title": "Honeypot",
+    "description": "Decoy AP that logs all connection attempts",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "defense",
+    "platform": "pineapple-pager",
+    "lines": 105,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

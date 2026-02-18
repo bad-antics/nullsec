@@ -1,0 +1,15 @@
+{
+    "name": "BeaconSpam",
+    "title": "Beacon Spam",
+    "description": "Flood area with fake WiFi networks",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "attack",
+    "platform": "pineapple-pager",
+    "lines": 153,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

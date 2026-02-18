@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Honeypot
-# Author: NullSec
+# Author: bad-antics
 # Description: Decoy AP that logs all connection attempts
 # Category: nullsec/defense
 

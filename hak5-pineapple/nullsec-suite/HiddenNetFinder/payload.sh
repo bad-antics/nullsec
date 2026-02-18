@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Hidden Net Finder
-# Author: NullSec
+# Author: bad-antics
 # Description: Discover hidden/cloaked SSIDs via passive and active probing
 # Category: nullsec/recon
 

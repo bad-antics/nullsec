@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Mimic - MAC Cloner
-# Author: NullSec
+# Author: bad-antics
 # Description: Clone any device MAC address
 # Category: nullsec/stealth
 

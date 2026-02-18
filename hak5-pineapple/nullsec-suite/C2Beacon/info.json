@@ -1,0 +1,15 @@
+{
+    "name": "C2Beacon",
+    "title": "C2 Beacon",
+    "description": "Command & control beacon with periodic check-in and remote execution",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "stealth",
+    "platform": "pineapple-pager",
+    "lines": 243,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

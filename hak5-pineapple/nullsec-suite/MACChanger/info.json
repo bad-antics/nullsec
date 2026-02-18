@@ -1,0 +1,15 @@
+{
+    "name": "MACChanger",
+    "title": "MAC Changer",
+    "description": "Changes MAC address on interfaces with multiple modes",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "utility",
+    "platform": "pineapple-pager",
+    "lines": 179,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

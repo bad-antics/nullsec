@@ -1,0 +1,15 @@
+{
+    "name": "BLERecon",
+    "title": "BLE Recon - Bluetooth Low Energy Scanner",
+    "description": "Bluetooth Low Energy device discovery, fingerprinting, and GATT enumeration",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 160,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": false
+    }
+}

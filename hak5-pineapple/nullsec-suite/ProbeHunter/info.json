@@ -1,0 +1,15 @@
+{
+    "name": "ProbeHunter",
+    "title": "NullSec Probe Hunter  ",
+    "description": "Passive probe request collection for SSID discovery",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "general",
+    "platform": "pineapple-pager",
+    "lines": 80,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

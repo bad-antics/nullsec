@@ -1,0 +1,15 @@
+{
+    "name": "BruteHydra",
+    "title": "Brute Hydra",
+    "description": "Multi-protocol brute force attack using distributed mesh compute",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "cracking",
+    "platform": "pineapple-pager",
+    "lines": 263,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

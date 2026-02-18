@@ -1,0 +1,15 @@
+{
+    "name": "ZeroClick",
+    "title": "ZeroClick - Automated Attack Chain",
+    "description": "Automated scan, identify, and capture",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "automation",
+    "platform": "pineapple-pager",
+    "lines": 114,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

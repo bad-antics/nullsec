@@ -1,0 +1,15 @@
+{
+    "name": "DeepPacket",
+    "title": "Deep Packet",
+    "description": "Deep packet inspection with protocol analysis and credential extraction",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "capture",
+    "platform": "pineapple-pager",
+    "lines": 161,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

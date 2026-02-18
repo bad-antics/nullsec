@@ -1,0 +1,15 @@
+{
+    "name": "Reaper",
+    "title": "Reaper - Hash Harvester",
+    "description": "Automated WPA handshake and PMKID capture",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "capture",
+    "platform": "pineapple-pager",
+    "lines": 120,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

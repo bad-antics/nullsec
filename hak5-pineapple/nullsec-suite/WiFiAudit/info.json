@@ -1,0 +1,15 @@
+{
+    "name": "WiFiAudit",
+    "title": "NullSec WiFi Audit",
+    "description": "Comprehensive WiFi security assessment",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "general",
+    "platform": "pineapple-pager",
+    "lines": 137,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

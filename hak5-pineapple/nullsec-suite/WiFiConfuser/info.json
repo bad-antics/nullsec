@@ -1,0 +1,15 @@
+{
+    "name": "WiFiConfuser",
+    "title": "WiFi Confuser",
+    "description": "Create confusion with fake networks + deauths",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "attack",
+    "platform": "pineapple-pager",
+    "lines": 99,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

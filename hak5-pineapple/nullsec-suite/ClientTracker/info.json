@@ -1,0 +1,15 @@
+{
+    "name": "ClientTracker",
+    "title": "Client Tracker",
+    "description": "Track a specific device across networks",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 105,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

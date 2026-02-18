@@ -1,0 +1,15 @@
+{
+    "name": "EvilTwin",
+    "title": "Evil Twin",
+    "description": "Clone a target network and capture credentials",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "attack",
+    "platform": "pineapple-pager",
+    "lines": 179,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

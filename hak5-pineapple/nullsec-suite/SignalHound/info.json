@@ -1,0 +1,15 @@
+{
+    "name": "SignalHound",
+    "title": "Signal Hound",
+    "description": "RF signal intelligence — detect and analyze wireless signals across spectrum",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "sigint",
+    "platform": "pineapple-pager",
+    "lines": 159,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

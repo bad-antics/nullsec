@@ -1,0 +1,15 @@
+{
+    "name": "TokenThief",
+    "title": "Token Thief",
+    "description": "Session token interception, extraction and replay attack tool",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "capture",
+    "platform": "pineapple-pager",
+    "lines": 279,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

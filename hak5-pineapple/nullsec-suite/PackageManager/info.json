@@ -1,0 +1,15 @@
+{
+    "name": "PackageManager",
+    "title": "Package Manager",
+    "description": "Manage opkg packages from the Pager UI",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "utility",
+    "platform": "pineapple-pager",
+    "lines": 250,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

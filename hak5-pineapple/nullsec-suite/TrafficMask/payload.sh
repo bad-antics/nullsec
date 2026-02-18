@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Traffic Mask
-# Author: NullSec
+# Author: bad-antics
 # Description: Masks Pineapple traffic to look like a normal device
 # Category: nullsec/stealth
 

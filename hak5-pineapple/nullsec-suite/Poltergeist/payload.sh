@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Poltergeist - Random WiFi Chaos
-# Author: NullSec
+# Author: bad-antics
 # Description: Unpredictable WiFi disruption attacks
 # Category: nullsec/chaos
 

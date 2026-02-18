@@ -16,7 +16,7 @@
 # License: MIT
 ###############################################################################
 
-LOOT_DIR="/root/loot/wificanary"
+LOOT_DIR="/mmc/nullsec/wificanary"
 LOG_FILE="$LOOT_DIR/canary.log"
 ALERT_LOG="$LOOT_DIR/alerts.json"
 ATTACKER_DB="$LOOT_DIR/attackers.json"

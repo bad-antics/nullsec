@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Credential Sniffer
-# Author: NullSec
+# Author: bad-antics
 # Description: Passive credential sniffing with tcpdump
 # Category: nullsec/recon
 

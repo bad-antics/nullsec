@@ -1,0 +1,66 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# NullSec Pineapple Suite - .gitignore
+# Developed by: bad-antics
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Temp / log files
+wget-log*
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+.*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+.Trash-*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# Node
+node_modules/
+
+# IDE
+.vscode/settings.json
+.idea/
+*.iml
+
+# Build artifacts
+cluster-output/
+nullsec-suite-backup/
+
+# Firmware build outputs (keep source, ignore builds)
+nullsec-firmware/build/output/
+nullsec-firmware/build/*.bin
+nullsec-firmware/build/*.img
+
+# Package downloads (can be re-downloaded)
+packages/*.ipk
+packages/*.deb
+
+# Captured loot (never commit loot)
+loot/
+*.pcap
+*.pcapng
+*.cap
+*.hccapx
+*.pmkid
+*.22000
+
+# Credentials / secrets
+*.pem
+*.key
+id_rsa*
+.env
+.env.*
+secrets.sh

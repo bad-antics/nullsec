@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: WaveRider - Channel-hopping Pursuit
-# Author: NullSec
+# Author: bad-antics
 # Description: Track a device across channels
 # Category: nullsec/tracking
 

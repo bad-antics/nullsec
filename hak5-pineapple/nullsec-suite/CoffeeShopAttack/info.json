@@ -1,0 +1,15 @@
+{
+    "name": "CoffeeShopAttack",
+    "title": "Coffee Shop Attack",
+    "description": "Rogue AP for public WiFi credential capture",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "attack",
+    "platform": "pineapple-pager",
+    "lines": 139,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

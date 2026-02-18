@@ -1,0 +1,15 @@
+{
+    "name": "NetworkPivot",
+    "title": "Network Pivot - Multi-Hop Network Traversal",
+    "description": "Automated network pivoting through compromised hosts for deep network penetration",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "stealth",
+    "platform": "pineapple-pager",
+    "lines": 210,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": false
+    }
+}

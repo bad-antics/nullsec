@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Firewall Manager
-# Author: NullSec
+# Author: bad-antics
 # Description: Manage iptables firewall rules from the Pager UI
 # Category: nullsec/utility
 

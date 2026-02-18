@@ -1,0 +1,15 @@
+{
+    "name": "APTSimulator",
+    "title": "APT Simulator",
+    "description": "Advanced Persistent Threat simulation framework for red team exercises",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "simulation",
+    "platform": "pineapple-pager",
+    "lines": 436,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

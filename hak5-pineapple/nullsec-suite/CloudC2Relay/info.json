@@ -1,0 +1,15 @@
+{
+    "name": "CloudC2Relay",
+    "title": "Cloud C2 Relay - Cloud Command & Control Interface",
+    "description": "Secure cloud relay for remote Pineapple management via encrypted tunnels",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "stealth",
+    "platform": "pineapple-pager",
+    "lines": 280,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": false
+    }
+}

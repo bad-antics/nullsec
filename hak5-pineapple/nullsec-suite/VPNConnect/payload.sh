@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: VPN Connect
-# Author: NullSec
+# Author: bad-antics
 # Description: Connects Pineapple to VPN for anonymous operations
 # Category: nullsec/remote
 

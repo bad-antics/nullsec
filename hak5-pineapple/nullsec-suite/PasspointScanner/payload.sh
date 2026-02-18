@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Passpoint Scanner
-# Author: NullSec
+# Author: bad-antics
 # Description: Scan for Passpoint/Hotspot 2.0 and enterprise WiFi configurations
 # Category: nullsec/recon
 

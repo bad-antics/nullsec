@@ -17,7 +17,7 @@
 # License: MIT
 ###############################################################################
 
-LOOT_DIR="/root/loot/protocolfuzzer"
+LOOT_DIR="/mmc/nullsec/protocolfuzzer"
 LOG_FILE="$LOOT_DIR/fuzzer.log"
 CRASH_DIR="$LOOT_DIR/crashes"
 REPORT_FILE="$LOOT_DIR/fuzzer_report.html"

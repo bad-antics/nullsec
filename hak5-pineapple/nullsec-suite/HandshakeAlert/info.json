@@ -1,0 +1,15 @@
+{
+    "name": "HandshakeAlert",
+    "title": "Handshake Alert",
+    "description": "Watch for WPA handshake captures and alert with SSID/BSSID info",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "defense",
+    "platform": "pineapple-pager",
+    "lines": 156,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "name": "WarGames",
+    "title": "WarGames",
+    "description": "WOPR-style hacking simulation game",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "prank",
+    "platform": "pineapple-pager",
+    "lines": 418,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

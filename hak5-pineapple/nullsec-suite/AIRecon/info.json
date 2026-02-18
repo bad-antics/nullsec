@@ -1,0 +1,15 @@
+{
+    "name": "AIRecon",
+    "title": "AI Recon",
+    "description": "AI-powered network reconnaissance using Ollama for analysis",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 157,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

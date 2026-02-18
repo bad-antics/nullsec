@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: WiFi Jammer
-# Author: NullSec
+# Author: bad-antics
 # Description: Continuous WiFi disruption via deauth
 # Category: nullsec/attack
 

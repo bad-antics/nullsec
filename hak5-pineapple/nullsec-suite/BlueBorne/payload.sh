@@ -15,7 +15,7 @@
 
 # ── NullSec Framework ──────────────────────────────────────────────────────
 PAYLOAD_DIR="/root/payloads/BlueBorne"
-LOOT_DIR="/root/loot/blueborne"
+LOOT_DIR="/mmc/nullsec/blueborne"
 LOG_FILE="$LOOT_DIR/blueborne.log"
 REPORT_FILE="$LOOT_DIR/blueborne_report.html"
 SCAN_INTERVAL=15

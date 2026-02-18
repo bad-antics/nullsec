@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Bandwidth Alert
-# Author: NullSec
+# Author: bad-antics
 # Description: Monitor bandwidth usage and alert when thresholds are exceeded
 # Category: nullsec/alerts
 

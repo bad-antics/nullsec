@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Channel Jammer
-# Author: NullSec
+# Author: bad-antics
 # Description: Disrupt WiFi across channels using deauth
 # Category: nullsec/attack
 

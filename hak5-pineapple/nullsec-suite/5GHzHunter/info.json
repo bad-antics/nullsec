@@ -1,0 +1,15 @@
+{
+    "name": "5GHzHunter",
+    "title": "5GHz Hunter - Dual Band Network Analyzer",
+    "description": "Focused 5GHz band scanner with DFS channel detection and channel utilization mapping",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 170,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

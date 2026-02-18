@@ -1,0 +1,15 @@
+{
+    "name": "SupplyChainAudit",
+    "title": "Supply Chain Audit - Network Supply Chain Analyzer",
+    "description": "Audit network infrastructure for supply chain risks, firmware versions, and known vulnerabilities",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "compliance",
+    "platform": "pineapple-pager",
+    "lines": 230,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": false
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "name": "IsoBreaker",
+    "title": "IsoBreaker",
+    "description": "Client/AP isolation bypass tester for compliance validation",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "compliance",
+    "platform": "pineapple-pager",
+    "lines": 523,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

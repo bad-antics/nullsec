@@ -1,0 +1,15 @@
+{
+    "name": "SignalTracker",
+    "title": "Signal Tracker",
+    "description": "Track signal strength to locate WiFi sources",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 145,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

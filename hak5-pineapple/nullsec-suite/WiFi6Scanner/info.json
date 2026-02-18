@@ -1,0 +1,15 @@
+{
+    "name": "WiFi6Scanner",
+    "title": "WiFi6 Scanner - 802.11ax Network Analyzer",
+    "description": "Advanced WiFi 6/6E network scanner with ax-specific feature detection",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 140,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

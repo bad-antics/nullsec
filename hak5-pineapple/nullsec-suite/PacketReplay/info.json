@@ -1,0 +1,15 @@
+{
+    "name": "PacketReplay",
+    "title": "Packet Replay",
+    "description": "Capture and replay WiFi packets",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "attack",
+    "platform": "pineapple-pager",
+    "lines": 93,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

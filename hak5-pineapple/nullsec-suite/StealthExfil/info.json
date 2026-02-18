@@ -1,0 +1,15 @@
+{
+    "name": "StealthExfil",
+    "title": "Stealth Exfil - Covert Data Exfiltration Toolkit",
+    "description": "Multi-channel covert data exfiltration using DNS, ICMP, HTTP headers, and steganography",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "exfiltration",
+    "platform": "pineapple-pager",
+    "lines": 250,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

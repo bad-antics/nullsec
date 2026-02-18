@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: System Info
-# Author: NullSec
+# Author: bad-antics
 # Description: Displays comprehensive Pineapple system information
 # Category: nullsec/utility
 

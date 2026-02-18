@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Client Alert
-# Author: NullSec
+# Author: bad-antics
 # Description: Alerts when new clients connect to the Pineapple AP
 # Category: nullsec/alerts
 

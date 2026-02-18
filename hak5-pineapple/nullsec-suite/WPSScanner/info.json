@@ -1,0 +1,15 @@
+{
+    "name": "WPSScanner",
+    "title": "WPS Scanner",
+    "description": "Scan for WPS-enabled networks and identify vulnerable implementations",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 194,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

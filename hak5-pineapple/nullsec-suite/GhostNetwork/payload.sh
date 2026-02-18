@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Ghost Network
-# Author: NullSec
+# Author: bad-antics
 # Description: Create hidden covert network for stealth ops
 # Category: nullsec/stealth
 

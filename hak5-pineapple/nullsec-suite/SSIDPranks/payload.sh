@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: SSID Pranks
-# Author: NullSec
+# Author: bad-antics
 # Description: Broadcast funny WiFi names
 # Category: nullsec/prank
 

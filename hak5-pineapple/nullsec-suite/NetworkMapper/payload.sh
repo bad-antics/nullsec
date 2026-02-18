@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Network Mapper
-# Author: NullSec
+# Author: bad-antics
 # Description: Scan and map all nearby networks
 # Category: nullsec/recon
 

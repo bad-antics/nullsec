@@ -1,0 +1,15 @@
+{
+    "name": "HiddenNetFinder",
+    "title": "Hidden Net Finder",
+    "description": "Discover hidden/cloaked SSIDs via passive and active probing",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 192,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

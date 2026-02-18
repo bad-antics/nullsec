@@ -1,0 +1,15 @@
+{
+    "name": "RogueAPAlert",
+    "title": "Rogue AP Alert",
+    "description": "Detect rogue/evil twin access points and SSID spoofing",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "defense",
+    "platform": "pineapple-pager",
+    "lines": 183,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Spectrum Analyzer
-# Author: NullSec
+# Author: bad-antics
 # Description: WiFi spectrum analysis with channel utilization and signal mapping
 # Category: nullsec/recon
 

@@ -18,7 +18,7 @@
 ###############################################################################
 
 PAYLOAD_DIR="/root/payloads/WirelessIDS"
-LOOT_DIR="/root/loot/wirelessids"
+LOOT_DIR="/mmc/nullsec/wirelessids"
 LOG_FILE="$LOOT_DIR/ids.log"
 ALERT_FILE="$LOOT_DIR/alerts.csv"
 BASELINE_FILE="$LOOT_DIR/baseline.json"

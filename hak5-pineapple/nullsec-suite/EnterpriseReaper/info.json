@@ -1,0 +1,15 @@
+{
+    "name": "EnterpriseReaper",
+    "title": "Enterprise Reaper",
+    "description": "WPA Enterprise EAP credential harvester with rogue AP + RADIUS",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "enterprise",
+    "platform": "pineapple-pager",
+    "lines": 765,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

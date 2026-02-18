@@ -15,7 +15,7 @@
 
 # ── NullSec Framework ──────────────────────────────────────────────────────
 PAYLOAD_DIR="/root/payloads/WiFiForensics"
-LOOT_DIR="/root/loot/wififorensics"
+LOOT_DIR="/mmc/nullsec/wififorensics"
 LOG_FILE="$LOOT_DIR/forensics.log"
 EVIDENCE_DIR="$LOOT_DIR/evidence"
 REPORT_FILE="$LOOT_DIR/forensic_report.html"

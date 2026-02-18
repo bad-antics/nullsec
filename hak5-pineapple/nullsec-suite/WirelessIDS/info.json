@@ -1,0 +1,15 @@
+{
+    "name": "WirelessIDS",
+    "title": "WirelessIDS",
+    "description": "NullSec WirelessIDS payload",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "general",
+    "platform": "pineapple-pager",
+    "lines": 416,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

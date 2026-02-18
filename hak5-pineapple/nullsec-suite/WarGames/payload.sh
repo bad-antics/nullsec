@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: WarGames
-# Author: NullSec
+# Author: bad-antics
 # Description: WOPR-style hacking simulation game
 # Category: nullsec/games
 

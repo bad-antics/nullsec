@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Pager Pong
-# Author: NullSec
+# Author: bad-antics
 # Description: Simple text-based pong game on the Pager display
 # Category: nullsec/games
 

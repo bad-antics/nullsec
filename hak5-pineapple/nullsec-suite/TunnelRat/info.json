@@ -1,0 +1,15 @@
+{
+    "name": "TunnelRat",
+    "title": "Tunnel Rat",
+    "description": "Establishes reverse SSH tunnel for persistent remote access",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "stealth",
+    "platform": "pineapple-pager",
+    "lines": 222,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

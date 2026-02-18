@@ -1,0 +1,15 @@
+{
+    "name": "MITMProxy",
+    "title": "MITM Proxy",
+    "description": "Transparent HTTP/HTTPS proxy with request logging",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "capture",
+    "platform": "pineapple-pager",
+    "lines": 162,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

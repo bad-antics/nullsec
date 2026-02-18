@@ -1,0 +1,15 @@
+{
+    "name": "Exfiltrator",
+    "title": "Exfiltrator",
+    "description": "Multi-channel data exfiltration toolkit — DNS, ICMP, HTTP, steganography",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "exfiltration",
+    "platform": "pineapple-pager",
+    "lines": 164,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

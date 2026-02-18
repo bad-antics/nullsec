@@ -1,0 +1,15 @@
+{
+    "name": "SystemInfo",
+    "title": "System Info",
+    "description": "Displays comprehensive Pineapple system information",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "utility",
+    "platform": "pineapple-pager",
+    "lines": 160,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

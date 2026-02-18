@@ -1,0 +1,15 @@
+{
+    "name": "ARPSpoof",
+    "title": "ARP Spoof",
+    "description": "ARP poisoning for MITM attacks with target selection",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "capture",
+    "platform": "pineapple-pager",
+    "lines": 181,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

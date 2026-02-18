@@ -1,0 +1,15 @@
+{
+    "name": "IntrusionAlert",
+    "title": "Intrusion Alert",
+    "description": "Network intrusion detection for port scans, ARP spoofing, and suspicious traffic",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "defense",
+    "platform": "pineapple-pager",
+    "lines": 159,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

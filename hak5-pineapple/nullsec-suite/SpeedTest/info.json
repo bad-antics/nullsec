@@ -1,0 +1,15 @@
+{
+    "name": "SpeedTest",
+    "title": "Speed Test",
+    "description": "Tests internet connection speed through the Pineapple",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "utility",
+    "platform": "pineapple-pager",
+    "lines": 165,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

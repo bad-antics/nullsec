@@ -1,0 +1,15 @@
+{
+    "name": "Banshee",
+    "title": "Banshee - Deauth Screamer",
+    "description": "Aggressive deauthentication attack",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "attack",
+    "platform": "pineapple-pager",
+    "lines": 97,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

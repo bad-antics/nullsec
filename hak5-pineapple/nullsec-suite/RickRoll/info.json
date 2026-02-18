@@ -1,0 +1,15 @@
+{
+    "name": "RickRoll",
+    "title": "NullSec RickRoll AP",
+    "description": "Open AP that rickrolls everyone",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "prank",
+    "platform": "pineapple-pager",
+    "lines": 126,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

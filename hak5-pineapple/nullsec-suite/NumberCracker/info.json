@@ -1,0 +1,15 @@
+{
+    "name": "NumberCracker",
+    "title": "Number Cracker",
+    "description": "Number guessing game with hacking theme",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "prank",
+    "platform": "pineapple-pager",
+    "lines": 182,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

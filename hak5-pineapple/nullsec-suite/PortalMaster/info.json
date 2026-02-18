@@ -1,0 +1,15 @@
+{
+    "name": "PortalMaster",
+    "title": "Portal Master",
+    "description": "All-in-one portal launcher with 15+ templates",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "social-engineering",
+    "platform": "pineapple-pager",
+    "lines": 357,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

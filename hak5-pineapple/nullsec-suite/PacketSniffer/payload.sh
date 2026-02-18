@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Packet Sniffer
-# Author: NullSec
+# Author: bad-antics
 # Description: Advanced packet capture with protocol-aware filters and statistics
 # Category: nullsec/interception
 

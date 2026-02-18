@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Cloud Exfil
-# Author: NullSec
+# Author: bad-antics
 # Description: Exfiltrates captured loot to cloud storage endpoints
 # Category: nullsec/exfiltration
 

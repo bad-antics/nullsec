@@ -14,7 +14,7 @@
 ###############################################################################
 
 PAYLOAD_DIR="/root/payloads/CaptiveClone"
-LOOT_DIR="/root/loot/captiveclone"
+LOOT_DIR="/mmc/nullsec/captiveclone"
 LOG_FILE="$LOOT_DIR/captiveclone.log"
 PORTAL_DIR="$LOOT_DIR/portal"
 CRED_FILE="$LOOT_DIR/credentials.csv"

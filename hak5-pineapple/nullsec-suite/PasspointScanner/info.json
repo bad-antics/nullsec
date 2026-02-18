@@ -1,0 +1,15 @@
+{
+    "name": "PasspointScanner",
+    "title": "Passpoint Scanner",
+    "description": "Scan for Passpoint/Hotspot 2.0 and enterprise WiFi configurations",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 227,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

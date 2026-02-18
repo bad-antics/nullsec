@@ -1,0 +1,15 @@
+{
+    "name": "PasswordSpray",
+    "title": "Password Spray",
+    "description": "Distributed password spraying against network services with lockout evasion",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "cracking",
+    "platform": "pineapple-pager",
+    "lines": 343,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

@@ -18,7 +18,7 @@
 # License: MIT
 ###############################################################################
 
-LOOT_DIR="/root/loot/shadowbridge"
+LOOT_DIR="/mmc/nullsec/shadowbridge"
 LOG_FILE="$LOOT_DIR/shadowbridge.log"
 REPORT_FILE="$LOOT_DIR/bridge_report.html"
 CRED_LOG="$LOOT_DIR/credentials.log"

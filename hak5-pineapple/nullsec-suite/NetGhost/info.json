@@ -1,0 +1,15 @@
+{
+    "name": "NetGhost",
+    "title": "Net Ghost",
+    "description": "Invisible network presence — hide from IDS, bypass NAC, ghost on the wire",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "stealth",
+    "platform": "pineapple-pager",
+    "lines": 187,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

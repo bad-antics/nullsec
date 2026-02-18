@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: MAC Changer
-# Author: NullSec
+# Author: bad-antics
 # Description: Changes MAC address on interfaces with multiple modes
 # Category: nullsec/utility
 

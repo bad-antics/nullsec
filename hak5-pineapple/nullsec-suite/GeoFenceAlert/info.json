@@ -1,0 +1,15 @@
+{
+    "name": "GeoFenceAlert",
+    "title": "GeoFence Alert",
+    "description": "GPS-based geofence monitoring with device enter/leave alerts",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "defense",
+    "platform": "pineapple-pager",
+    "lines": 259,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

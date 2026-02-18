@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Probe Attack
-# Author: NullSec
+# Author: bad-antics
 # Description: Exploits probe requests to lure clients by creating matching APs
 # Category: nullsec/attack
 

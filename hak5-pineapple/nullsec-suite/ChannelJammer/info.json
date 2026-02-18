@@ -1,0 +1,15 @@
+{
+    "name": "ChannelJammer",
+    "title": "Channel Jammer",
+    "description": "Disrupt WiFi across channels using deauth",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "attack",
+    "platform": "pineapple-pager",
+    "lines": 92,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

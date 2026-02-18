@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Banshee - Deauth Screamer
-# Author: NullSec
+# Author: bad-antics
 # Description: Aggressive deauthentication attack
 # Category: nullsec/attack
 

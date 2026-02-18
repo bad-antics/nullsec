@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: DNS Exfil
-# Author: NullSec
+# Author: bad-antics
 # Description: Data exfiltration via DNS tunneling queries
 # Category: nullsec/exfiltration
 

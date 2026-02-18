@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Log Wiper
-# Author: NullSec
+# Author: bad-antics
 # Description: Securely wipes operation logs with selective or total options
 # Category: nullsec/stealth
 

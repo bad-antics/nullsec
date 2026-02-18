@@ -1,0 +1,15 @@
+{
+    "name": "NullSecDeface",
+    "title": "NullSec Deface Portal",
+    "description": "Hacker-style deface page with credential capture",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "social-engineering",
+    "platform": "pineapple-pager",
+    "lines": 459,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

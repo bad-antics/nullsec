@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: SSL Strip
-# Author: NullSec
+# Author: bad-antics
 # Description: SSL stripping attack to downgrade HTTPS to HTTP
 # Category: nullsec/interception
 

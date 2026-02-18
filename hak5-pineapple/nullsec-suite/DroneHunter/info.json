@@ -1,0 +1,15 @@
+{
+    "name": "DroneHunter",
+    "title": "Drone Hunter",
+    "description": "Detect and identify nearby drones by WiFi",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 166,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "name": "PagerPong",
+    "title": "Pager Pong",
+    "description": "Simple text-based pong game on the Pager display",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "prank",
+    "platform": "pineapple-pager",
+    "lines": 197,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

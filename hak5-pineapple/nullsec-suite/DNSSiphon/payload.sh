@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: DNS Siphon
-# Author: NullSec
+# Author: bad-antics
 # Description: DNS query interception and browsing pattern analysis
 # Category: nullsec/interception
 

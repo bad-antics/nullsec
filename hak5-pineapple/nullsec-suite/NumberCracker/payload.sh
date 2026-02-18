@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Number Cracker
-# Author: NullSec
+# Author: bad-antics
 # Description: Number guessing game with hacking theme
 # Category: nullsec/games
 

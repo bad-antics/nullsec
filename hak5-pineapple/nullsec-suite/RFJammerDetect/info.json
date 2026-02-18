@@ -1,0 +1,15 @@
+{
+    "name": "RFJammerDetect",
+    "title": "RF Jammer Detector - Radio Frequency Interference Scanner",
+    "description": "Detect and locate RF jamming sources using signal analysis and interference patterns",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "sigint",
+    "platform": "pineapple-pager",
+    "lines": 240,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

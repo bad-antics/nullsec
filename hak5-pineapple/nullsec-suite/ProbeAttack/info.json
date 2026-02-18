@@ -1,0 +1,15 @@
+{
+    "name": "ProbeAttack",
+    "title": "Probe Attack",
+    "description": "Exploits probe requests to lure clients by creating matching APs",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "attack",
+    "platform": "pineapple-pager",
+    "lines": 262,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

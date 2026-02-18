@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: PMKID Capture
-# Author: NullSec
+# Author: bad-antics
 # Description: Capture PMKID hashes for offline cracking
 # Category: nullsec/capture
 

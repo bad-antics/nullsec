@@ -16,7 +16,7 @@
 ###############################################################################
 
 PAYLOAD_DIR="/root/payloads/SpecOps"
-LOOT_DIR="/root/loot/specops"
+LOOT_DIR="/mmc/nullsec/specops"
 LOG_FILE="$LOOT_DIR/specops.log"
 REPORT_FILE="$LOOT_DIR/specops_report.html"
 FINDINGS_FILE="$LOOT_DIR/findings.csv"

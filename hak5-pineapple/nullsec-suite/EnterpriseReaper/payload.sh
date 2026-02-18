@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Enterprise Reaper
-# Author: bad-antics (NullSec)
+# Author: bad-antics
 # Description: WPA Enterprise EAP credential harvester with rogue AP + RADIUS
 # Category: nullsec/enterprise
 # Version: 1.0.0
@@ -13,7 +13,7 @@
 #
 # LEGAL: For authorized penetration testing only.
 
-LOOT_DIR="/root/loot/enterprise-reaper"
+LOOT_DIR="/mmc/nullsec/enterprisereaper"
 LOG="$LOOT_DIR/reaper.log"
 CERTS_DIR="$LOOT_DIR/certs"
 HASHES_DIR="$LOOT_DIR/hashes"

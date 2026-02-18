@@ -1,0 +1,15 @@
+{
+    "name": "CredHarvester",
+    "title": "Cred Harvester",
+    "description": "Multi-protocol credential harvesting with live monitoring",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "capture",
+    "platform": "pineapple-pager",
+    "lines": 224,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

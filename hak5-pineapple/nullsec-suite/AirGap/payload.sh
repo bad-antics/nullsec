@@ -16,7 +16,7 @@
 ###############################################################################
 
 PAYLOAD_DIR="/root/payloads/AirGap"
-LOOT_DIR="/root/loot/airgap"
+LOOT_DIR="/mmc/nullsec/airgap"
 LOG_FILE="$LOOT_DIR/airgap.log"
 REPORT_FILE="$LOOT_DIR/airgap_report.html"
 IFACE=""

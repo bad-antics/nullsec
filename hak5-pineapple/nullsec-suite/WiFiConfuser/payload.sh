@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: WiFi Confuser
-# Author: NullSec
+# Author: bad-antics
 # Description: Create confusion with fake networks + deauths
 # Category: nullsec/chaos
 

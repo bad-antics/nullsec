@@ -1,6 +1,6 @@
 #!/bin/bash
 # Title: Handshake Alert
-# Author: NullSec
+# Author: bad-antics
 # Description: Watch for WPA handshake captures and alert with SSID/BSSID info
 # Category: nullsec/alerts
 
