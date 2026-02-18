@@ -1,0 +1,29 @@
+════════════════════════════════════════════════════════════════
+  DELL POWEREDGE R410 — DEBIAN INSTALL FIX
+  Problem: Stuck on "Trying to enable the frame buffer"
+════════════════════════════════════════════════════════════════
+
+The R410 has a Matrox G200eR server BMC graphics chip that 
+causes the kernel to hang trying to initialize the framebuffer.
+
+FIX — At the Debian installer boot menu:
+
+  1. Select "Install" (NOT "Graphical install")
+  2. Press TAB to edit the boot command line
+  3. You'll see something like:
+     /install.amd/vmlinuz ... quiet ---
+  4. ADD these parameters before the ---:
+     nomodeset fb=false vga=normal video=vesafb:off
+  5. The full line should look like:
+     /install.amd/vmlinuz ... quiet nomodeset fb=false vga=normal video=vesafb:off ---
+  6. Press ENTER to boot
+
+If it's UEFI mode (press 'e' instead of TAB):
+  - Find the line starting with 'linux'
+  - Add: nomodeset fb=false vga=normal video=vesafb:off
+  - Press Ctrl+X to boot
+
+After install, make the fix permanent:
+  sudo nano /etc/default/grub
+  Change: GRUB_CMDLINE_LINUX_DEFAULT="quiet nomodeset"
+  Run: sudo update-grub && sudo reboot
