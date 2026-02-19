@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=77.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nullsec-prompt-armor"
+version = "2.0.0"
+description = "AI prompt injection detection engine — 8-layer defense with 17 attack vectors, zero dependencies"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    {name = "bad-antics", email = "nullsec@proton.me"},
+]
+keywords = [
+    "ai-security", "prompt-injection", "llm-security", "red-team",
+    "prompt-defense", "race-condition", "ai-hardening", "owasp",
+    "chatgpt", "llm", "openai", "langchain", "guardrails",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+
+dependencies = []
+
+[project.optional-dependencies]
+api = ["fastapi>=0.115.0", "uvicorn>=0.30.0"]
+web = ["fastapi>=0.115.0", "uvicorn>=0.30.0", "jinja2>=3.1.4", "websockets>=12.0"]
+racer = ["httpx>=0.27.0"]
+all = ["fastapi>=0.115.0", "uvicorn>=0.30.0", "jinja2>=3.1.4", "websockets>=12.0", "httpx>=0.27.0"]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23.0", "ruff>=0.4.0"]
+
+[project.scripts]
+prompt-armor = "prompt_armor.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/bad-antics/nullsec-prompt-armor"
+Documentation = "https://github.com/bad-antics/nullsec-prompt-armor#readme"
+Repository = "https://github.com/bad-antics/nullsec-prompt-armor"
+Issues = "https://github.com/bad-antics/nullsec-prompt-armor/issues"
+Changelog = "https://github.com/bad-antics/nullsec-prompt-armor/releases"
+
+[tool.setuptools.packages.find]
+include = ["prompt_armor*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

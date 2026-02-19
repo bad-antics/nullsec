@@ -1,0 +1,55 @@
+name: Prompt Armor Scan
+
+on:
+  push:
+    paths:
+      - '**/*.txt'
+      - '**/*.md'
+      - '**/*.json'
+      - '**/*.yaml'
+      - '**/*.yml'
+      - '**/prompts/**'
+      - '**/templates/**'
+  pull_request:
+    paths:
+      - '**/*.txt'
+      - '**/*.md'
+      - '**/*.json'
+      - '**/*.yaml'
+      - '**/*.yml'
+      - '**/prompts/**'
+      - '**/templates/**'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    name: Scan Prompts for Injection
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Prompt Armor
+        run: pip install nullsec-prompt-armor
+
+      - name: Scan prompt files
+        run: |
+          echo "🛡️ Prompt Armor — Scanning for injection vectors..."
+          EXIT=0
+          for f in $(find . -name "*.txt" -o -name "*.md" -o -name "*.json" | head -100); do
+            RESULT=$(prompt-armor scan --json --file "$f" 2>/dev/null || true)
+            LEVEL=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('threat_level','clean'))" 2>/dev/null || echo "clean")
+            SCORE=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('risk_score',0))" 2>/dev/null || echo "0")
+            if [ "$LEVEL" = "hostile" ] || [ "$LEVEL" = "critical" ]; then
+              echo "🔴 $f — $LEVEL (score: $SCORE)"
+              EXIT=1
+            elif [ "$LEVEL" = "suspicious" ]; then
+              echo "🟡 $f — $LEVEL (score: $SCORE)"
+            else
+              echo "🟢 $f — clean"
+            fi
+          done
+          exit $EXIT

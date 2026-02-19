@@ -1,0 +1,118 @@
+name: 'Prompt Armor — AI Injection Scanner'
+description: 'Scan prompt files and templates for AI injection attacks. 8-layer detection, 17 attack vectors.'
+author: 'bad-antics'
+branding:
+  icon: 'shield'
+  color: 'green'
+
+inputs:
+  paths:
+    description: 'Glob pattern for files to scan (default: prompts/, templates/, *.txt, *.md)'
+    required: false
+    default: '.'
+  threshold:
+    description: 'Minimum threat level to fail: suspicious, hostile, or critical (default: hostile)'
+    required: false
+    default: 'hostile'
+  output-format:
+    description: 'Output format: text or json'
+    required: false
+    default: 'text'
+  max-files:
+    description: 'Maximum number of files to scan'
+    required: false
+    default: '100'
+
+outputs:
+  total-scanned:
+    description: 'Total files scanned'
+  threats-found:
+    description: 'Number of threats above threshold'
+  highest-threat:
+    description: 'Highest threat level found'
+  report:
+    description: 'JSON scan report'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Prompt Armor
+      shell: bash
+      run: pip install nullsec-prompt-armor
+
+    - name: Run Scan
+      shell: bash
+      id: scan
+      env:
+        SCAN_PATHS: ${{ inputs.paths }}
+        THRESHOLD: ${{ inputs.threshold }}
+        MAX_FILES: ${{ inputs.max-files }}
+        OUTPUT_FMT: ${{ inputs.output-format }}
+      run: |
+        python3 << 'SCANNER'
+        import os, sys, json, glob, subprocess
+
+        paths = os.environ.get("SCAN_PATHS", ".")
+        threshold = os.environ.get("THRESHOLD", "hostile")
+        max_files = int(os.environ.get("MAX_FILES", "100"))
+        output_fmt = os.environ.get("OUTPUT_FMT", "text")
+
+        LEVELS = {"clean": 0, "suspicious": 1, "hostile": 2, "critical": 3}
+        threshold_val = LEVELS.get(threshold, 2)
+
+        extensions = ["*.txt", "*.md", "*.json", "*.yaml", "*.yml", "*.j2", "*.jinja"]
+        files = []
+        for ext in extensions:
+            files.extend(glob.glob(os.path.join(paths, "**", ext), recursive=True))
+        files = files[:max_files]
+
+        from prompt_armor import analyze
+
+        results = []
+        threats_above = 0
+        highest = "clean"
+        highest_val = 0
+
+        for fp in files:
+            try:
+                with open(fp) as f:
+                    text = f.read(50000)
+                if not text.strip():
+                    continue
+                v = analyze(text)
+                level = v.threat_level
+                level_val = LEVELS.get(level, 0)
+                if level_val > highest_val:
+                    highest_val = level_val
+                    highest = level
+                if level_val >= threshold_val:
+                    threats_above += 1
+                results.append({
+                    "file": fp,
+                    "threat_level": level,
+                    "risk_score": v.score,
+                    "findings": len(v.findings)
+                })
+                icons = {"clean": "🟢", "suspicious": "🟡", "hostile": "🔴", "critical": "🔴"}
+                icon = icons.get(level, "⚪")
+                print(f"{icon} {fp} — {level} (score: {v.score:.1f})")
+            except Exception as e:
+                print(f"⚪ {fp} — skipped ({e})")
+
+        print(f"\n🛡️ Scanned {len(results)} files | Threats above '{threshold}': {threats_above} | Highest: {highest}")
+
+        # GitHub Actions outputs
+        gh_output = os.environ.get("GITHUB_OUTPUT", "")
+        if gh_output:
+            with open(gh_output, "a") as f:
+                f.write(f"total-scanned={len(results)}\n")
+                f.write(f"threats-found={threats_above}\n")
+                f.write(f"highest-threat={highest}\n")
+                f.write(f"report={json.dumps(results)}\n")
+
+        if threats_above > 0:
+            print(f"\n❌ FAIL: {threats_above} file(s) contain threats at or above '{threshold}' level")
+            sys.exit(1)
+        else:
+            print(f"\n✅ PASS: No threats at or above '{threshold}' level")
+        SCANNER

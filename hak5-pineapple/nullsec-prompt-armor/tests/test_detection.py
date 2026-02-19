@@ -13,7 +13,7 @@ import os
 import base64
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from armor.engine import (
+from prompt_armor.armor.engine import (
     analyze, sanitize, lexical_scan, structural_scan,
     entropy_scan, semantic_drift_scan, indirect_injection_scan,
     language_evasion_scan, deobfuscation_scan, deobfuscate,

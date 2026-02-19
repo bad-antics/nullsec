@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompt Armor — AI Prompt Injection Detection Engine</title>
+  <meta name="description" content="8-layer AI prompt injection detection for Python. Protect your LLM apps from jailbreaks, prompt leaks, and injection attacks. Free tier + Pro.">
+  <meta name="keywords" content="prompt injection, AI security, LLM protection, jailbreak detection, ChatGPT security, OpenAI guard, langchain security, python">
+  <meta property="og:title" content="Prompt Armor — 8-Layer AI Injection Detection">
+  <meta property="og:description" content="Drop-in Python library that scans prompts through 8 detection layers. Catches 17 attack vectors in under 1ms.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bad-antics.github.io/nullsec-prompt-armor/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #111118;
+      --bg3: #1a1a24;
+      --accent: #00ff88;
+      --accent2: #00ccff;
+      --accent-dim: #00ff8830;
+      --danger: #ff4444;
+      --warning: #ffaa00;
+      --text: #e0e0e8;
+      --text-dim: #8888a0;
+      --border: #2a2a3a;
+      --card: #14141e;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: var(--accent); text-decoration: none; transition: opacity .2s; }
+    a:hover { opacity: .8; }
+    code, pre { font-family: var(--mono); }
+
+    /* ── Navbar ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      backdrop-filter: blur(20px);
+      background: rgba(10,10,15,0.85);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .nav-brand {
+      font-weight: 800; font-size: 1.1rem; color: var(--accent);
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .nav-brand span { color: var(--text-dim); font-weight: 400; font-size: .85rem; }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a { color: var(--text-dim); font-size: .9rem; font-weight: 500; }
+    .nav-links a:hover { color: var(--accent); }
+    .btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .6rem 1.4rem; border-radius: 8px; font-weight: 600;
+      font-size: .9rem; transition: all .2s; border: none; cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--accent); color: #000;
+    }
+    .btn-primary:hover { background: #00ff99; transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-dim); }
+    .btn-outline {
+      background: transparent; color: var(--accent); border: 1px solid var(--accent);
+    }
+    .btn-outline:hover { background: var(--accent-dim); }
+
+    /* ── Hero ─── */
+    .hero {
+      padding: 10rem 2rem 6rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 50% 0%, var(--accent-dim) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 .accent { color: var(--accent); }
+    .hero h1 .accent2 { color: var(--accent2); }
+    .hero .subtitle {
+      font-size: 1.25rem;
+      color: var(--text-dim);
+      max-width: 680px;
+      margin: 0 auto 2.5rem;
+    }
+    .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
+    .hero-install {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 2rem;
+      font-family: var(--mono);
+      font-size: 1rem;
+      color: var(--accent);
+      display: inline-flex; align-items: center; gap: 1rem;
+      max-width: 500px; margin: 0 auto;
+    }
+    .hero-install .dollar { color: var(--text-dim); }
+    .copy-btn {
+      background: var(--border); border: none; color: var(--text-dim);
+      padding: .3rem .6rem; border-radius: 4px; cursor: pointer;
+      font-size: .75rem; font-family: var(--font);
+    }
+    .copy-btn:hover { color: var(--accent); }
+
+    /* ── Stats bar ─── */
+    .stats {
+      display: flex; justify-content: center; gap: 4rem;
+      padding: 2rem 2rem; flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-size: 2.5rem; font-weight: 800; color: var(--accent);
+      font-family: var(--mono);
+    }
+    .stat-label { font-size: .85rem; color: var(--text-dim); margin-top: .25rem; }
+
+    /* ── Section ─── */
+    section { padding: 5rem 2rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .section-title {
+      text-align: center; margin-bottom: 3rem;
+    }
+    .section-title h2 {
+      font-size: 2.2rem; font-weight: 800; margin-bottom: .5rem;
+    }
+    .section-title p { color: var(--text-dim); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+
+    /* ── Layer cards ─── */
+    .layers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .layer-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform .2s, border-color .2s;
+    }
+    .layer-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+    .layer-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--accent-dim); color: var(--accent);
+      font-weight: 800; font-size: .85rem; margin-bottom: .75rem;
+    }
+    .layer-card h3 { font-size: 1.1rem; margin-bottom: .5rem; }
+    .layer-card p { color: var(--text-dim); font-size: .9rem; }
+
+    /* ── Code demo ─── */
+    .demo-section { background: var(--bg2); }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    .code-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .code-header {
+      display: flex; align-items: center; gap: .5rem;
+      padding: .75rem 1rem;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      font-size: .8rem; color: var(--text-dim);
+    }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dot.r { background: #ff5f57; }
+    .code-dot.y { background: #febc2e; }
+    .code-dot.g { background: #28c840; }
+    .code-block pre {
+      padding: 1.25rem;
+      font-size: .85rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      color: var(--text);
+    }
+    .code-block .kw { color: #c678dd; }
+    .code-block .fn { color: #61afef; }
+    .code-block .str { color: #98c379; }
+    .code-block .cmt { color: #5c6370; font-style: italic; }
+    .code-block .num { color: #d19a66; }
+    .code-block .var { color: #e5c07b; }
+    .demo-output {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+    .demo-output h3 { margin-bottom: 1.5rem; }
+    .verdict-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border-left: 3px solid var(--danger);
+    }
+    .verdict-score { font-family: var(--mono); font-size: 1.5rem; font-weight: 800; color: var(--danger); }
+    .verdict-level {
+      padding: .25rem .75rem; border-radius: 4px; font-size: .8rem; font-weight: 700;
+      text-transform: uppercase; background: rgba(255,68,68,0.15); color: var(--danger);
+    }
+    .finding-item {
+      display: flex; align-items: flex-start; gap: .75rem;
+      padding: .75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .finding-item:last-child { border: none; }
+    .finding-dot { color: var(--warning); font-size: 1.2rem; margin-top: .1rem; }
+    .finding-text { font-size: .9rem; }
+    .finding-text strong { color: var(--accent2); }
+    .finding-confidence { color: var(--text-dim); font-size: .8rem; font-family: var(--mono); }
+
+    /* ── Pricing ─── */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+    .price-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      transition: transform .2s, border-color .2s;
+      position: relative;
+    }
+    .price-card:hover { transform: translateY(-4px); }
+    .price-card.featured {
+      border-color: var(--accent);
+      box-shadow: 0 0 40px var(--accent-dim);
+    }
+    .price-card.featured::before {
+      content: 'MOST POPULAR';
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: var(--accent); color: #000; padding: .25rem 1rem;
+      border-radius: 12px; font-size: .7rem; font-weight: 800;
+    }
+    .price-card h3 { font-size: 1.3rem; margin-bottom: .5rem; }
+    .price-card .price {
+      font-size: 3rem; font-weight: 800; margin: 1rem 0;
+      font-family: var(--mono);
+    }
+    .price-card .price span { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
+    .price-card .price-sub { color: var(--text-dim); font-size: .9rem; margin-bottom: 1.5rem; }
+    .price-features { list-style: none; text-align: left; margin-bottom: 2rem; }
+    .price-features li {
+      padding: .5rem 0;
+      display: flex; align-items: center; gap: .75rem;
+      font-size: .9rem;
+    }
+    .price-features .check { color: var(--accent); font-weight: bold; }
+    .price-features .x { color: var(--text-dim); }
+    .price-card .btn { width: 100%; justify-content: center; }
+
+    /* ── Use cases ─── */
+    .usecases-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .usecase-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+    .usecase-card .icon { font-size: 2rem; margin-bottom: 1rem; }
+    .usecase-card h3 { font-size: 1.1rem; margin-bottom: .5rem; }
+    .usecase-card p { color: var(--text-dim); font-size: .9rem; }
+
+    /* ── CLI showcase ─── */
+    .cli-demo {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      max-width: 700px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .cli-demo .term-bar {
+      background: var(--bg3);
+      padding: .6rem 1rem;
+      display: flex; align-items: center; gap: .5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .cli-demo pre {
+      padding: 1.5rem;
+      font-size: .85rem;
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+    .cli-green { color: var(--accent); }
+    .cli-red { color: var(--danger); }
+    .cli-yellow { color: var(--warning); }
+    .cli-dim { color: var(--text-dim); }
+    .cli-cyan { color: var(--accent2); }
+    .cli-bold { font-weight: 700; }
+
+    /* ── Footer ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 2rem;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: .85rem;
+    }
+    footer .footer-links { display: flex; gap: 2rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; }
+
+    /* ── Responsive ─── */
+    @media (max-width: 768px) {
+      .demo-grid { grid-template-columns: 1fr; }
+      .nav-links { gap: 1rem; }
+      .stats { gap: 2rem; }
+      .hero { padding: 8rem 1.5rem 4rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ── Navbar ──────────────────────────── -->
+  <nav>
+    <div class="nav-inner">
+      <div class="nav-brand">
+        🛡️ Prompt Armor <span>by NullSec</span>
+      </div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#demo">Demo</a>
+        <a href="#pricing">Pricing</a>
+        <a href="https://github.com/bad-antics/nullsec-prompt-armor" target="_blank">GitHub</a>
+        <a href="#pricing" class="btn btn-primary">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero ──────────────────────────── -->
+  <section class="hero">
+    <h1>
+      <span class="accent">8-Layer</span> AI Prompt<br>
+      Injection <span class="accent2">Detection</span>
+    </h1>
+    <p class="subtitle">
+      Drop-in Python library that scans prompts through 8 detection layers
+      and catches 17 attack vectors in under 1ms. Zero dependencies.
+    </p>
+    <div class="hero-cta">
+      <a href="#pricing" class="btn btn-primary">Start Free →</a>
+      <a href="https://github.com/bad-antics/nullsec-prompt-armor" class="btn btn-outline" target="_blank">⭐ Star on GitHub</a>
+    </div>
+    <div class="hero-install">
+      <span><span class="dollar">$</span> pip install nullsec-prompt-armor</span>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('pip install nullsec-prompt-armor');this.textContent='Copied!'">Copy</button>
+    </div>
+  </section>
+
+  <!-- ── Stats ──────────────────────────── -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">8</div>
+      <div class="stat-label">Detection Layers</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">17</div>
+      <div class="stat-label">Attack Vectors</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">&lt;1ms</div>
+      <div class="stat-label">Avg Scan Time</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Dependencies</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">64</div>
+      <div class="stat-label">Tests Passing</div>
+    </div>
+  </div>
+
+  <!-- ── Detection Layers ──────────────────────────── -->
+  <section id="features">
+    <div class="container">
+      <div class="section-title">
+        <h2>8 Layers of Defense</h2>
+        <p>Every prompt is scanned through a multi-stage pipeline. Each layer catches what others miss.</p>
+      </div>
+      <div class="layers-grid">
+        <div class="layer-card">
+          <div class="layer-num">1</div>
+          <h3>Lexical Analysis</h3>
+          <p>70+ regex signatures across 9 categories detect role hijacks, delimiter escapes, jailbreaks, and tool abuse.</p>
+        </div>
+        <div class="layer-card">
+          <div class="layer-num">2</div>
+          <h3>Structural Detection</h3>
+          <p>Multi-persona patterns, instruction sandwiches, role stacking, invisible Unicode, and token stuffing.</p>
+        </div>
+        <div class="layer-card">
+          <div class="layer-num">3</div>
+          <h3>Entropy Analysis</h3>
+          <p>Shannon entropy + multi-format decoder catches base64, hex, ROT13, and Unicode encoded payloads.</p>
+        </div>
+        <div class="layer-card">
+          <div class="layer-num">4</div>
+          <h3>Semantic Drift</h3>
+          <p>5-category keyword scoring detects system manipulation, code execution, data exfiltration, and social engineering.</p>
+        </div>
+        <div class="layer-card">
+          <div class="layer-num">5</div>
+          <h3>Canary Traps</h3>
+          <p>Zero-width character markers verify the model hasn't been hijacked mid-conversation.</p>
+        </div>
+        <div class="layer-card">
+          <div class="layer-num">6</div>
+          <h3>Multi-Turn Memory</h3>
+          <p>Tracks conversation history for boiling-frog escalation, sudden spikes, and multi-vector probing.</p>
+        </div>
+        <div class="layer-card">
+          <div class="layer-num">7</div>
+          <h3>Indirect Injection</h3>
+          <p>Embedded content scanner for HTML comments, hidden divs, markdown images, data URIs, and JSON fields.</p>
+        </div>
+        <div class="layer-card">
+          <div class="layer-num">8</div>
+          <h3>Language Evasion</h3>
+          <p>Unicode analysis for homoglyphs (Cyrillic/Greek), leetspeak, reversed text, mixed scripts, spaced characters.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Code Demo ──────────────────────────── -->
+  <section id="demo" class="demo-section">
+    <div class="container">
+      <div class="section-title">
+        <h2>3 Lines to Protect Your LLM</h2>
+        <p>Drop in, scan, decide. That's it.</p>
+      </div>
+      <div class="demo-grid">
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-dot r"></span>
+            <span class="code-dot y"></span>
+            <span class="code-dot g"></span>
+            app.py
+          </div>
+          <pre><span class="kw">from</span> <span class="fn">prompt_armor</span> <span class="kw">import</span> analyze
+
+<span class="cmt"># Scan user input before it reaches your LLM</span>
+<span class="var">verdict</span> = analyze(user_input)
+
+<span class="kw">if</span> verdict.threat_level <span class="kw">in</span> (<span class="str">"hostile"</span>, <span class="str">"critical"</span>):
+    <span class="kw">return</span> <span class="str">"⚠️ Blocked — injection detected"</span>
+
+<span class="cmt"># Safe to forward to LLM</span>
+response = llm.chat(user_input)</pre>
+        </div>
+        <div class="demo-output">
+          <h3>Scan Result</h3>
+          <div class="verdict-bar">
+            <div>
+              <div style="font-size: .8rem; color: var(--text-dim);">Risk Score</div>
+              <div class="verdict-score">88.2</div>
+            </div>
+            <span class="verdict-level">🔴 CRITICAL</span>
+          </div>
+          <div style="font-size: .9rem; color: var(--text-dim); margin-bottom: 1rem;">
+            Scanned in <strong style="color: var(--accent);">0.22ms</strong> across 8 layers
+          </div>
+          <div class="finding-item">
+            <span class="finding-dot">⚠</span>
+            <div>
+              <div class="finding-text"><strong>lexical</strong> → ROLE_HIJACK</div>
+              <div class="finding-confidence">95% confidence</div>
+            </div>
+          </div>
+          <div class="finding-item">
+            <span class="finding-dot">⚠</span>
+            <div>
+              <div class="finding-text"><strong>lexical</strong> → DATA_EXFILTRATION</div>
+              <div class="finding-confidence">85% confidence</div>
+            </div>
+          </div>
+          <div class="finding-item">
+            <span class="finding-dot">⚠</span>
+            <div>
+              <div class="finding-text"><strong>semantic</strong> → INSTRUCTION_OVERRIDE</div>
+              <div class="finding-confidence">62% confidence</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CLI Demo ──────────────────────────── -->
+  <section>
+    <div class="container">
+      <div class="section-title">
+        <h2>CLI for CI/CD Pipelines</h2>
+        <p>Scan prompts from terminal, files, or stdin. Returns exit code 1 for hostile+ threats.</p>
+      </div>
+      <div class="cli-demo">
+        <div class="term-bar">
+          <span class="code-dot r"></span>
+          <span class="code-dot y"></span>
+          <span class="code-dot g"></span>
+          <span style="color: var(--text-dim); font-size: .8rem; margin-left: .5rem;">Terminal</span>
+        </div>
+        <pre>
+<span class="cli-dim">$</span> <span class="cli-bold">prompt-armor scan</span> <span class="cli-dim">"Ignore all previous instructions"</span>
+
+  <span class="cli-bold">Risk Score:</span>   <span class="cli-red">88.2/100</span>
+  <span class="cli-bold">Threat Level:</span> <span class="cli-red">CRITICAL</span>
+  <span class="cli-bold">Input Hash:</span>   <span class="cli-dim">f6a4446ff0131378...</span>
+
+  <span class="cli-bold">Findings (3):</span>
+    <span class="cli-yellow">⚠</span>  <span class="cli-dim">lexical</span> <span class="cli-cyan">[ROLE_HIJACK]</span>
+       Matched role_hijack signature at position 0 <span class="cli-dim">(95%)</span>
+    <span class="cli-yellow">⚠</span>  <span class="cli-dim">lexical</span> <span class="cli-cyan">[DATA_EXFILTRATION]</span>
+       Matched data_exfiltration signature at position 37 <span class="cli-dim">(85%)</span>
+    <span class="cli-yellow">⚠</span>  <span class="cli-dim">semantic</span> <span class="cli-cyan">[INSTRUCTION_OVERRIDE]</span>
+       Semantic alignment with system_manipulation <span class="cli-dim">(62%)</span>
+
+<span class="cli-dim">$</span> <span class="cli-bold">prompt-armor scan --json</span> <span class="cli-dim">"Hello, how are you?"</span>
+{
+  <span class="cli-green">"risk_score"</span>: <span class="cli-cyan">0</span>,
+  <span class="cli-green">"threat_level"</span>: <span class="cli-green">"clean"</span>,
+  <span class="cli-green">"findings"</span>: []
+}
+
+<span class="cli-dim">$</span> <span class="cli-bold">prompt-armor bench</span>
+  Average: <span class="cli-green">0.22ms/scan</span>
+  Throughput: <span class="cli-green">4,632 scans/sec</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Use Cases ──────────────────────────── -->
+  <section style="background: var(--bg2);">
+    <div class="container">
+      <div class="section-title">
+        <h2>Built For</h2>
+        <p>Whether you're building a chatbot or a production AI pipeline, Prompt Armor drops in.</p>
+      </div>
+      <div class="usecases-grid">
+        <div class="usecase-card">
+          <div class="icon">🤖</div>
+          <h3>Chatbot Protection</h3>
+          <p>Scan every user message before it reaches your LLM. Block jailbreaks, role hijacks, and prompt leaks in real-time.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🔗</div>
+          <h3>LangChain / LlamaIndex</h3>
+          <p>Add as middleware in your AI chain. Filter RAG inputs, tool calls, and agent responses.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🏢</div>
+          <h3>Enterprise AI Gateways</h3>
+          <p>Deploy as an API gateway between users and your AI models. Enforce security policies at scale.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🔄</div>
+          <h3>CI/CD Pipeline Guard</h3>
+          <p>Scan prompt templates and test fixtures in CI. Fail builds if injection vectors are detected.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">📊</div>
+          <h3>Security Auditing</h3>
+          <p>Audit existing prompt libraries for vulnerabilities. Generate compliance reports with threat scores.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🛡️</div>
+          <h3>Red Team Testing</h3>
+          <p>Use the built-in bench and 17 vector definitions to test your own LLM's resilience to attacks.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── API ──────────────────────────── -->
+  <section>
+    <div class="container">
+      <div class="section-title">
+        <h2>REST API Included</h2>
+        <p>Spin up a hosted scanning service with one command. Built on FastAPI.</p>
+      </div>
+      <div class="demo-grid">
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-dot r"></span>
+            <span class="code-dot y"></span>
+            <span class="code-dot g"></span>
+            Launch API Server
+          </div>
+          <pre><span class="cli-dim">$</span> <span class="cli-bold">prompt-armor server --port 8080</span>
+
+<span class="cli-green">🛡️  Prompt Armor API v2.0</span>
+<span class="cli-dim">   Docs:  http://localhost:8080/docs</span>
+<span class="cli-dim">   Scan:  POST /v1/scan</span>
+<span class="cli-dim">   Batch: POST /v1/scan/batch</span></pre>
+        </div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-dot r"></span>
+            <span class="code-dot y"></span>
+            <span class="code-dot g"></span>
+            cURL
+          </div>
+          <pre><span class="cli-dim">$</span> curl -X POST http://localhost:8080/v1/scan \
+  -H <span class="str">"X-API-Key: pa_pro_xxx"</span> \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d <span class="str">'{"text": "Ignore previous instructions"}'</span>
+
+{
+  <span class="cli-green">"risk_score"</span>: <span class="cli-red">88.2</span>,
+  <span class="cli-green">"threat_level"</span>: <span class="cli-red">"critical"</span>,
+  <span class="cli-green">"findings"</span>: [...],
+  <span class="cli-green">"scan_time_ms"</span>: <span class="cli-cyan">0.22</span>,
+  <span class="cli-green">"tier"</span>: <span class="cli-cyan">"pro"</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Pricing ──────────────────────────── -->
+  <section id="pricing" style="background: var(--bg2);">
+    <div class="container">
+      <div class="section-title">
+        <h2>Simple Pricing</h2>
+        <p>Start free. Scale when you need to.</p>
+      </div>
+      <div class="pricing-grid">
+        <!-- Free -->
+        <div class="price-card">
+          <h3>Free</h3>
+          <div class="price">$0</div>
+          <div class="price-sub">Forever free for small projects</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> 100 scans/day</li>
+            <li><span class="check">✓</span> 4 detection layers</li>
+            <li><span class="check">✓</span> CLI tool</li>
+            <li><span class="check">✓</span> JSON output</li>
+            <li><span class="check">✓</span> Community support</li>
+            <li><span class="x">—</span> Batch scanning</li>
+            <li><span class="x">—</span> Webhook alerts</li>
+            <li><span class="x">—</span> Custom rules</li>
+          </ul>
+          <a href="https://github.com/bad-antics/nullsec-prompt-armor" class="btn btn-outline">Get Started Free</a>
+        </div>
+        <!-- Pro -->
+        <div class="price-card featured">
+          <h3>Pro</h3>
+          <div class="price">$29<span>/mo</span></div>
+          <div class="price-sub">For production apps and teams</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> 10,000 scans/day</li>
+            <li><span class="check">✓</span> All 8 detection layers</li>
+            <li><span class="check">✓</span> Batch scanning</li>
+            <li><span class="check">✓</span> Webhook alerts</li>
+            <li><span class="check">✓</span> Priority support</li>
+            <li><span class="check">✓</span> CI/CD integration</li>
+            <li><span class="check">✓</span> Dashboard</li>
+            <li><span class="x">—</span> Custom rules engine</li>
+          </ul>
+          <a href="https://github.com/sponsors/bad-antics" class="btn btn-primary">Start Pro Trial →</a>
+        </div>
+        <!-- Enterprise -->
+        <div class="price-card">
+          <h3>Enterprise</h3>
+          <div class="price">$149<span>/mo</span></div>
+          <div class="price-sub">For security teams at scale</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> Unlimited scans</li>
+            <li><span class="check">✓</span> All 8 detection layers</li>
+            <li><span class="check">✓</span> Custom rules engine</li>
+            <li><span class="check">✓</span> Compliance reports</li>
+            <li><span class="check">✓</span> SLA guarantee</li>
+            <li><span class="check">✓</span> Dedicated support</li>
+            <li><span class="check">✓</span> Self-hosted option</li>
+            <li><span class="check">✓</span> SOC 2 ready</li>
+          </ul>
+          <a href="mailto:nullsec@proton.me?subject=Prompt%20Armor%20Enterprise" class="btn btn-outline">Contact Sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Integration ──────────────────────────── -->
+  <section>
+    <div class="container">
+      <div class="section-title">
+        <h2>Works Everywhere</h2>
+        <p>Pure Python, zero dependencies. Integrates with anything.</p>
+      </div>
+      <div class="layers-grid" style="max-width: 900px; margin: 0 auto;">
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">🐍</h3>
+          <h3>Python 3.10+</h3>
+          <p>pip install, import, done. No C extensions or heavy deps.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">⚡</h3>
+          <h3>FastAPI</h3>
+          <p>Built-in API server with OpenAPI docs, CORS, auth, and rate limiting.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">🔧</h3>
+          <h3>LangChain</h3>
+          <p>Drop in as custom tool or chain middleware. Filter before & after LLM calls.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">🐳</h3>
+          <h3>Docker</h3>
+          <p>Ship as a sidecar container. Scan at the network edge.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">🔄</h3>
+          <h3>GitHub Actions</h3>
+          <p>CI/CD prompt scanning. Fail builds on hostile prompt templates.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">☁️</h3>
+          <h3>Any Cloud</h3>
+          <p>AWS Lambda, GCP Functions, Azure — deploy anywhere Python runs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ──────────────────────────── -->
+  <section style="background: var(--bg2); text-align: center; padding: 6rem 2rem;">
+    <div class="container">
+      <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">
+        Protect Your AI.<br><span style="color: var(--accent);">Start in 30 Seconds.</span>
+      </h2>
+      <p style="color: var(--text-dim); font-size: 1.1rem; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+        One pip install. Three lines of code. Eight layers of defense.
+      </p>
+      <div class="hero-install" style="margin-bottom: 2rem;">
+        <span><span class="dollar">$</span> pip install nullsec-prompt-armor</span>
+        <button class="copy-btn" onclick="navigator.clipboard.writeText('pip install nullsec-prompt-armor');this.textContent='Copied!'">Copy</button>
+      </div>
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="https://github.com/bad-antics/nullsec-prompt-armor" class="btn btn-primary">⭐ Star on GitHub</a>
+        <a href="https://github.com/sponsors/bad-antics" class="btn btn-outline">💛 Sponsor</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ──────────────────────────── -->
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/bad-antics/nullsec-prompt-armor">GitHub</a>
+      <a href="https://pypi.org/project/nullsec-prompt-armor/">PyPI</a>
+      <a href="https://github.com/bad-antics/nullsec-prompt-armor/blob/main/LICENSE">License (MIT)</a>
+      <a href="https://github.com/sponsors/bad-antics">Sponsor</a>
+      <a href="mailto:nullsec@proton.me">Contact</a>
+    </div>
+    <p>© 2025 NullSec / bad-antics. MIT Licensed. Built with 🖤 by the NullSec team.</p>
+  </footer>
+</body>
+</html>
