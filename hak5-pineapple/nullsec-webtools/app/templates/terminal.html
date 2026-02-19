@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Web Terminal{% endblock %}
+
+{% block content %}
+<!-- Node Selector -->
+<div class="card" style="margin-bottom:16px;">
+    <div class="input-group" style="margin-bottom:0;">
+        <select id="term-node" style="min-width:220px;">
+            <option value="">Select a node...</option>
+        </select>
+        <button class="btn btn-primary" id="btn-connect" onclick="connectTerminal()">🔌 Connect</button>
+        <button class="btn" id="btn-disconnect" onclick="disconnectTerminal()" style="display:none;">⏏ Disconnect</button>
+        <div style="flex:1;"></div>
+        <span id="term-status" style="font-size:12px;color:#888;">Not connected</span>
+    </div>
+</div>
+
+<!-- Terminal -->
+<div class="terminal-container">
+    <div class="terminal-header">
+        <div class="terminal-dots">
+            <span class="terminal-dot red"></span>
+            <span class="terminal-dot yellow"></span>
+            <span class="terminal-dot green"></span>
+        </div>
+        <div id="term-title" style="font-size:12px;color:#888;">NullSec Terminal</div>
+        <button class="btn btn-sm" onclick="clearTerminal()">🗑 Clear</button>
+    </div>
+    <div class="terminal-body" id="term-body" onclick="NS.$('#term-input').focus()">
+        <div style="color:#00ff88;">
+╔══════════════════════════════════════════════════════╗
+║           NullSec WebTools — Terminal                ║
+║         Select a node and click Connect              ║
+╚══════════════════════════════════════════════════════╝
+        </div>
+    </div>
+    <div class="terminal-input">
+        <span class="terminal-prompt" id="term-prompt">$</span>
+        <input type="text" id="term-input" placeholder="Type command..." disabled
+               onkeydown="handleTermKey(event)">
+    </div>
+</div>
+
+<!-- Command History -->
+<div class="card" style="margin-top:16px;">
+    <div style="font-weight:600;margin-bottom:8px;">⚡ Quick Commands</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <button class="btn btn-sm" onclick="sendQuick('uname -a')">uname -a</button>
+        <button class="btn btn-sm" onclick="sendQuick('uptime')">uptime</button>
+        <button class="btn btn-sm" onclick="sendQuick('free -m')">free -m</button>
+        <button class="btn btn-sm" onclick="sendQuick('df -h')">df -h</button>
+        <button class="btn btn-sm" onclick="sendQuick('w')">who</button>
+        <button class="btn btn-sm" onclick="sendQuick('ps aux --sort=-%mem | head -15')">top mem</button>
+        <button class="btn btn-sm" onclick="sendQuick('ip addr show')">ip addr</button>
+        <button class="btn btn-sm" onclick="sendQuick('ss -tulpn')">open ports</button>
+        <button class="btn btn-sm" onclick="sendQuick('cat /proc/cpuinfo | grep model | head -1')">cpu info</button>
+        <button class="btn btn-sm" onclick="sendQuick('lsblk')">disks</button>
+        <button class="btn btn-sm" onclick="sendQuick('last -5')">last logins</button>
+        <button class="btn btn-sm" onclick="sendQuick('cat /etc/os-release')">os info</button>
+    </div>
+</div>
+
+<script>
+let cmdHistory = [];
+let historyIdx = -1;
+
+async function loadTermNodes() {
+    const nodes = await NS.get('/cluster/api/nodes');
+    const sel = NS.$('#term-node');
+    sel.innerHTML = '<option value="">Select a node...</option>';
+    nodes.filter(n => n.online).forEach(n => {
+        sel.innerHTML += `<option value="${n.name}">${n.name} (${n.ip})</option>`;
+    });
+    
+    // Auto-select from URL param
+    const params = new URLSearchParams(location.search);
+    const node = params.get('node');
+    if (node) {
+        sel.value = node;
+        connectTerminal();
+    }
+}
+
+function connectTerminal() {
+    const node = NS.$('#term-node').value;
+    if (!node) { NS.notify('Select a node first', 'warn'); return; }
+    
+    NS.html('#term-status', `Connecting to ${node}...`);
+    NS.html('#term-title', `${node} — connecting`);
+    
+    NS.terminal.onData = (data) => {
+        appendOutput(data);
+    };
+    
+    NS.terminal.connect(node);
+    
+    NS.$('#term-input').disabled = false;
+    NS.$('#term-input').focus();
+    NS.$('#btn-connect').style.display = 'none';
+    NS.$('#btn-disconnect').style.display = '';
+    NS.html('#term-status', `<span class="status-dot online" style="display:inline-block;"></span> Connected to ${node}`);
+    NS.html('#term-title', `${node}`);
+    NS.html('#term-prompt', `${node}$`);
+}
+
+function disconnectTerminal() {
+    NS.terminal.disconnect();
+    NS.$('#term-input').disabled = true;
+    NS.$('#btn-connect').style.display = '';
+    NS.$('#btn-disconnect').style.display = 'none';
+    NS.html('#term-status', 'Disconnected');
+    NS.html('#term-title', 'NullSec Terminal');
+    NS.html('#term-prompt', '$');
+}
+
+function handleTermKey(e) {
+    if (e.key === 'Enter') {
+        const input = NS.$('#term-input');
+        const cmd = input.value;
+        if (cmd.trim()) {
+            cmdHistory.unshift(cmd);
+            historyIdx = -1;
+        }
+        
+        appendOutput(`\n$ ${cmd}\n`);
+        NS.terminal.send(cmd + '\n');
+        input.value = '';
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (historyIdx < cmdHistory.length - 1) {
+            historyIdx++;
+            NS.$('#term-input').value = cmdHistory[historyIdx];
+        }
+    } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (historyIdx > 0) {
+            historyIdx--;
+            NS.$('#term-input').value = cmdHistory[historyIdx];
+        } else {
+            historyIdx = -1;
+            NS.$('#term-input').value = '';
+        }
+    } else if (e.key === 'c' && e.ctrlKey) {
+        NS.terminal.send('\x03');
+    }
+}
+
+function sendQuick(cmd) {
+    if (!NS.terminal.ws || NS.terminal.ws.readyState !== WebSocket.OPEN) {
+        NS.notify('Connect to a node first', 'warn');
+        return;
+    }
+    appendOutput(`\n$ ${cmd}\n`);
+    NS.terminal.send(cmd + '\n');
+}
+
+function appendOutput(text) {
+    const body = NS.$('#term-body');
+    const span = document.createElement('span');
+    span.textContent = text;
+    body.appendChild(span);
+    body.scrollTop = body.scrollHeight;
+}
+
+function clearTerminal() {
+    NS.$('#term-body').innerHTML = '';
+}
+
+loadTermNodes();
+</script>
+{% endblock %}

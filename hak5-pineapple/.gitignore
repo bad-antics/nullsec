@@ -67,3 +67,12 @@ id_rsa*
 .env
 .env.*
 secrets.sh
+# Virtual environments (all apps)
+nullsec-webtools/venv/
+nullsec-monitor/venv/
+nullsec-scanner/venv/
+nullsec-bench/venv/
+nullsec-prompt-armor/venv/
+nullsec-race-audit/venv/
+nullsec-nightshift/venv/
+venv/

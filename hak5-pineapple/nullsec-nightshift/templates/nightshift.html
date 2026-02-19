@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NullSec NightShift</title>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --surface2: #1a1a26;
+            --border: #2a2a3a;
+            --text: #c8c8d4;
+            --text-dim: #666680;
+            --accent: #7c6aef;
+            --accent-glow: rgba(124,106,239,0.3);
+            --green: #00e676;
+            --red: #ff3d5a;
+            --yellow: #ffab00;
+            --blue: #40c4ff;
+            --orange: #ff6d00;
+            --moon: #e8d44d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 13px;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .header h1 span { color: var(--moon); }
+        .header-status {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        .badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-night { background: #1a1a3a; color: var(--moon); border: 1px solid #3a3a2a; }
+        .badge-day { background: #1a1a1a; color: var(--text-dim); border: 1px solid var(--border); }
+        .badge-online { background: #0a2a1a; color: var(--green); border: 1px solid #1a3a2a; }
+
+        .main { display: grid; grid-template-columns: 280px 1fr; height: calc(100vh - 60px); }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 16px;
+        }
+        .sidebar h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin: 16px 0 8px;
+            letter-spacing: 1px;
+        }
+        .sidebar h3:first-child { margin-top: 0; }
+
+        .node-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 6px;
+        }
+        .node-card .name {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .node-card .name strong { font-size: 12px; }
+        .node-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .node-dot.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+        .node-dot.off { background: var(--red); opacity: 0.5; }
+        .node-card .specs {
+            font-size: 10px;
+            color: var(--text-dim);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid var(--accent);
+            background: transparent;
+            color: var(--accent);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.15s;
+        }
+        .btn:hover {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-sm { padding: 4px 10px; font-size: 11px; }
+        .btn-green { border-color: var(--green); color: var(--green); }
+        .btn-green:hover { background: var(--green); color: #000; }
+
+        .shift-controls {
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Content */
+        .content { overflow-y: auto; padding: 20px; }
+
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Job grid */
+        .job-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+        .job-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            transition: border-color 0.15s;
+        }
+        .job-card:hover { border-color: var(--accent); }
+        .job-card .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 6px;
+        }
+        .job-card .job-name { font-weight: 600; font-size: 12px; }
+        .job-card .job-desc { font-size: 11px; color: var(--text-dim); margin-bottom: 6px; }
+        .job-card .job-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .tag {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            background: var(--bg);
+            color: var(--text-dim);
+        }
+        .tag-revenue { color: var(--green); border: 1px solid rgba(0,230,118,0.2); }
+        .tag-research { color: var(--blue); border: 1px solid rgba(64,196,255,0.2); }
+        .tag-hardening { color: var(--orange); border: 1px solid rgba(255,109,0,0.2); }
+        .tag-maintenance { color: var(--text-dim); border: 1px solid var(--border); }
+
+        /* Report */
+        .report-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 14px;
+            text-align: center;
+        }
+        .stat-card .value { font-size: 28px; font-weight: 700; }
+        .stat-card .label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+        .stat-completed .value { color: var(--green); }
+        .stat-failed .value { color: var(--red); }
+        .stat-skipped .value { color: var(--yellow); }
+
+        /* Log output */
+        .log-area {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+        .log-line { white-space: pre-wrap; word-break: break-all; }
+        .log-line.success { color: var(--green); }
+        .log-line.error { color: var(--red); }
+        .log-line.info { color: var(--blue); }
+
+        /* History table */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 12px; }
+        th { color: var(--text-dim); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        tr:hover td { background: var(--surface2); }
+
+        /* Category filter */
+        .cat-filter {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .cat-btn {
+            padding: 4px 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: transparent;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 11px;
+            transition: all 0.15s;
+        }
+        .cat-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(124,106,239,0.1); }
+        .cat-btn:hover { border-color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><span>🌙</span> NullSec NightShift</h1>
+        <div class="header-status">
+            <span id="timeStatus" class="badge badge-day">──</span>
+            <span id="nodeStatus" class="badge badge-online">──</span>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="sidebar">
+            <h3>Cluster Nodes</h3>
+            <div id="nodeList"></div>
+
+            <div class="shift-controls">
+                <h3>Shift Control</h3>
+                <button class="btn btn-green" id="runShiftBtn" onclick="runShift()">▶ Run Shift Now</button>
+                <button class="btn btn-sm" onclick="runShift(true)">Run (Force)</button>
+            </div>
+
+            <h3>Filter Jobs</h3>
+            <div class="cat-filter" style="flex-direction: column;">
+                <button class="cat-btn active" data-cat="all" onclick="filterCat('all', this)">All Jobs</button>
+                <button class="cat-btn" data-cat="revenue" onclick="filterCat('revenue', this)">💰 Revenue</button>
+                <button class="cat-btn" data-cat="research" onclick="filterCat('research', this)">🔬 Research</button>
+                <button class="cat-btn" data-cat="hardening" onclick="filterCat('hardening', this)">🛡️ Hardening</button>
+                <button class="cat-btn" data-cat="maintenance" onclick="filterCat('maintenance', this)">🧹 Maintenance</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Live Report -->
+            <div class="section" id="reportSection" style="display: none;">
+                <div class="section-title">Latest Shift Report</div>
+                <div class="report-summary" id="reportSummary"></div>
+                <div class="log-area" id="shiftLog"></div>
+            </div>
+
+            <!-- Jobs Grid -->
+            <div class="section">
+                <div class="section-title">
+                    <span>Scheduled Jobs</span>
+                    <span id="jobCount" style="font-size: 11px; color: var(--text-dim);"></span>
+                </div>
+                <div class="job-grid" id="jobGrid"></div>
+            </div>
+
+            <!-- History -->
+            <div class="section">
+                <div class="section-title">Shift History</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Shift ID</th>
+                            <th>Started</th>
+                            <th>Duration</th>
+                            <th>Completed</th>
+                            <th>Failed</th>
+                            <th>Skipped</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws;
+        let allJobs = [];
+        let activeCat = 'all';
+
+        async function init() {
+            loadStatus();
+            loadJobs();
+            loadHistory();
+            connectWS();
+        }
+
+        function connectWS() {
+            const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+            ws = new WebSocket(`${proto}://${location.host}/ws`);
+            ws.onmessage = (e) => {
+                const msg = JSON.parse(e.data);
+                if (msg.type === 'log') appendLog(msg.msg, 'info');
+                if (msg.type === 'shift_start') {
+                    document.getElementById('reportSection').style.display = 'block';
+                    document.getElementById('shiftLog').innerHTML = '';
+                    appendLog('Shift starting...', 'info');
+                }
+                if (msg.type === 'shift_complete') showReport(msg.report);
+                if (msg.type === 'shift_error') appendLog('ERROR: ' + msg.error, 'error');
+            };
+            ws.onclose = () => setTimeout(connectWS, 3000);
+        }
+
+        async function loadStatus() {
+            try {
+                const r = await fetch('/api/status');
+                const d = await r.json();
+                const ts = document.getElementById('timeStatus');
+                ts.textContent = d.nighttime ? `🌙 Night (${d.current_hour}:00)` : `☀️ Day (${d.current_hour}:00)`;
+                ts.className = `badge ${d.nighttime ? 'badge-night' : 'badge-day'}`;
+
+                document.getElementById('nodeStatus').textContent = `${d.nodes_online}/${d.nodes_total} online`;
+
+                const nl = document.getElementById('nodeList');
+                nl.innerHTML = d.nodes.map(n => `
+                    <div class="node-card">
+                        <div class="name">
+                            <strong>${n.name}</strong>
+                            <span class="node-dot ${n.online ? 'on' : 'off'}"></span>
+                        </div>
+                        <div class="specs">${n.cores}c · ${n.ram_mb}MB · ${n.gpu || 'no GPU'} · ${n.os}</div>
+                    </div>
+                `).join('');
+            } catch (e) { console.error('Status load failed', e); }
+        }
+
+        async function loadJobs() {
+            try {
+                const r = await fetch('/api/jobs');
+                allJobs = await r.json();
+                renderJobs();
+            } catch (e) { console.error('Jobs load failed', e); }
+        }
+
+        function renderJobs() {
+            const filtered = activeCat === 'all' ? allJobs : allJobs.filter(j => j.category === activeCat);
+            document.getElementById('jobCount').textContent = `${filtered.length} jobs`;
+            document.getElementById('jobGrid').innerHTML = filtered.map(j => `
+                <div class="job-card">
+                    <div class="job-header">
+                        <span class="job-name">${j.name}</span>
+                        <span class="tag tag-${j.category}">${j.category}</span>
+                    </div>
+                    <div class="job-desc">${j.description}</div>
+                    <div class="job-meta">
+                        <span class="tag">P${j.priority}</span>
+                        <span class="tag">${j.target_os}</span>
+                        ${j.requires_gpu ? '<span class="tag" style="color:var(--yellow)">GPU</span>' : ''}
+                        <span class="tag">${j.run_on}</span>
+                        <span class="tag">${j.timeout_sec}s</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCat(cat, el) {
+            activeCat = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            renderJobs();
+        }
+
+        async function loadHistory() {
+            try {
+                const r = await fetch('/api/history');
+                const data = await r.json();
+                document.getElementById('historyBody').innerHTML = data.map(h => `
+                    <tr>
+                        <td>${h.shift_id}</td>
+                        <td>${h.started || '—'}</td>
+                        <td>${h.duration_sec}s</td>
+                        <td style="color:var(--green)">${h.jobs_completed}</td>
+                        <td style="color:var(--red)">${h.jobs_failed}</td>
+                        <td style="color:var(--text-dim)">${h.jobs_skipped}</td>
+                    </tr>
+                `).join('') || '<tr><td colspan="6" style="color:var(--text-dim)">No shift history yet</td></tr>';
+            } catch (e) { console.error('History load failed', e); }
+        }
+
+        async function runShift(force) {
+            const btn = document.getElementById('runShiftBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Running...';
+
+            try {
+                const r = await fetch('/api/shift/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ force: force || false }),
+                });
+                const report = await r.json();
+                showReport(report);
+                loadHistory();
+            } catch (e) {
+                appendLog('Failed to start shift: ' + e, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '▶ Run Shift Now';
+            }
+        }
+
+        function showReport(report) {
+            const sec = document.getElementById('reportSection');
+            sec.style.display = 'block';
+
+            if (report.status === 'skipped') {
+                appendLog('Shift skipped: ' + report.reason, 'info');
+                return;
+            }
+
+            const sum = document.getElementById('reportSummary');
+            sum.innerHTML = `
+                <div class="stat-card">
+                    <div class="value">${report.jobs_total || 0}</div>
+                    <div class="label">Total</div>
+                </div>
+                <div class="stat-card stat-completed">
+                    <div class="value">${report.jobs_completed || 0}</div>
+                    <div class="label">Completed</div>
+                </div>
+                <div class="stat-card stat-failed">
+                    <div class="value">${report.jobs_failed || 0}</div>
+                    <div class="label">Failed</div>
+                </div>
+                <div class="stat-card stat-skipped">
+                    <div class="value">${report.jobs_skipped || 0}</div>
+                    <div class="label">Skipped</div>
+                </div>
+            `;
+
+            const log = document.getElementById('shiftLog');
+            appendLog(`Shift ${report.shift_id} completed in ${report.duration_sec}s`, 'info');
+            if (report.jobs) {
+                report.jobs.forEach(j => {
+                    const cls = j.status === 'completed' ? 'success' : j.status === 'failed' ? 'error' : 'info';
+                    appendLog(`  ${j.status === 'completed' ? '✓' : j.status === 'failed' ? '✗' : '—'} ${j.name} → ${j.assigned_node || 'unassigned'} (${j.status})`, cls);
+                    if (j.output) appendLog(`    ${j.output.substring(0, 200)}`, '');
+                    if (j.error && j.status === 'failed') appendLog(`    ERR: ${j.error.substring(0, 200)}`, 'error');
+                });
+            }
+        }
+
+        function appendLog(text, cls) {
+            const log = document.getElementById('shiftLog');
+            const line = document.createElement('div');
+            line.className = `log-line ${cls || ''}`;
+            line.textContent = text;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NullSec Monitor</title>
+    <link rel="stylesheet" href="/static/css/nullsec.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <span class="logo">◉</span>
+            <span class="logo-text">Monitor</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/" class="active"><span class="nav-icon">◉</span> Live View</a></li>
+            <li><a href="/api/alerts"><span class="nav-icon">⚠</span> Alerts</a></li>
+        </ul>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section">App Network</div>
+        <ul class="nav-links">
+            <li><a href="http://localhost:9000"><span class="nav-icon">⬡</span> Hub</a></li>
+            <li><a href="http://localhost:9002"><span class="nav-icon">◎</span> Scanner</a></li>
+            <li><a href="http://localhost:9003"><span class="nav-icon">⚡</span> Bench</a></li>
+        </ul>
+        <div class="sidebar-footer"><span class="version">v1.0.0</span></div>
+    </nav>
+
+    <main class="content">
+        <header class="topbar">
+            <h1 class="page-title">⚡ Real-Time Cluster Monitor</h1>
+            <div class="topbar-actions">
+                <span class="status-dot" id="ws-dot"></span>
+                <span class="status-text" id="ws-status">Connecting...</span>
+                <span style="margin-left:12px;color:var(--text-dim);font-size:12px;" id="update-time">—</span>
+            </div>
+        </header>
+        <div class="page-content">
+            <!-- Aggregate Stats -->
+            <div class="stat-row" id="totals">
+                <div class="stat-card"><div class="stat-num" id="t-online">—</div><div class="stat-label">Nodes Online</div></div>
+                <div class="stat-card"><div class="stat-num" id="t-cores">—</div><div class="stat-label">Total Cores</div></div>
+                <div class="stat-card"><div class="stat-num" id="t-ram">—</div><div class="stat-label">Total RAM (GB)</div></div>
+                <div class="stat-card"><div class="stat-num" id="t-cpu">—</div><div class="stat-label">Avg CPU %</div></div>
+                <div class="stat-card"><div class="stat-num" id="t-ramavg">—</div><div class="stat-label">Avg RAM %</div></div>
+            </div>
+
+            <!-- CPU Chart -->
+            <div class="section-header">
+                <div class="section-title">📊 CPU Usage (Live)</div>
+            </div>
+            <div class="card" style="margin-bottom:24px;padding:16px;">
+                <canvas id="cpu-chart" height="180"></canvas>
+            </div>
+
+            <!-- RAM Chart -->
+            <div class="section-header">
+                <div class="section-title">🧠 RAM Usage (Live)</div>
+            </div>
+            <div class="card" style="margin-bottom:24px;padding:16px;">
+                <canvas id="ram-chart" height="180"></canvas>
+            </div>
+
+            <!-- Node Cards -->
+            <div class="section-header">
+                <div class="section-title">🖥️ Node Status</div>
+            </div>
+            <div class="node-grid" id="node-grid">
+                <div class="loading"><div class="spinner"></div> Waiting for data...</div>
+            </div>
+
+            <!-- Alert History -->
+            <div class="section-header" style="margin-top:24px;">
+                <div class="section-title">⚠️ Recent Alerts</div>
+            </div>
+            <div class="table-wrap" id="alert-wrap">
+                <table>
+                    <thead><tr><th>Time</th><th>Node</th><th>Level</th><th>Message</th></tr></thead>
+                    <tbody id="alert-body">
+                        <tr><td colspan="4" style="text-align:center;color:var(--text-dim);">No alerts yet</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+<script>
+// ─── Chart Setup ────────────────────────────────────────────────────────────
+const COLORS = ['#00ff88','#00aaff','#ff4444','#ffcc00','#aa66ff','#ff8800','#00e5ff','#ff66aa'];
+const MAX_PTS = 60;
+
+const cpuCtx = document.getElementById('cpu-chart').getContext('2d');
+const ramCtx = document.getElementById('ram-chart').getContext('2d');
+
+const cpuChart = new Chart(cpuCtx, {
+    type: 'line',
+    data: { labels: [], datasets: [] },
+    options: chartOpts('CPU %', 100)
+});
+const ramChart = new Chart(ramCtx, {
+    type: 'line',
+    data: { labels: [], datasets: [] },
+    options: chartOpts('RAM %', 100)
+});
+
+function chartOpts(title, max) {
+    return {
+        responsive: true, animation: { duration: 200 },
+        scales: {
+            x: { display: true, grid: { color: '#222' }, ticks: { color: '#555', maxTicksLimit: 10, font: { family: 'monospace', size: 10 } } },
+            y: { min: 0, max, grid: { color: '#222' }, ticks: { color: '#555', font: { family: 'monospace', size: 10 } } }
+        },
+        plugins: { legend: { labels: { color: '#888', font: { family: 'monospace', size: 11 } } } },
+        elements: { point: { radius: 0 }, line: { tension: 0.3, borderWidth: 2 } }
+    };
+}
+
+const nodeTimeline = {};
+
+function updateCharts(nodes) {
+    const now = new Date().toLocaleTimeString();
+    const onlineNodes = nodes.filter(n => n.online);
+
+    // Ensure datasets exist for each node
+    onlineNodes.forEach((n, i) => {
+        const color = COLORS[i % COLORS.length];
+        if (!cpuChart.data.datasets.find(d => d.label === n.name)) {
+            cpuChart.data.datasets.push({ label: n.name, data: [], borderColor: color, backgroundColor: 'transparent' });
+            ramChart.data.datasets.push({ label: n.name, data: [], borderColor: color, backgroundColor: 'transparent' });
+        }
+    });
+
+    cpuChart.data.labels.push(now);
+    ramChart.data.labels.push(now);
+    if (cpuChart.data.labels.length > MAX_PTS) {
+        cpuChart.data.labels.shift();
+        ramChart.data.labels.shift();
+    }
+
+    cpuChart.data.datasets.forEach(ds => {
+        const node = nodes.find(n => n.name === ds.label);
+        ds.data.push(node && node.online ? node.cpu_pct : null);
+        if (ds.data.length > MAX_PTS) ds.data.shift();
+    });
+    ramChart.data.datasets.forEach(ds => {
+        const node = nodes.find(n => n.name === ds.label);
+        ds.data.push(node && node.online ? node.ram_pct : null);
+        if (ds.data.length > MAX_PTS) ds.data.shift();
+    });
+
+    cpuChart.update();
+    ramChart.update();
+}
+
+// ─── Node Grid ──────────────────────────────────────────────────────────────
+
+function renderNodes(nodes) {
+    const grid = document.getElementById('node-grid');
+    grid.innerHTML = nodes.map(n => {
+        const cpuClass = n.cpu_pct > 90 ? 'danger' : n.cpu_pct > 70 ? 'warn' : '';
+        const ramClass = n.ram_pct > 90 ? 'danger' : n.ram_pct > 70 ? 'warn' : '';
+        const diskClass = n.disk_pct > 90 ? 'danger' : n.disk_pct > 70 ? 'warn' : '';
+        return `
+        <div class="node-card ${n.online ? 'online' : 'offline'}">
+            <div class="node-name">
+                <span class="status-dot ${n.online ? 'online' : 'offline'}"></span>
+                ${n.name}
+                <span class="badge ${n.online ? 'badge-green' : 'badge-red'}" style="margin-left:auto;">
+                    ${n.online ? n.role.toUpperCase() : 'OFFLINE'}
+                </span>
+            </div>
+            <div class="node-stats">
+                <div>
+                    <div class="node-stat-label">CPU</div>
+                    <div class="node-stat-value">${n.online ? n.cpu_pct.toFixed(1) + '%' : '—'}</div>
+                    <div class="progress-bar"><div class="progress-fill ${cpuClass}" style="width:${n.cpu_pct}%"></div></div>
+                </div>
+                <div>
+                    <div class="node-stat-label">RAM</div>
+                    <div class="node-stat-value">${n.online ? n.ram_used_gb.toFixed(1) + '/' + n.ram_total_gb.toFixed(1) + ' GB' : '—'}</div>
+                    <div class="progress-bar"><div class="progress-fill ${ramClass}" style="width:${n.ram_pct}%"></div></div>
+                </div>
+                <div>
+                    <div class="node-stat-label">Disk</div>
+                    <div class="node-stat-value">${n.online ? n.disk_free_gb.toFixed(0) + 'G free' : '—'}</div>
+                    <div class="progress-bar"><div class="progress-fill ${diskClass}" style="width:${n.disk_pct}%"></div></div>
+                </div>
+                <div>
+                    <div class="node-stat-label">Cores</div>
+                    <div class="node-stat-value">${n.cores || '—'}</div>
+                </div>
+                <div>
+                    <div class="node-stat-label">Load</div>
+                    <div class="node-stat-value">${n.online && n.load_1m ? n.load_1m.toFixed(2) : '—'}</div>
+                </div>
+                <div>
+                    <div class="node-stat-label">Uptime</div>
+                    <div class="node-stat-value">${n.uptime || '—'}</div>
+                </div>
+                <div>
+                    <div class="node-stat-label">Procs</div>
+                    <div class="node-stat-value">${n.processes || '—'}</div>
+                </div>
+                <div>
+                    <div class="node-stat-label">OS</div>
+                    <div class="node-stat-value" style="font-size:11px;">${n.os_info || '—'}</div>
+                </div>
+            </div>
+            ${n.gpu ? `<div style="margin-top:8px;font-size:11px;color:var(--text-dim);">🎮 ${n.gpu}</div>` : ''}
+            ${n.error ? `<div style="margin-top:4px;font-size:11px;color:var(--red);">⚠ ${n.error}</div>` : ''}
+        </div>`;
+    }).join('');
+}
+
+// ─── Alerts ─────────────────────────────────────────────────────────────────
+
+function renderAlerts(alerts) {
+    const body = document.getElementById('alert-body');
+    if (!alerts || alerts.length === 0) return;
+    body.innerHTML = alerts.reverse().map(a => {
+        const t = new Date(a.ts * 1000).toLocaleTimeString();
+        const cls = a.level === 'critical' ? 'color:var(--red)' : 'color:var(--yellow)';
+        return `<tr><td>${t}</td><td>${a.node}</td><td style="${cls};font-weight:600;">${a.level.toUpperCase()}</td><td>${a.msg}</td></tr>`;
+    }).join('');
+}
+
+// ─── WebSocket ──────────────────────────────────────────────────────────────
+
+function connectWS() {
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${proto}//${location.host}/ws`);
+    const dot = document.getElementById('ws-dot');
+    const status = document.getElementById('ws-status');
+
+    ws.onopen = () => {
+        dot.className = 'status-dot online';
+        status.textContent = 'Live';
+    };
+    ws.onclose = () => {
+        dot.className = 'status-dot offline';
+        status.textContent = 'Disconnected';
+        setTimeout(connectWS, 3000);
+    };
+    ws.onerror = () => {
+        dot.className = 'status-dot offline';
+        status.textContent = 'Error';
+    };
+    ws.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        if (data.type === 'update') {
+            // Update totals
+            const t = data.totals;
+            document.getElementById('t-online').textContent = `${t.online}/${t.total}`;
+            document.getElementById('t-cores').textContent = t.total_cores;
+            document.getElementById('t-ram').textContent = t.total_ram.toFixed(0);
+            document.getElementById('t-cpu').textContent = t.avg_cpu.toFixed(1) + '%';
+            document.getElementById('t-ramavg').textContent = t.avg_ram.toFixed(1) + '%';
+            document.getElementById('update-time').textContent = new Date().toLocaleTimeString();
+
+            renderNodes(data.nodes);
+            updateCharts(data.nodes);
+            renderAlerts(data.alerts);
+        }
+    };
+}
+
+connectWS();
+</script>
+</body>
+</html>

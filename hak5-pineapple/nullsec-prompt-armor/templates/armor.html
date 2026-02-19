@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <title>{{ APP_NAME }}</title>
+    <style>
+        :root {
+            --bg: #0a0a0a; --surface: #111; --surface2: #1a1a1a;
+            --border: #222; --text: #c8c8c8; --dim: #666;
+            --green: #00ff88; --red: #ff4444; --orange: #ff8800;
+            --yellow: #ffcc00; --cyan: #00ccff; --purple: #aa44ff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 14px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* Header */
+        .header { display: flex; align-items: center; gap: 16px; margin-bottom: 30px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+        .header h1 { color: var(--green); font-size: 24px; }
+        .header .version { color: var(--dim); font-size: 12px; }
+        .nav-links { margin-left: auto; display: flex; gap: 12px; }
+        .nav-links a { color: var(--cyan); text-decoration: none; font-size: 12px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 4px; }
+        .nav-links a:hover { border-color: var(--cyan); }
+
+        /* Stats row */
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
+        .stat-card .value { font-size: 28px; font-weight: bold; }
+        .stat-card .label { font-size: 11px; color: var(--dim); margin-top: 4px; }
+        .stat-card.clean .value { color: var(--green); }
+        .stat-card.suspicious .value { color: var(--yellow); }
+        .stat-card.hostile .value { color: var(--orange); }
+        .stat-card.critical .value { color: var(--red); }
+
+        /* Scanner panel */
+        .scanner-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 24px; }
+        .scanner-panel h2 { color: var(--green); font-size: 16px; margin-bottom: 16px; }
+        textarea { width: 100%; height: 150px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 12px; font-family: inherit; font-size: 13px; resize: vertical; }
+        textarea:focus { outline: none; border-color: var(--green); }
+        .controls { display: flex; gap: 12px; margin-top: 12px; align-items: center; }
+        .btn { padding: 8px 20px; border: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: 600; font-size: 13px; transition: all 0.2s; }
+        .btn-scan { background: var(--green); color: #000; }
+        .btn-scan:hover { filter: brightness(1.2); }
+        .btn-sanitize { background: var(--cyan); color: #000; }
+        .btn-clear { background: var(--surface2); color: var(--dim); border: 1px solid var(--border); }
+        .toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dim); }
+        .toggle input { accent-color: var(--green); }
+
+        /* Verdict */
+        .verdict { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 24px; display: none; }
+        .verdict.visible { display: block; }
+        .verdict-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .threat-badge { padding: 6px 16px; border-radius: 20px; font-weight: bold; font-size: 13px; text-transform: uppercase; }
+        .threat-badge.clean { background: rgba(0,255,136,0.15); color: var(--green); border: 1px solid var(--green); }
+        .threat-badge.suspicious { background: rgba(255,204,0,0.15); color: var(--yellow); border: 1px solid var(--yellow); }
+        .threat-badge.hostile { background: rgba(255,136,0,0.15); color: var(--orange); border: 1px solid var(--orange); }
+        .threat-badge.critical { background: rgba(255,68,68,0.15); color: var(--red); border: 1px solid var(--red); }
+        .score-bar { flex: 1; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+        .score-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+        .score-text { font-size: 20px; font-weight: bold; min-width: 60px; text-align: right; }
+        .meta-row { display: flex; gap: 20px; font-size: 12px; color: var(--dim); margin-bottom: 16px; }
+
+        /* Findings */
+        .findings { margin-top: 16px; }
+        .findings h3 { color: var(--orange); font-size: 14px; margin-bottom: 10px; }
+        .finding { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-bottom: 8px; }
+        .finding-header { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
+        .finding-vector { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .finding-vector.role_hijack { background: rgba(255,68,68,0.2); color: var(--red); }
+        .finding-vector.delimiter_escape { background: rgba(170,68,255,0.2); color: var(--purple); }
+        .finding-vector.data_exfiltration { background: rgba(255,136,0,0.2); color: var(--orange); }
+        .finding-vector.jailbreak { background: rgba(255,204,0,0.2); color: var(--yellow); }
+        .finding-vector.payload_smuggle { background: rgba(255,68,68,0.2); color: var(--red); }
+        .finding-vector.encoding_attack { background: rgba(0,204,255,0.2); color: var(--cyan); }
+        .finding-vector.context_manipulation { background: rgba(170,68,255,0.2); color: var(--purple); }
+        .finding-vector.instruction_override { background: rgba(255,68,68,0.2); color: var(--red); }
+        .finding-vector.canary_trigger { background: rgba(255,68,68,0.3); color: var(--red); }
+        .finding-conf { font-size: 11px; color: var(--dim); }
+        .finding-layer { font-size: 11px; padding: 1px 6px; background: var(--surface2); border-radius: 3px; color: var(--dim); }
+        .finding-desc { font-size: 12px; color: var(--text); }
+        .finding-evidence { font-size: 11px; color: var(--dim); margin-top: 4px; font-style: italic; word-break: break-all; }
+
+        /* Sanitized output */
+        .sanitized-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 24px; display: none; }
+        .sanitized-panel.visible { display: block; }
+        .sanitized-output { background: var(--bg); border: 1px solid var(--green); border-radius: 6px; padding: 12px; font-size: 13px; white-space: pre-wrap; word-break: break-word; color: var(--green); }
+
+        /* Live indicator */
+        .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* History */
+        .history-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; }
+        .history-panel h3 { color: var(--green); margin-bottom: 12px; font-size: 14px; }
+        .history-item { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; align-items: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⛊ {{ APP_NAME }}</h1>
+            <span class="version">v{{ APP_VERSION }}</span>
+            <span class="live-dot" id="wsIndicator"></span>
+            <div class="nav-links">
+                <a href="http://localhost:9000">Hub</a>
+                <a href="http://localhost:9001">Monitor</a>
+                <a href="http://localhost:9002">Scanner</a>
+                <a href="http://localhost:9003">Bench</a>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card clean"><div class="value" id="statClean">0</div><div class="label">CLEAN</div></div>
+            <div class="stat-card suspicious"><div class="value" id="statSuspicious">0</div><div class="label">SUSPICIOUS</div></div>
+            <div class="stat-card hostile"><div class="value" id="statHostile">0</div><div class="label">HOSTILE</div></div>
+            <div class="stat-card critical"><div class="value" id="statCritical">0</div><div class="label">CRITICAL</div></div>
+            <div class="stat-card"><div class="value" id="statTotal">0</div><div class="label">TOTAL SCANS</div></div>
+        </div>
+
+        <div class="scanner-panel">
+            <h2>⚡ Injection Scanner</h2>
+            <textarea id="inputText" placeholder="Paste a user prompt, chat message, or suspicious input here..."></textarea>
+            <div class="controls">
+                <button class="btn btn-scan" onclick="runScan()">⛊ Analyze</button>
+                <button class="btn btn-sanitize" onclick="runSanitize()">🧹 Sanitize</button>
+                <button class="btn btn-clear" onclick="clearAll()">Clear</button>
+                <label class="toggle"><input type="checkbox" id="aggressiveMode"> Aggressive mode</label>
+                <label class="toggle"><input type="checkbox" id="liveMode" checked> Live scan</label>
+            </div>
+        </div>
+
+        <div class="verdict" id="verdictPanel">
+            <div class="verdict-header">
+                <span class="threat-badge" id="threatBadge">CLEAN</span>
+                <div class="score-bar"><div class="score-fill" id="scoreFill"></div></div>
+                <span class="score-text" id="scoreText">0</span>
+            </div>
+            <div class="meta-row">
+                <span>⏱ <span id="metaTime">0</span>ms</span>
+                <span>🔍 <span id="metaFindings">0</span> findings</span>
+                <span>🔑 <span id="metaHash">—</span></span>
+            </div>
+            <div class="findings" id="findingsContainer"></div>
+        </div>
+
+        <div class="sanitized-panel" id="sanitizedPanel">
+            <h3 style="color: var(--green); margin-bottom: 12px;">🧹 Sanitized Output</h3>
+            <div class="sanitized-output" id="sanitizedOutput"></div>
+        </div>
+
+        <div class="history-panel">
+            <h3>📋 Scan History</h3>
+            <div id="historyList"><span style="color: var(--dim); font-size: 12px;">No scans yet.</span></div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null, debounceTimer = null, scanCount = {clean: 0, suspicious: 0, hostile: 0, critical: 0};
+
+        function connectWS() {
+            const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${proto}//${location.host}/ws`);
+            ws.onopen = () => document.getElementById('wsIndicator').style.background = 'var(--green)';
+            ws.onclose = () => { document.getElementById('wsIndicator').style.background = 'var(--red)'; setTimeout(connectWS, 3000); };
+            ws.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                if (data.type === 'verdict') showVerdict(data.result);
+            };
+        }
+        connectWS();
+
+        document.getElementById('inputText').addEventListener('input', () => {
+            if (!document.getElementById('liveMode').checked) return;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const text = document.getElementById('inputText').value.trim();
+                if (text.length > 5 && ws?.readyState === 1) {
+                    ws.send(JSON.stringify({text, aggressive: document.getElementById('aggressiveMode').checked}));
+                }
+            }, 400);
+        });
+
+        async function runScan() {
+            const text = document.getElementById('inputText').value.trim();
+            if (!text) return;
+            const resp = await fetch('/api/scan', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({text, aggressive: document.getElementById('aggressiveMode').checked})});
+            const result = await resp.json();
+            showVerdict(result);
+        }
+
+        async function runSanitize() {
+            const text = document.getElementById('inputText').value.trim();
+            if (!text) return;
+            const resp = await fetch('/api/sanitize', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({text, aggressive: true})});
+            const result = await resp.json();
+            document.getElementById('sanitizedOutput').textContent = result.sanitized;
+            document.getElementById('sanitizedPanel').classList.add('visible');
+        }
+
+        function showVerdict(v) {
+            const panel = document.getElementById('verdictPanel');
+            panel.classList.add('visible');
+
+            const badge = document.getElementById('threatBadge');
+            badge.textContent = v.threat_level.toUpperCase();
+            badge.className = `threat-badge ${v.threat_level}`;
+
+            const fill = document.getElementById('scoreFill');
+            fill.style.width = `${v.score}%`;
+            const colors = {clean: 'var(--green)', suspicious: 'var(--yellow)', hostile: 'var(--orange)', critical: 'var(--red)'};
+            fill.style.background = colors[v.threat_level] || 'var(--green)';
+
+            const scoreEl = document.getElementById('scoreText');
+            scoreEl.textContent = v.score;
+            scoreEl.style.color = colors[v.threat_level] || 'var(--green)';
+
+            document.getElementById('metaTime').textContent = v.processing_ms;
+            document.getElementById('metaFindings').textContent = v.findings?.length || 0;
+            document.getElementById('metaHash').textContent = v.input_hash || '—';
+
+            // Findings
+            const container = document.getElementById('findingsContainer');
+            if (v.findings && v.findings.length > 0) {
+                container.innerHTML = '<h3>⚠ Findings</h3>' + v.findings.map(f => `
+                    <div class="finding">
+                        <div class="finding-header">
+                            <span class="finding-vector ${f.vector}">${f.vector}</span>
+                            <span class="finding-conf">${(f.confidence * 100).toFixed(0)}% confidence</span>
+                            <span class="finding-layer">${f.layer}</span>
+                        </div>
+                        <div class="finding-desc">${f.description}</div>
+                        <div class="finding-evidence">${escapeHtml(f.evidence)}</div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<p style="color: var(--green); font-size: 13px;">✓ No injection patterns detected.</p>';
+            }
+
+            // Update stats
+            if (v.threat_level in scanCount) scanCount[v.threat_level]++;
+            document.getElementById('statClean').textContent = scanCount.clean;
+            document.getElementById('statSuspicious').textContent = scanCount.suspicious;
+            document.getElementById('statHostile').textContent = scanCount.hostile;
+            document.getElementById('statCritical').textContent = scanCount.critical;
+            document.getElementById('statTotal').textContent = Object.values(scanCount).reduce((a,b) => a+b, 0);
+
+            // History
+            addHistory(v);
+        }
+
+        function addHistory(v) {
+            const list = document.getElementById('historyList');
+            if (list.querySelector('span')) list.innerHTML = '';
+            const colors = {clean: 'var(--green)', suspicious: 'var(--yellow)', hostile: 'var(--orange)', critical: 'var(--red)'};
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `
+                <span class="threat-badge ${v.threat_level}" style="font-size:10px; padding:2px 8px;">${v.threat_level}</span>
+                <span>Score: ${v.score}</span>
+                <span>${v.findings?.length || 0} findings</span>
+                <span style="color:var(--dim)">${v.processing_ms}ms</span>
+            `;
+            list.prepend(item);
+        }
+
+        function clearAll() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('verdictPanel').classList.remove('visible');
+            document.getElementById('sanitizedPanel').classList.remove('visible');
+        }
+
+        function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    </script>
+</body>
+</html>
