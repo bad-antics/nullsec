@@ -116,34 +116,202 @@ def generate_traffic_pattern(pattern: str = "heartbeat",
     return packets
 
 
-def scan_open_ports(target: str = "127.0.0.1",
-                    ports: Optional[List[int]] = None,
-                    timeout: float = 0.5) -> List[Dict]:
-    """Scan ports and report which ones have phantom listeners."""
-    if ports is None:
-        ports = [21, 22, 23, 25, 53, 80, 110, 143, 443, 993, 995,
-                 3306, 5432, 6379, 8080, 8443, 9090, 27017]
+def decode_packet(hex_data: str) -> Dict:
+    """
+    Decode a raw hex packet string into human-readable layers.
+    This is a hex packet dissector — NOT a port scanner (we already have 3).
+    Takes raw hex (e.g. from tcpdump -xx, wireshark copy-as-hex) and
+    rips it apart into Ethernet/IP/TCP/UDP layers.
+    """
+    try:
+        raw = bytes.fromhex(hex_data.replace(" ", "").replace(":", "").replace("\n", ""))
+    except ValueError:
+        return {"error": "Invalid hex data", "raw_length": 0}
 
-    results = []
-    for port in ports:
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(timeout)
-            result = sock.connect_ex((target, port))
-            status = "ALIVE" if result == 0 else "SILENT"
-            sock.close()
-        except Exception:
-            status = "ERROR"
+    result = {
+        "raw_length": len(raw),
+        "raw_hex": raw.hex(),
+        "layers": [],
+        "anomalies": [],
+    }
 
-        emoji = "👻" if status == "ALIVE" else "💀" if status == "SILENT" else "⚠️"
-        results.append({
-            "port": port,
-            "status": status,
-            "emoji": emoji,
-            "service": _guess_service(port),
+    offset = 0
+
+    # Layer 2 — Ethernet (14 bytes min)
+    if len(raw) >= 14:
+        dst_mac = ':'.join(f'{b:02x}' for b in raw[0:6])
+        src_mac = ':'.join(f'{b:02x}' for b in raw[6:12])
+        ethertype = struct.unpack("!H", raw[12:14])[0]
+
+        eth_type_name = {
+            0x0800: "IPv4", 0x86DD: "IPv6", 0x0806: "ARP",
+            0x8100: "802.1Q VLAN", 0x88A8: "802.1ad QinQ",
+        }.get(ethertype, f"Unknown (0x{ethertype:04x})")
+
+        layer2 = {
+            "name": "Ethernet",
+            "emoji": "🔌",
+            "dst_mac": dst_mac,
+            "src_mac": src_mac,
+            "ethertype": f"0x{ethertype:04x}",
+            "ethertype_name": eth_type_name,
+        }
+
+        # Check for broadcast/multicast
+        if dst_mac == "ff:ff:ff:ff:ff:ff":
+            layer2["note"] = "BROADCAST"
+        elif int(dst_mac.split(":")[0], 16) & 1:
+            layer2["note"] = "MULTICAST"
+
+        result["layers"].append(layer2)
+        offset = 14
+
+        # Layer 3 — IPv4
+        if ethertype == 0x0800 and len(raw) >= offset + 20:
+            version_ihl = raw[offset]
+            version = (version_ihl >> 4) & 0xF
+            ihl = (version_ihl & 0xF) * 4
+            total_length = struct.unpack("!H", raw[offset+2:offset+4])[0]
+            identification = struct.unpack("!H", raw[offset+4:offset+6])[0]
+            flags_frag = struct.unpack("!H", raw[offset+6:offset+8])[0]
+            flags = (flags_frag >> 13) & 0x7
+            frag_offset = flags_frag & 0x1FFF
+            ttl = raw[offset+8]
+            protocol = raw[offset+9]
+            checksum = struct.unpack("!H", raw[offset+10:offset+12])[0]
+            src_ip = socket.inet_ntoa(raw[offset+12:offset+16])
+            dst_ip = socket.inet_ntoa(raw[offset+16:offset+20])
+
+            proto_name = {1: "ICMP", 6: "TCP", 17: "UDP", 47: "GRE", 50: "ESP"}.get(
+                protocol, f"Proto-{protocol}")
+
+            flag_strs = []
+            if flags & 0x2: flag_strs.append("DF")
+            if flags & 0x1: flag_strs.append("MF")
+
+            layer3 = {
+                "name": "IPv4",
+                "emoji": "🌐",
+                "version": version,
+                "header_length": ihl,
+                "total_length": total_length,
+                "identification": f"0x{identification:04x}",
+                "flags": ' '.join(flag_strs) or "none",
+                "fragment_offset": frag_offset,
+                "ttl": ttl,
+                "protocol": proto_name,
+                "protocol_num": protocol,
+                "checksum": f"0x{checksum:04x}",
+                "src_ip": src_ip,
+                "dst_ip": dst_ip,
+            }
+
+            # TTL anomaly checks
+            if ttl == 1:
+                result["anomalies"].append("⚠️ TTL=1 — traceroute or about to expire")
+            elif ttl > 200:
+                result["anomalies"].append(f"🔍 Unusual TTL={ttl} (common: 64/128)")
+
+            if version != 4:
+                result["anomalies"].append(f"⚠️ Version={version} in IPv4 ethertype")
+
+            result["layers"].append(layer3)
+            offset += ihl
+
+            # Layer 4 — TCP
+            if protocol == 6 and len(raw) >= offset + 20:
+                src_port = struct.unpack("!H", raw[offset:offset+2])[0]
+                dst_port = struct.unpack("!H", raw[offset+2:offset+4])[0]
+                seq = struct.unpack("!I", raw[offset+4:offset+8])[0]
+                ack = struct.unpack("!I", raw[offset+8:offset+12])[0]
+                data_offset = ((raw[offset+12] >> 4) & 0xF) * 4
+                tcp_flags = raw[offset+13]
+
+                flag_names = []
+                if tcp_flags & 0x01: flag_names.append("FIN")
+                if tcp_flags & 0x02: flag_names.append("SYN")
+                if tcp_flags & 0x04: flag_names.append("RST")
+                if tcp_flags & 0x08: flag_names.append("PSH")
+                if tcp_flags & 0x10: flag_names.append("ACK")
+                if tcp_flags & 0x20: flag_names.append("URG")
+
+                window = struct.unpack("!H", raw[offset+14:offset+16])[0]
+                tcp_checksum = struct.unpack("!H", raw[offset+16:offset+18])[0]
+
+                layer4 = {
+                    "name": "TCP",
+                    "emoji": "🔗",
+                    "src_port": src_port,
+                    "dst_port": dst_port,
+                    "src_service": _guess_service(src_port),
+                    "dst_service": _guess_service(dst_port),
+                    "seq": seq,
+                    "ack": ack,
+                    "data_offset": data_offset,
+                    "flags": ' '.join(flag_names) or "none",
+                    "flags_raw": f"0x{tcp_flags:02x}",
+                    "window": window,
+                    "checksum": f"0x{tcp_checksum:04x}",
+                }
+
+                # Christmas tree scan detection
+                if tcp_flags == 0x29:  # FIN+PSH+URG
+                    result["anomalies"].append("🎄 XMAS scan detected (FIN+PSH+URG)")
+                if tcp_flags == 0x00:
+                    result["anomalies"].append("👻 NULL scan detected (no flags)")
+                if tcp_flags == 0x01:
+                    result["anomalies"].append("🔍 FIN scan detected (only FIN)")
+
+                result["layers"].append(layer4)
+                payload_start = offset + data_offset
+                if payload_start < len(raw):
+                    payload_data = raw[payload_start:]
+                    result["payload"] = {
+                        "size": len(payload_data),
+                        "hex": payload_data[:64].hex(),
+                        "printable": ''.join(chr(b) if 32 <= b < 127 else '.' for b in payload_data[:64]),
+                        "entropy": _calc_entropy(payload_data),
+                    }
+
+            # Layer 4 — UDP
+            elif protocol == 17 and len(raw) >= offset + 8:
+                src_port = struct.unpack("!H", raw[offset:offset+2])[0]
+                dst_port = struct.unpack("!H", raw[offset+2:offset+4])[0]
+                udp_length = struct.unpack("!H", raw[offset+4:offset+6])[0]
+                udp_checksum = struct.unpack("!H", raw[offset+6:offset+8])[0]
+
+                layer4 = {
+                    "name": "UDP",
+                    "emoji": "📡",
+                    "src_port": src_port,
+                    "dst_port": dst_port,
+                    "src_service": _guess_service(src_port),
+                    "dst_service": _guess_service(dst_port),
+                    "length": udp_length,
+                    "checksum": f"0x{udp_checksum:04x}",
+                }
+                result["layers"].append(layer4)
+
+                payload_start = offset + 8
+                if payload_start < len(raw):
+                    payload_data = raw[payload_start:]
+                    result["payload"] = {
+                        "size": len(payload_data),
+                        "hex": payload_data[:64].hex(),
+                        "printable": ''.join(chr(b) if 32 <= b < 127 else '.' for b in payload_data[:64]),
+                        "entropy": _calc_entropy(payload_data),
+                    }
+
+    if not result["layers"]:
+        # Raw dump if we can't parse
+        result["layers"].append({
+            "name": "RAW",
+            "emoji": "📦",
+            "hex": raw[:128].hex(),
+            "printable": ''.join(chr(b) if 32 <= b < 127 else '.' for b in raw[:128]),
         })
 
-    return results
+    return result
 
 
 def network_ghost_map() -> Dict:

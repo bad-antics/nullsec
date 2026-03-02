@@ -1,6 +1,6 @@
 """CLI for nullsec-voodoo"""
 import click
-from .engine import read_memory_map, stick_pin, find_strings_in_memory, create_voodoo_doll
+from .engine import read_memory_map, stick_pin, curse_scan, create_voodoo_doll
 
 @click.group()
 def main():
@@ -41,16 +41,22 @@ def pin(pid, address, length):
     else:
         click.echo(f"   ❌ {r.get('error', 'Access denied')}")
 
-@main.command(name="strings")
+@main.command(name="curse")
 @click.argument("pid", type=int)
-@click.option("--pattern", "-p", default=None, help="Filter by pattern")
-def strings(pid, pattern):
-    """Extract strings from process memory."""
-    click.echo(f"\n🪡 Extracting souls from PID {pid}...\n")
-    results = find_strings_in_memory(pid, pattern)
-    for r in results[:50]:
-        click.echo(f"   [{r['region']}] {r['string']}")
-    click.echo(f"\n   🔤 {len(results)} strings extracted.\n")
+def curse(pid):
+    """Scan process memory for corruption curses (heap spray, NOP sleds, etc)."""
+    click.echo(f"\n🪡 Scanning PID {pid} for memory curses...\n")
+    curses = curse_scan(pid)
+    if not curses:
+        click.echo("   ✅ No corruption curses detected — this one is clean.\n")
+        return
+    for c in curses:
+        click.echo(f"   {c['type']} [{c['severity']}]")
+        click.echo(f"      📍 {c['address']} in {c['region']} ({c['region_addr']})")
+        click.echo(f"      💀 {c['detail']}")
+    crit = sum(1 for c in curses if c['severity'] == 'CRITICAL')
+    high = sum(1 for c in curses if c['severity'] == 'HIGH')
+    click.echo(f"\n   🩸 {len(curses)} curses found ({crit} critical, {high} high).\n")
 
 @main.command(name="doll")
 @click.argument("pid", type=int)

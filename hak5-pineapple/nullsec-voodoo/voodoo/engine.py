@@ -103,20 +103,43 @@ def stick_pin(pid: int, address: int, length: int = 256) -> Dict:
     return result
 
 
-def find_strings_in_memory(pid: int, pattern: str = None,
-                           min_length: int = 6) -> List[Dict]:
-    """Search process memory for strings — extract the souls of data."""
-    results = []
-
+def curse_scan(pid: int) -> List[Dict]:
+    """
+    Scan process memory for corruption curses — heap spray, stack smash,
+    use-after-free markers, canary deaths, and other memory dark arts.
+    This is NOT string extraction (MemHunter does that) — this looks
+    for structural corruption signatures.
+    """
+    curses = []
     regions = read_memory_map(pid)
     readable_regions = [r for r in regions if 'r' in r['permissions']]
 
+    # Corruption signatures to hunt
+    CORRUPTION_SIGS = {
+        b"\x41\x41\x41\x41\x41\x41\x41\x41": ("🔴 HEAP_SPRAY", "Repeated 0x41 (AAAA) — classic heap spray"),
+        b"\x42\x42\x42\x42\x42\x42\x42\x42": ("🔴 BUFFER_FILL", "Repeated 0x42 (BBBB) — buffer overflow marker"),
+        b"\x43\x43\x43\x43\x43\x43\x43\x43": ("🟡 PADDING_FILL", "Repeated 0x43 (CCCC) — overflow padding"),
+        b"\xde\xad\xbe\xef": ("🔴 DEADBEEF", "Magic debug marker — freed/uninitialized memory"),
+        b"\xfe\xed\xfa\xce": ("🟡 FEEDFACE", "Mach-O magic or debug marker"),
+        b"\xba\xad\xf0\x0d": ("🔴 BAADF00D", "Windows HeapAlloc marker — uninitialized heap"),
+        b"\xab\xab\xab\xab": ("🟡 ABABABAB", "Guard bytes — heap guard page fill"),
+        b"\xfd\xfd\xfd\xfd": ("🟡 FDFDFDFD", "No-mans-land guard — buffer overrun sentinel"),
+        b"\xcd\xcd\xcd\xcd": ("🟡 CDCDCDCD", "Uninitialized heap — debug mode fill"),
+        b"\xcc\xcc\xcc\xcc": ("🔴 INT3_SLED", "INT3 breakpoint sled — debugger or shellcode"),
+        b"\x90\x90\x90\x90\x90\x90\x90\x90": ("🔴 NOP_SLED", "NOP sled — classic shellcode landing zone"),
+    }
+
+    # Stack canary death signatures (common sentinel values after overwrite)
+    CANARY_DEATH = [
+        (b"\x00\x00\x00\x00\x00\x00\x00\x00", "NULL canary — stack smash with null bytes"),
+    ]
+
     try:
         with open(f"/proc/{pid}/mem", 'rb') as mem:
-            for region in readable_regions[:20]:  # Limit to prevent hanging
+            for region in readable_regions[:30]:
                 start_hex = region['address'].split('-')[0]
                 start = int(start_hex, 16)
-                size = min(region['size'], 1024 * 1024)  # Cap at 1MB per region
+                size = min(region['size'], 512 * 1024)  # 512KB cap
 
                 try:
                     mem.seek(start)
@@ -124,22 +147,50 @@ def find_strings_in_memory(pid: int, pattern: str = None,
                 except (OSError, ValueError):
                     continue
 
-                strings = _extract_strings(data, min_length)
-                for s in strings:
-                    if pattern and pattern.lower() not in s.lower():
-                        continue
-                    results.append({
-                        "string": s[:200],
-                        "region": region['type'],
-                        "address_range": region['address'],
-                    })
+                # Scan for corruption signatures
+                for sig, (curse_type, detail) in CORRUPTION_SIGS.items():
+                    offset = data.find(sig)
+                    while offset != -1:
+                        # Count consecutive occurrences (indicates spray vs incidental)
+                        run_length = 0
+                        check_pos = offset
+                        while check_pos + len(sig) <= len(data) and data[check_pos:check_pos+len(sig)] == sig:
+                            run_length += 1
+                            check_pos += len(sig)
 
-                if len(results) > 500:
-                    break
+                        if run_length >= 2:  # At least 2 consecutive = suspicious
+                            severity = "CRITICAL" if run_length >= 8 else "HIGH" if run_length >= 4 else "MEDIUM"
+                            curses.append({
+                                "type": curse_type,
+                                "detail": f"{detail} (×{run_length} consecutive)",
+                                "address": f"0x{start + offset:016x}",
+                                "region": region['type'],
+                                "region_addr": region['address'],
+                                "severity": severity,
+                                "run_length": run_length,
+                            })
+                        offset = data.find(sig, offset + len(sig) * max(1, run_length))
+
+                # Check for entropy anomalies in heap/stack (uniform fill = suspicious)
+                if region['type'] in ('HEAP', 'STACK', 'ANONYMOUS') and len(data) > 256:
+                    for chunk_off in range(0, len(data) - 256, 4096):
+                        chunk = data[chunk_off:chunk_off + 256]
+                        unique_bytes = len(set(chunk))
+                        if unique_bytes <= 3 and len(chunk) == 256:
+                            curses.append({
+                                "type": "🟠 MONOTONE_FILL",
+                                "detail": f"Suspiciously uniform memory ({unique_bytes} unique bytes in 256B block)",
+                                "address": f"0x{start + chunk_off:016x}",
+                                "region": region['type'],
+                                "region_addr": region['address'],
+                                "severity": "MEDIUM",
+                                "run_length": 1,
+                            })
+
     except (PermissionError, FileNotFoundError):
         pass
 
-    return results
+    return curses
 
 
 def create_voodoo_doll(pid: int) -> Dict:

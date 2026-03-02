@@ -146,10 +146,6 @@ def _chapter_blood() -> Dict:
     return blood
 
 
-def _chapter_bones() -> Dict:
-    pass  # Placeholder
-
-
 def _chapter_bones(target_dir: str) -> Dict:
     """Chapter III: The Bones — Filesystem analysis."""
     bones = {"title": "📖 Chapter III: The Bones", "findings": []}
@@ -193,49 +189,168 @@ def _chapter_bones(target_dir: str) -> Dict:
 
 
 def _chapter_spirits() -> Dict:
-    """Chapter IV: The Spirits — Process analysis."""
-    spirits = {"title": "📖 Chapter IV: The Spirits", "findings": []}
+    """
+    Chapter IV: The Spirits — Scheduled Task & Persistence Audit.
+    Checks crontabs, systemd timers, at jobs, init.d scripts, and rc.local
+    for suspicious persistence mechanisms.
+    NOTE: Zombie/process checks removed — revenant and skinwalker handle those.
+    """
+    spirits = {"title": "📖 Chapter IV: The Spirits (Persistence)", "findings": []}
 
-    proc_count = 0
-    zombie_count = 0
+    # ── Crontab files ──
+    cron_dirs = [
+        "/etc/crontab", "/etc/cron.d", "/etc/cron.daily",
+        "/etc/cron.hourly", "/etc/cron.weekly", "/etc/cron.monthly",
+        "/var/spool/cron/crontabs",
+    ]
 
-    for entry in os.listdir("/proc"):
-        if not entry.isdigit():
+    cron_entries = 0
+    suspicious_cron_patterns = [
+        (r'curl|wget|nc\s|ncat|netcat', "Network download/connect in cron"),
+        (r'base64\s+-d|eval\s|python\s+-c', "Code execution pattern in cron"),
+        (r'/dev/tcp/|/dev/udp/', "Bash net redirect in cron"),
+        (r'chmod\s+[47]77|chmod\s+\+s', "Permission escalation in cron"),
+        (r'>\s*/dev/null\s*2>&1.*&$', "Silenced background job"),
+        (r'/tmp/|/dev/shm/', "World-writable path in cron"),
+    ]
+
+    for cron_path in cron_dirs:
+        if not os.path.exists(cron_path):
             continue
-        proc_count += 1
-        pid = int(entry)
-
         try:
-            with open(f"/proc/{pid}/status", 'r') as f:
-                status = f.read()
+            if os.path.isfile(cron_path):
+                files_to_check = [cron_path]
+            else:
+                files_to_check = [
+                    os.path.join(cron_path, f)
+                    for f in os.listdir(cron_path)
+                    if os.path.isfile(os.path.join(cron_path, f))
+                ]
 
-            if 'Z (zombie)' in status:
-                zombie_count += 1
+            for fpath in files_to_check:
+                try:
+                    with open(fpath, 'r') as f:
+                        for line_num, line in enumerate(f, 1):
+                            line = line.strip()
+                            if not line or line.startswith('#'):
+                                continue
+                            cron_entries += 1
 
-            # Check for deleted binaries
-            try:
-                exe = os.readlink(f"/proc/{pid}/exe")
-                if "(deleted)" in exe:
-                    name_match = re.search(r'Name:\s+(\S+)', status)
-                    name = name_match.group(1) if name_match else "?"
+                            for pattern, desc in suspicious_cron_patterns:
+                                if re.search(pattern, line, re.IGNORECASE):
+                                    spirits["findings"].append({
+                                        "emoji": "⏰", "severity": "HIGH",
+                                        "detail": f"{desc}: {fpath}:{line_num} → {line[:80]}",
+                                    })
+                except (PermissionError, UnicodeDecodeError):
+                    pass
+        except PermissionError:
+            pass
+
+    spirits["cron_entries"] = cron_entries
+
+    # ── User crontabs ──
+    user_cron_dir = "/var/spool/cron/crontabs"
+    if os.path.exists(user_cron_dir):
+        try:
+            user_crons = os.listdir(user_cron_dir)
+            spirits["user_crontabs"] = user_crons
+            for uc in user_crons:
+                if uc not in ("root",):
                     spirits["findings"].append({
-                        "emoji": "💀", "severity": "HIGH",
-                        "detail": f"PID {pid} ({name}) running deleted binary: {exe}",
+                        "emoji": "👤", "severity": "INFO",
+                        "detail": f"User crontab exists for: {uc}",
                     })
-            except (PermissionError, FileNotFoundError):
-                pass
+        except PermissionError:
+            pass
 
-        except (FileNotFoundError, PermissionError):
+    # ── Systemd timers ──
+    timer_count = 0
+    try:
+        import subprocess
+        out = subprocess.run(
+            ["systemctl", "list-timers", "--all", "--no-pager", "--no-legend"],
+            capture_output=True, text=True, timeout=10
+        )
+        if out.returncode == 0:
+            for line in out.stdout.strip().split("\n"):
+                if line.strip():
+                    timer_count += 1
+            spirits["systemd_timers"] = timer_count
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass
+
+    # Check for user-level systemd services (persistence vector)
+    for home_entry in ("/root", "/home"):
+        if not os.path.exists(home_entry):
             continue
+        dirs_to_scan = [home_entry] if home_entry == "/root" else [
+            os.path.join(home_entry, d)
+            for d in os.listdir(home_entry)
+            if os.path.isdir(os.path.join(home_entry, d))
+        ]
+        for user_home in dirs_to_scan:
+            user_systemd = os.path.join(user_home, ".config", "systemd", "user")
+            if os.path.exists(user_systemd):
+                try:
+                    services = [f for f in os.listdir(user_systemd)
+                               if f.endswith(('.service', '.timer'))]
+                    if services:
+                        spirits["findings"].append({
+                            "emoji": "🔧", "severity": "MEDIUM",
+                            "detail": f"User systemd units in {user_systemd}: {', '.join(services[:5])}",
+                        })
+                except PermissionError:
+                    pass
 
-    spirits["total_processes"] = proc_count
-    spirits["zombies"] = zombie_count
+    # ── init.d scripts ──
+    initd_path = "/etc/init.d"
+    if os.path.exists(initd_path):
+        try:
+            initd_scripts = [f for f in os.listdir(initd_path)
+                           if os.path.isfile(os.path.join(initd_path, f))]
+            spirits["initd_scripts"] = len(initd_scripts)
+        except PermissionError:
+            pass
 
-    if zombie_count > 5:
+    # ── rc.local ──
+    rc_local = "/etc/rc.local"
+    if os.path.exists(rc_local):
+        try:
+            with open(rc_local, 'r') as f:
+                content = f.read()
+            non_comment = [l.strip() for l in content.split('\n')
+                         if l.strip() and not l.strip().startswith('#')
+                         and l.strip() != 'exit 0']
+            if non_comment:
+                spirits["findings"].append({
+                    "emoji": "🚀", "severity": "MEDIUM",
+                    "detail": f"rc.local has {len(non_comment)} active commands: {non_comment[0][:60]}",
+                })
+        except (PermissionError, UnicodeDecodeError):
+            pass
+
+    # ── at jobs ──
+    at_spool = "/var/spool/at"
+    if os.path.exists(at_spool):
+        try:
+            at_jobs = [f for f in os.listdir(at_spool) if f.startswith('a')]
+            if at_jobs:
+                spirits["findings"].append({
+                    "emoji": "⏱️", "severity": "INFO",
+                    "detail": f"{len(at_jobs)} pending at jobs in spool",
+                })
+        except PermissionError:
+            pass
+
+    # ── Summary severity ──
+    if cron_entries > 50:
         spirits["findings"].append({
-            "emoji": "🧟", "severity": "HIGH",
-            "detail": f"Zombie outbreak: {zombie_count} undead processes",
+            "emoji": "📊", "severity": "MEDIUM",
+            "detail": f"High cron density: {cron_entries} scheduled entries",
         })
+
+    return spirits
 
     return spirits
 

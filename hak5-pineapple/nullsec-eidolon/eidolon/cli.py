@@ -1,7 +1,7 @@
 """CLI for nullsec-eidolon"""
 import json, click
 from .engine import (craft_phantom_packet, generate_traffic_pattern,
-                     scan_open_ports, network_ghost_map)
+                     decode_packet, network_ghost_map)
 
 @click.group()
 def main():
@@ -38,16 +38,29 @@ def traffic(pattern, count):
                    f"{pkt['layer3']['dst_ip']}:{pkt['layer4']['dst_port']} "
                    f"[{pkt['layer4']['type']}] +{delay}ms")
 
-@main.command(name="haunt")
-@click.option("--target", default="127.0.0.1")
-def haunt(target):
-    """Scan for eidolon listeners (open ports) on a target."""
-    click.echo(f"\n👻 Haunting {target}... looking for spirits...\n")
-    results = scan_open_ports(target)
-    for r in results:
-        click.echo(f"   {r['emoji']} :{r['port']} ({r['service']}) — {r['status']}")
-    alive = sum(1 for r in results if r["status"] == "ALIVE")
-    click.echo(f"\n   🕯️ {alive} spirits found listening in the dark.\n")
+@main.command(name="decode")
+@click.argument("hex_data")
+def decode(hex_data):
+    """Decode a raw hex packet into human-readable layers."""
+    click.echo(f"\n👻 Decoding spectral packet ({len(hex_data)//2} bytes)...\n")
+    result = decode_packet(hex_data)
+    if "error" in result:
+        click.echo(f"   ❌ {result['error']}")
+        return
+    for layer in result["layers"]:
+        click.echo(f"   {layer['emoji']} {layer['name']}")
+        for k, v in layer.items():
+            if k not in ('name', 'emoji'):
+                click.echo(f"      {k}: {v}")
+    if result.get("payload"):
+        click.echo(f"   📦 Payload")
+        click.echo(f"      Size: {result['payload']['size']} bytes")
+        click.echo(f"      Hex: {result['payload']['hex']}")
+        click.echo(f"      ASCII: {result['payload']['printable']}")
+        click.echo(f"      Entropy: {result['payload']['entropy']}")
+    for anomaly in result.get("anomalies", []):
+        click.echo(f"   {anomaly}")
+    click.echo()
 
 @main.command(name="map")
 def ghost_map():
