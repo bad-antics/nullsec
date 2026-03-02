@@ -1,11 +1,11 @@
-"""CLI for nullsec-wraith"""
+"""CLI for nullsec-eidolon"""
 import json, click
 from .engine import (craft_phantom_packet, generate_traffic_pattern,
                      scan_open_ports, network_ghost_map)
 
 @click.group()
 def main():
-    """👻 nullsec-wraith — Ghost Network Packets"""
+    """👻 nullsec-eidolon — Ghost Network Packets"""
     pass
 
 @main.command(name="craft")
@@ -14,9 +14,9 @@ def main():
 @click.option("--payload", default="", help="Payload message")
 @click.option("--protocol", type=click.Choice(["tcp", "udp"]), default="tcp")
 def craft(dst, port, payload, protocol):
-    """Craft a wraith packet — see its anatomy without sending."""
+    """Craft an eidolon packet — see its anatomy without sending."""
     pkt = craft_phantom_packet(dst, port, payload, protocol)
-    click.echo(f"\n👻 Wraith Packet #{pkt['phantom_id']}\n")
+    click.echo(f"\n👻 Eidolon Packet #{pkt['phantom_id']}\n")
     click.echo(f"   L2: {pkt['layer2']['src_mac']} → {pkt['layer2']['dst_mac']}")
     click.echo(f"   L3: {pkt['layer3']['src_ip']} → {pkt['layer3']['dst_ip']} TTL={pkt['layer3']['ttl']}")
     click.echo(f"   L4: {pkt['layer4']['type']} :{pkt['layer4']['src_port']} → :{pkt['layer4']['dst_port']}")
@@ -29,7 +29,7 @@ def craft(dst, port, payload, protocol):
 @click.option("--pattern", type=click.Choice(["heartbeat", "exfil", "scan", "ghost"]), default="ghost")
 @click.option("--count", type=int, default=5)
 def traffic(pattern, count):
-    """Generate wraith traffic patterns for analysis."""
+    """Generate eidolon traffic patterns for analysis."""
     click.echo(f"\n👻 Generating '{pattern}' traffic pattern ({count} packets)...\n")
     packets = generate_traffic_pattern(pattern, count)
     for i, pkt in enumerate(packets):
@@ -41,7 +41,7 @@ def traffic(pattern, count):
 @main.command(name="haunt")
 @click.option("--target", default="127.0.0.1")
 def haunt(target):
-    """Scan for wraith listeners (open ports) on a target."""
+    """Scan for eidolon listeners (open ports) on a target."""
     click.echo(f"\n👻 Haunting {target}... looking for spirits...\n")
     results = scan_open_ports(target)
     for r in results:

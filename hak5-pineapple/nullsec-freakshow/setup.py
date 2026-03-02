@@ -21,7 +21,7 @@ setup(
         "nullsec-whisper>=1.0.0",
         "nullsec-skinwalker>=1.0.0",
         "nullsec-ouija>=1.0.0",
-        "nullsec-wraith>=1.0.0",
+        "nullsec-eidolon>=1.0.0",
         "nullsec-doppelganger>=1.0.0",
         "nullsec-seance>=1.0.0",
         "nullsec-lamprey>=1.0.0",

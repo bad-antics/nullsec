@@ -14,7 +14,7 @@ TOOLS = [
     {"name": "whisper",      "package": "nullsec-whisper",      "emoji": "👁️", "desc": "Spectral audio steganography"},
     {"name": "skinwalker",   "package": "nullsec-skinwalker",   "emoji": "🐺", "desc": "Process mimicry detector"},
     {"name": "ouija",        "package": "nullsec-ouija",        "emoji": "🔮", "desc": "File carving & recovery"},
-    {"name": "wraith",      "package": "nullsec-wraith",      "emoji": "👻", "desc": "Ghost network packets"},
+    {"name": "eidolon",     "package": "nullsec-eidolon",     "emoji": "👻", "desc": "Ghost network packets"},
     {"name": "doppelganger", "package": "nullsec-doppelganger", "emoji": "👥", "desc": "File identity crisis detector"},
     {"name": "seance",       "package": "nullsec-seance",       "emoji": "🕯️", "desc": "Network necromancy"},
     {"name": "lamprey",     "package": "nullsec-lamprey",     "emoji": "🐟", "desc": "Dependency infection analyzer"},

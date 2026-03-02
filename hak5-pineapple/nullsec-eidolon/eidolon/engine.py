@@ -1,6 +1,6 @@
 """
-Wraith Engine — Crafts ghost network packets and analyzes spectral traffic.
-Creates decoy traffic patterns, wraith listeners, and network mirages.
+Eidolon Engine — Crafts ghost network packets and analyzes spectral traffic.
+Creates decoy traffic patterns, eidolon listeners, and network mirages.
 """
 
 import socket

@@ -22,7 +22,7 @@
 | 6 | 👁️ **Whisper** | `whisper` | Spectral audio steganography — voices hidden in spectrograms |
 | 7 | 🐺 **Skinwalker** | `skinwalker` | Process mimicry detector — finds processes wearing other faces |
 | 8 | 🔮 **Ouija** | `ouija` | File carving & recovery — summon spirits from deleted files |
-| 9 | 👻 **Wraith** | `wraith` | Ghost network packets — spectral traffic analysis |
+| 9 | 👻 **Eidolon** | `eidolon` | Ghost network packets — spectral traffic analysis |
 | 10 | 👥 **Doppelganger** | `doppelganger` | File identity crisis detector — unmask file impostors |
 | 11 | 🕯️ **Seance** | `seance` | Network necromancy — resurrect dead connections |
 | 12 | 🐟 **Lamprey** | `lamprey` | Dependency infection analyzer — supply chain lamprey detection |
