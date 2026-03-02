@@ -1,0 +1,42 @@
+from setuptools import setup, find_packages
+
+setup(
+    name="nullsec-freakshow",
+    version="1.0.0",
+    description="🎪 The Freakshow Suite — 20 Weird & Creepy Security Tools",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
+    author="bad-antics",
+    author_email="nullsec@proton.me",
+    url="https://github.com/bad-antics/nullsec",
+    packages=find_packages(),
+    python_requires=">=3.8",
+    install_requires=[
+        "click>=8.0",
+        "nullsec-sigil>=1.0.0",
+        "nullsec-dead-drop>=1.0.0",
+        "nullsec-entropy>=1.0.0",
+        "nullsec-temporal>=1.0.0",
+        "nullsec-hexspeak>=1.0.0",
+        "nullsec-whisper>=1.0.0",
+        "nullsec-skinwalker>=1.0.0",
+        "nullsec-ouija>=1.0.0",
+        "nullsec-phantom>=1.0.0",
+        "nullsec-doppelganger>=1.0.0",
+        "nullsec-seance>=1.0.0",
+        "nullsec-parasite>=1.0.0",
+        "nullsec-voodoo>=1.0.0",
+        "nullsec-cryptid>=1.0.0",
+        "nullsec-poltergeist>=1.0.0",
+        "nullsec-grimoire>=1.0.0",
+        "nullsec-wendigo>=1.0.0",
+        "nullsec-banshee>=1.0.0",
+        "nullsec-revenant>=1.0.0",
+        "nullsec-necronomicon>=1.0.0",
+    ],
+    entry_points={
+        "console_scripts": [
+            "freakshow=freakshow.cli:entry_point",
+        ],
+    },
+)
