@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}{{ payload.name }} — Payload{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:16px;">
+    <a href="/payloads" style="color:#888;text-decoration:none;">← Back to Payloads</a>
+</div>
+
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+    <h2 style="font-size:24px;color:#00ff88;">{{ payload.name }}</h2>
+    {% if payload.category %}
+    <span class="badge badge-blue">{{ payload.category }}</span>
+    {% endif %}
+</div>
+
+<!-- Info Cards -->
+<div class="stat-row" style="margin-bottom:24px;">
+    {% if payload.author %}
+    <div class="stat-card">
+        <div class="stat-num" style="font-size:16px;">{{ payload.author }}</div>
+        <div class="stat-label">Author</div>
+    </div>
+    {% endif %}
+    <div class="stat-card">
+        <div class="stat-num" style="font-size:16px;">{{ payload.files | length }}</div>
+        <div class="stat-label">Files</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" style="font-size:16px;">
+            {% if payload.has_payload %}<span class="badge badge-green">✓</span>{% else %}<span class="badge badge-red">✗</span>{% endif %}
+        </div>
+        <div class="stat-label">payload.sh</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" style="font-size:16px;">
+            {% if payload.has_info %}<span class="badge badge-green">✓</span>{% else %}<span class="badge badge-red">✗</span>{% endif %}
+        </div>
+        <div class="stat-label">info.json</div>
+    </div>
+</div>
+
+{% if payload.description %}
+<div class="card" style="margin-bottom:24px;">
+    <div class="card-label">Description</div>
+    <p style="margin-top:8px;">{{ payload.description }}</p>
+</div>
+{% endif %}
+
+<!-- Validation -->
+<div class="card" style="margin-bottom:24px;">
+    <div class="card-header">
+        <div class="card-label">Validation</div>
+        <button class="btn btn-sm" onclick="runValidation()">🔍 Validate</button>
+    </div>
+    <div id="validation-result" style="font-size:12px;color:#888;">Click validate to check payload structure</div>
+</div>
+
+<!-- Files -->
+<div class="section-header">
+    <div class="section-title">📄 Files</div>
+</div>
+<div class="table-wrap" style="margin-bottom:24px;">
+    <table>
+        <thead><tr><th>Filename</th></tr></thead>
+        <tbody>
+            {% for f in payload.files %}
+            <tr><td>{{ f }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Source Code -->
+{% if payload.source %}
+<div class="section-header">
+    <div class="section-title">📜 payload.sh</div>
+</div>
+<div class="code-block" style="margin-bottom:24px;">{{ payload.source }}</div>
+{% endif %}
+
+{% if payload.info_json %}
+<div class="section-header">
+    <div class="section-title">📋 info.json</div>
+</div>
+<div class="code-block" style="margin-bottom:24px;">{{ payload.info_json | tojson(indent=2) }}</div>
+{% endif %}
+
+<script>
+async function runValidation() {
+    const el = NS.$('#validation-result');
+    el.innerHTML = '<div class="spinner" style="display:inline-block;width:14px;height:14px;"></div> Validating...';
+    
+    const data = await NS.get('/payloads/api/{{ payload.name }}/validate');
+    
+    if (data.valid) {
+        el.innerHTML = '<span class="badge badge-green">✓ VALID</span> Payload structure is correct';
+    } else {
+        el.innerHTML = `<span class="badge badge-red">✗ ISSUES</span>
+            <ul style="margin-top:8px;padding-left:20px;">
+                ${(data.errors || []).map(i => `<li style="color:#ff4444;">${i}</li>`).join('')}
+            </ul>`;
+    }
+}
+</script>
+{% endblock %}

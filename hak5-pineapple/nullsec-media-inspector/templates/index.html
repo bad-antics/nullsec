@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>n01d Media Inspector — NullSec</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --surface2: #1e1e1e;
+            --border: #2a2a2a;
+            --text: #e0e0e0;
+            --dim: #666;
+            --accent: #ff2d2d;
+            --accent2: #ff6b35;
+            --green: #4caf50;
+            --yellow: #ffd600;
+            --cyan: #00bcd4;
+            --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--mono);
+            min-height: 100vh;
+        }
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--accent);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .header h1 {
+            font-size: 1.4rem;
+            color: var(--accent);
+            letter-spacing: 2px;
+        }
+        .header .sub {
+            color: var(--dim);
+            font-size: 0.8rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: var(--surface);
+        }
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--accent);
+            background: rgba(255, 45, 45, 0.05);
+        }
+        .upload-zone h2 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        .upload-zone p {
+            color: var(--dim);
+            font-size: 0.85rem;
+        }
+        .upload-zone input[type="file"] {
+            display: none;
+        }
+        .options {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .options label {
+            color: var(--dim);
+            font-size: 0.75rem;
+        }
+        .options select, .options input {
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-family: var(--mono);
+            font-size: 0.8rem;
+        }
+        .btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 0.7rem 2rem;
+            border-radius: 6px;
+            font-family: var(--mono);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1.5rem;
+            display: inline-block;
+        }
+        .btn:hover { background: #cc2424; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* scan cards */
+        .scans { margin-top: 2rem; }
+        .scans h3 {
+            color: var(--cyan);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+        .scan-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .scan-card .name {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+        .scan-card .status {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .status.queued { background: var(--surface2); color: var(--dim); }
+        .status.running { background: rgba(0, 188, 212, 0.15); color: var(--cyan); }
+        .status.complete { background: rgba(76, 175, 80, 0.15); color: var(--green); }
+        .status.error { background: rgba(255, 45, 45, 0.15); color: var(--accent); }
+
+        .progress-bar {
+            width: 200px;
+            height: 6px;
+            background: var(--surface2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.5s;
+            border-radius: 3px;
+        }
+        .risk-badge {
+            font-size: 0.85rem;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: center;
+        }
+        .risk-badge.low { color: var(--green); }
+        .risk-badge.med { color: var(--yellow); }
+        .risk-badge.high { color: var(--accent2); }
+        .risk-badge.crit { color: var(--accent); }
+
+        .view-btn {
+            background: var(--surface2);
+            color: var(--cyan);
+            border: 1px solid var(--border);
+            padding: 0.3rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            text-decoration: none;
+        }
+        .view-btn:hover { border-color: var(--cyan); }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--dim);
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>◉ n01d MEDIA INSPECTOR</h1>
+        <span class="sub">Subliminal Variable Frequency Layer Analyzer — NullSec Toolkit</span>
+    </div>
+
+    <div class="container">
+        <!-- upload -->
+        <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <h2>⬆ DROP MEDIA FILE</h2>
+            <p>Audio: WAV, FLAC, MP3, OGG, AAC, OPUS &nbsp;|&nbsp; Video: MP4, MKV, AVI, MOV, WEBM</p>
+            <p style="margin-top:0.5rem">Max 500 MB</p>
+            <input type="file" id="fileInput" accept="audio/*,video/*">
+
+            <div class="options">
+                <div>
+                    <label>FFT Size</label><br>
+                    <select id="fftSize">
+                        <option value="2048">2048</option>
+                        <option value="4096">4096</option>
+                        <option value="8192" selected>8192</option>
+                        <option value="16384">16384</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Window</label><br>
+                    <select id="window">
+                        <option value="blackman" selected>Blackman</option>
+                        <option value="blackmanharris">Blackman-Harris</option>
+                        <option value="hann">Hann</option>
+                        <option value="hamming">Hamming</option>
+                        <option value="kaiser">Kaiser</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn" id="scanBtn" disabled onclick="startScan(event)">
+                ◉ SCAN FOR SUBLIMINAL LAYERS
+            </button>
+        </div>
+
+        <!-- scan list -->
+        <div class="scans" id="scanList">
+            <h3>▸ SCAN HISTORY</h3>
+            <div id="scanCards"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        nullsec-media-inspector v1.0.0 — NullSec Toolkit for n01d
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const scanBtn = document.getElementById('scanBtn');
+        let selectedFile = null;
+
+        fileInput.addEventListener('change', () => {
+            selectedFile = fileInput.files[0];
+            if (selectedFile) {
+                scanBtn.disabled = false;
+                scanBtn.textContent = `◉ SCAN: ${selectedFile.name}`;
+            }
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                selectedFile = e.dataTransfer.files[0];
+                scanBtn.disabled = false;
+                scanBtn.textContent = `◉ SCAN: ${selectedFile.name}`;
+            }
+        });
+
+        function startScan(e) {
+            e.stopPropagation();
+            if (!selectedFile) return;
+
+            const form = new FormData();
+            form.append('file', selectedFile);
+            form.append('fft_size', document.getElementById('fftSize').value);
+            form.append('window', document.getElementById('window').value);
+
+            scanBtn.disabled = true;
+            scanBtn.textContent = '◉ UPLOADING...';
+
+            fetch('/upload', { method: 'POST', body: form })
+                .then(r => r.json())
+                .then(data => {
+                    scanBtn.textContent = '◉ SCAN FOR SUBLIMINAL LAYERS';
+                    selectedFile = null;
+                    fileInput.value = '';
+                    pollScan(data.scan_id);
+                    refreshScans();
+                })
+                .catch(err => {
+                    scanBtn.disabled = false;
+                    scanBtn.textContent = '◉ ERROR — TRY AGAIN';
+                    console.error(err);
+                });
+        }
+
+        function pollScan(scanId) {
+            const iv = setInterval(() => {
+                fetch(`/scan/${scanId}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        refreshScans();
+                        if (data.status === 'complete' || data.status === 'error') {
+                            clearInterval(iv);
+                        }
+                    });
+            }, 1500);
+        }
+
+        function refreshScans() {
+            fetch('/api/scans')
+                .then(r => r.json())
+                .then(scans => {
+                    const container = document.getElementById('scanCards');
+                    container.innerHTML = scans.reverse().map(s => {
+                        let risk = '';
+                        if (s.results && s.results.combined_risk_score !== undefined) {
+                            const r = s.results.combined_risk_score;
+                            const cls = r >= 70 ? 'crit' : r >= 40 ? 'high' : r >= 15 ? 'med' : 'low';
+                            risk = `<span class="risk-badge ${cls}">${r.toFixed(0)}</span>`;
+                        }
+                        let viewBtn = '';
+                        if (s.status === 'complete') {
+                            viewBtn = `<a class="view-btn" href="/scan/${s.id}/view">VIEW REPORT</a>`;
+                        }
+                        let progress = '';
+                        if (s.status === 'running') {
+                            progress = `<div class="progress-bar"><div class="fill" style="width:${s.progress}%"></div></div>`;
+                        }
+                        return `
+                            <div class="scan-card">
+                                <span class="name">${s.filename || s.id}</span>
+                                ${progress}
+                                <span class="status ${s.status}">${s.status}</span>
+                                ${risk}
+                                ${viewBtn}
+                            </div>
+                        `;
+                    }).join('');
+                });
+        }
+
+        // initial load
+        refreshScans();
+    </script>
+</body>
+</html>

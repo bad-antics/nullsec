@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marshall — NullSec Privacy Browser</title>
+  <meta name="description" content="Privacy-focused web browser built with Rust + GTK. Built-in ad blocking, Tor integration, OSINT tools, anti-fingerprinting. Secure. Private. Untraceable.">
+  <meta name="keywords" content="privacy browser, secure browser, Tor browser, anti-fingerprinting, OSINT browser, ad blocker, Rust browser, GTK browser">
+  <meta property="og:title" content="Marshall — Secure. Private. Untraceable.">
+  <meta property="og:description" content="Privacy-focused web browser with built-in ad blocking, Tor, OSINT tools, and AI assistant. 312MB memory, 0.8s startup.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bad-antics.github.io/marshall/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #111118;
+      --bg3: #1a1a24;
+      --accent: #7c3aed;
+      --accent2: #00ccff;
+      --accent-dim: #7c3aed30;
+      --danger: #ff4444;
+      --warning: #ffaa00;
+      --text: #e0e0e8;
+      --text-dim: #8888a0;
+      --border: #2a2a3a;
+      --card: #14141e;
+      --green: #00ff88;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+    a { color: var(--accent); text-decoration: none; transition: opacity .2s; }
+    a:hover { opacity: .8; }
+    code, pre { font-family: var(--mono); }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; backdrop-filter: blur(20px); background: rgba(10,10,15,0.85); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+    .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .nav-brand { font-weight: 800; font-size: 1.1rem; color: var(--accent); display: flex; align-items: center; gap: .5rem; }
+    .nav-brand span { color: var(--text-dim); font-weight: 400; font-size: .85rem; }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a { color: var(--text-dim); font-size: .9rem; font-weight: 500; }
+    .nav-links a:hover { color: var(--accent); }
+    .btn { display: inline-flex; align-items: center; gap: .5rem; padding: .6rem 1.4rem; border-radius: 8px; font-weight: 600; font-size: .9rem; transition: all .2s; border: none; cursor: pointer; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #8b5cf6; transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-dim); }
+    .btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    .btn-outline:hover { background: var(--accent-dim); }
+
+    .hero { padding: 10rem 2rem 6rem; text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at 50% 0%, var(--accent-dim) 0%, transparent 60%); pointer-events: none; }
+    .hero h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; }
+    .hero h1 .accent { color: var(--accent); }
+    .hero h1 .accent2 { color: var(--accent2); }
+    .hero .subtitle { font-size: 1.25rem; color: var(--text-dim); max-width: 680px; margin: 0 auto 2.5rem; }
+    .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
+    .hero-install { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 2rem; font-family: var(--mono); font-size: 1rem; color: var(--accent); display: inline-flex; align-items: center; gap: 1rem; max-width: 600px; margin: 0 auto; }
+    .hero-install .dollar { color: var(--text-dim); }
+    .copy-btn { background: var(--border); border: none; color: var(--text-dim); padding: .3rem .6rem; border-radius: 4px; cursor: pointer; font-size: .75rem; font-family: var(--font); }
+    .copy-btn:hover { color: var(--accent); }
+
+    .stats { display: flex; justify-content: center; gap: 4rem; padding: 2rem 2rem; flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat-num { font-size: 2.5rem; font-weight: 800; color: var(--accent); font-family: var(--mono); }
+    .stat-label { font-size: .85rem; color: var(--text-dim); margin-top: .25rem; }
+
+    section { padding: 5rem 2rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .section-title { text-align: center; margin-bottom: 3rem; }
+    .section-title h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: .5rem; }
+    .section-title p { color: var(--text-dim); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+
+    .layers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .layer-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; transition: transform .2s, border-color .2s; }
+    .layer-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+    .layer-card h3 { font-size: 1.1rem; margin-bottom: .5rem; }
+    .layer-card p { color: var(--text-dim); font-size: .9rem; }
+
+    .compare-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+    .compare-table th, .compare-table td { padding: .75rem 1rem; text-align: center; border-bottom: 1px solid var(--border); font-size: .85rem; }
+    .compare-table th { color: var(--text-dim); font-weight: 700; font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; }
+    .compare-table th:first-child, .compare-table td:first-child { text-align: left; color: var(--text); font-weight: 500; }
+    .compare-table .yes { color: var(--green); font-weight: 700; }
+    .compare-table .no { color: var(--danger); }
+    .compare-table .partial { color: var(--warning); }
+    .compare-table .marshall-col { background: rgba(124, 58, 237, 0.08); }
+
+    .usecases-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .usecase-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; }
+    .usecase-card .icon { font-size: 2rem; margin-bottom: 1rem; }
+    .usecase-card h3 { font-size: 1.1rem; margin-bottom: .5rem; }
+    .usecase-card p { color: var(--text-dim); font-size: .9rem; }
+
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+    .price-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; text-align: center; transition: transform .2s, border-color .2s; position: relative; }
+    .price-card:hover { transform: translateY(-4px); }
+    .price-card.featured { border-color: var(--accent); box-shadow: 0 0 40px var(--accent-dim); }
+    .price-card.featured::before { content: 'RECOMMENDED'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: .25rem 1rem; border-radius: 12px; font-size: .7rem; font-weight: 800; }
+    .price-card h3 { font-size: 1.3rem; margin-bottom: .5rem; }
+    .price-card .price { font-size: 3rem; font-weight: 800; margin: 1rem 0; font-family: var(--mono); }
+    .price-card .price span { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
+    .price-card .price-sub { color: var(--text-dim); font-size: .9rem; margin-bottom: 1.5rem; }
+    .price-features { list-style: none; text-align: left; margin-bottom: 2rem; }
+    .price-features li { padding: .5rem 0; display: flex; align-items: center; gap: .75rem; font-size: .9rem; }
+    .price-features .check { color: var(--green); font-weight: bold; }
+    .price-features .x { color: var(--text-dim); }
+    .price-card .btn { width: 100%; justify-content: center; }
+
+    .bench-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .bench-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; }
+    .bench-card h3 { font-size: 1rem; color: var(--text-dim); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: .05em; font-size: .8rem; }
+    .bench-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+    .bench-label { width: 100px; font-size: .85rem; color: var(--text-dim); }
+    .bench-track { flex: 1; height: 24px; background: var(--bg3); border-radius: 4px; overflow: hidden; position: relative; }
+    .bench-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: .5rem; font-size: .75rem; font-weight: 700; font-family: var(--mono); }
+    .bench-fill.marshall { background: var(--accent); color: #fff; }
+    .bench-fill.other { background: var(--border); color: var(--text-dim); }
+
+    footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--text-dim); font-size: .85rem; }
+    footer .footer-links { display: flex; gap: 2rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; }
+
+    @media (max-width: 768px) {
+      .bench-grid { grid-template-columns: 1fr; }
+      .nav-links { gap: 1rem; }
+      .stats { gap: 2rem; }
+      .hero { padding: 8rem 1.5rem 4rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <div class="nav-brand">🌐 Marshall <span>by NullSec</span></div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#compare">Compare</a>
+        <a href="#pricing">Pricing</a>
+        <a href="https://github.com/bad-antics/marshall" target="_blank">GitHub</a>
+        <a href="#pricing" class="btn btn-primary">Download</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>
+      <span class="accent">Secure.</span> Private.<br>
+      <span class="accent2">Untraceable.</span>
+    </h1>
+    <p class="subtitle">
+      Privacy-focused web browser built with Rust + GTK. Built-in ad blocking, Tor integration,
+      OSINT research tools, and AI assistant. Zero telemetry.
+    </p>
+    <div class="hero-cta">
+      <a href="https://github.com/bad-antics/marshall/releases" class="btn btn-primary">Download for Linux →</a>
+      <a href="https://github.com/bad-antics/marshall" class="btn btn-outline" target="_blank">⭐ Star on GitHub</a>
+    </div>
+    <div class="hero-install">
+      <span><span class="dollar">$</span> cargo install marshall-browser</span>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('cargo install marshall-browser');this.textContent='Copied!'">Copy</button>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">312</div><div class="stat-label">MB Avg Memory</div></div>
+    <div class="stat"><div class="stat-num">0.8s</div><div class="stat-label">Cold Start</div></div>
+    <div class="stat"><div class="stat-num">0</div><div class="stat-label">Telemetry</div></div>
+    <div class="stat"><div class="stat-num">8</div><div class="stat-label">OSINT Tools</div></div>
+    <div class="stat"><div class="stat-num">9</div><div class="stat-label">Threat Protections</div></div>
+  </div>
+
+  <section id="features">
+    <div class="container">
+      <div class="section-title">
+        <h2>Privacy By Architecture</h2>
+        <p>Not a fork. Not a skin. Built from scratch in Rust for security-first browsing.</p>
+      </div>
+      <div class="layers-grid">
+        <div class="layer-card">
+          <div style="font-size:1.5rem; margin-bottom:.75rem;">🚫</div>
+          <h3>Built-in Ad Blocking</h3>
+          <p>EasyList-powered filter engine runs natively. No extension overhead. Blocks ads, trackers, and malware domains.</p>
+        </div>
+        <div class="layer-card">
+          <div style="font-size:1.5rem; margin-bottom:.75rem;">🧅</div>
+          <h3>Tor Integration</h3>
+          <p>One-click Tor circuit. Route all traffic through onion network. DNS-over-Tor, SOCKS5 proxy chain support.</p>
+        </div>
+        <div class="layer-card">
+          <div style="font-size:1.5rem; margin-bottom:.75rem;">👤</div>
+          <h3>Anti-Fingerprinting</h3>
+          <p>Canvas, WebGL, and Audio API protection. WebRTC leak prevention. mDNS ICE candidates only.</p>
+        </div>
+        <div class="layer-card">
+          <div style="font-size:1.5rem; margin-bottom:.75rem;">🔒</div>
+          <h3>Tab Isolation</h3>
+          <p>Each tab runs in its own process sandbox. Cookie isolation prevents cross-site tracking. Clear-on-exit by default.</p>
+        </div>
+        <div class="layer-card">
+          <div style="font-size:1.5rem; margin-bottom:.75rem;">🤖</div>
+          <h3>Dr. Marshall AI</h3>
+          <p>Built-in AI assistant sidebar for research, summarization, and security analysis. Runs locally — no cloud calls.</p>
+        </div>
+        <div class="layer-card">
+          <div style="font-size:1.5rem; margin-bottom:.75rem;">🔬</div>
+          <h3>OSINT Research Suite</h3>
+          <p>Right-click Shodan lookup, WHOIS, DNS enumeration, SSL cert analysis, Wayback Machine, VirusTotal integration.</p>
+        </div>
+        <div class="layer-card">
+          <div style="font-size:1.5rem; margin-bottom:.75rem;">🛡️</div>
+          <h3>Extension Sandbox</h3>
+          <p>Extensions run in isolated containers with honeypot detection for malicious add-ons. Permission-gated API access.</p>
+        </div>
+        <div class="layer-card">
+          <div style="font-size:1.5rem; margin-bottom:.75rem;">🔐</div>
+          <h3>DNS-over-HTTPS</h3>
+          <p>DNSSEC validation, certificate pinning, HSTS preload list. No plaintext DNS queries ever leave your machine.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare" style="background: var(--bg2);">
+    <div class="container">
+      <div class="section-title">
+        <h2>Browser Comparison</h2>
+        <p>How Marshall stacks up against other privacy browsers.</p>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th class="marshall-col">Marshall</th>
+              <th>Tor Browser</th>
+              <th>Brave</th>
+              <th>Firefox</th>
+              <th>LibreWolf</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Built-in Ad Blocker</td><td class="marshall-col yes">✅</td><td class="no">❌</td><td class="yes">✅</td><td class="no">❌</td><td class="yes">✅</td></tr>
+            <tr><td>Fingerprint Protection</td><td class="marshall-col yes">✅</td><td class="yes">✅</td><td class="partial">⚠️</td><td class="partial">⚠️</td><td class="yes">✅</td></tr>
+            <tr><td>WebRTC Leak Protection</td><td class="marshall-col yes">✅</td><td class="yes">✅</td><td class="partial">⚠️</td><td class="no">❌</td><td class="yes">✅</td></tr>
+            <tr><td>Tor Integration</td><td class="marshall-col yes">✅</td><td class="yes">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td></tr>
+            <tr><td>DNS-over-HTTPS</td><td class="marshall-col yes">✅</td><td class="no">❌</td><td class="yes">✅</td><td class="yes">✅</td><td class="yes">✅</td></tr>
+            <tr><td>Extension Sandbox</td><td class="marshall-col yes">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td></tr>
+            <tr><td>OSINT Tools Built-in</td><td class="marshall-col yes">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td></tr>
+            <tr><td>Zero Telemetry</td><td class="marshall-col yes">✅</td><td class="yes">✅</td><td class="partial">⚠️</td><td class="partial">⚠️</td><td class="yes">✅</td></tr>
+            <tr><td>Honeypot Detection</td><td class="marshall-col yes">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td></tr>
+            <tr><td>Memory Footprint</td><td class="marshall-col" style="color:var(--green);font-weight:700;">Low</td><td>High</td><td>Medium</td><td>Medium</td><td>Medium</td></tr>
+            <tr><td>Startup Time</td><td class="marshall-col" style="color:var(--green);font-weight:700;">0.8s</td><td>4.2s</td><td>1.6s</td><td>2.1s</td><td>2.4s</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-title">
+        <h2>Performance Benchmarks</h2>
+        <p>Lighter, faster, and more efficient than every competitor. Measured on real hardware.</p>
+      </div>
+      <div class="bench-grid">
+        <div class="bench-card">
+          <h3>Memory Usage (10 tabs, 5 min idle)</h3>
+          <div class="bench-bar"><span class="bench-label">Marshall</span><div class="bench-track"><div class="bench-fill marshall" style="width:35%;">312 MB</div></div></div>
+          <div class="bench-bar"><span class="bench-label">LibreWolf</span><div class="bench-track"><div class="bench-fill other" style="width:64%;">567 MB</div></div></div>
+          <div class="bench-bar"><span class="bench-label">Firefox</span><div class="bench-track"><div class="bench-fill other" style="width:77%;">689 MB</div></div></div>
+          <div class="bench-bar"><span class="bench-label">Brave</span><div class="bench-track"><div class="bench-fill other" style="width:81%;">723 MB</div></div></div>
+          <div class="bench-bar"><span class="bench-label">Chrome</span><div class="bench-track"><div class="bench-fill other" style="width:100%;">891 MB</div></div></div>
+        </div>
+        <div class="bench-card">
+          <h3>Cold Start Time (SSD)</h3>
+          <div class="bench-bar"><span class="bench-label">Marshall</span><div class="bench-track"><div class="bench-fill marshall" style="width:19%;">0.8s</div></div></div>
+          <div class="bench-bar"><span class="bench-label">Brave</span><div class="bench-track"><div class="bench-fill other" style="width:38%;">1.6s</div></div></div>
+          <div class="bench-bar"><span class="bench-label">Firefox</span><div class="bench-track"><div class="bench-fill other" style="width:50%;">2.1s</div></div></div>
+          <div class="bench-bar"><span class="bench-label">Chrome</span><div class="bench-track"><div class="bench-fill other" style="width:57%;">2.4s</div></div></div>
+          <div class="bench-bar"><span class="bench-label">Tor</span><div class="bench-track"><div class="bench-fill other" style="width:100%;">4.2s</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background: var(--bg2);">
+    <div class="container">
+      <div class="section-title">
+        <h2>Built-in OSINT Toolkit</h2>
+        <p>Right-click research tools for security professionals. No extensions needed.</p>
+      </div>
+      <div class="usecases-grid">
+        <div class="usecase-card">
+          <div class="icon">🔍</div>
+          <h3>IP Lookup</h3>
+          <p>GeoIP, ASN, reputation check. Right-click any IP for instant intelligence.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">📋</div>
+          <h3>WHOIS</h3>
+          <p>Domain registration details, registrar, nameservers, creation/expiry dates.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🌐</div>
+          <h3>DNS Inspector</h3>
+          <p>A, AAAA, MX, TXT, NS records. Full DNS enumeration from the context menu.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">📡</div>
+          <h3>Header Viewer</h3>
+          <p>Full HTTP request/response headers. Server fingerprinting. Security header analysis.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🔐</div>
+          <h3>Cert Analyzer</h3>
+          <p>SSL/TLS certificate chain analysis. Expiry alerts. Pinning status verification.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🔧</div>
+          <h3>Tech Detector</h3>
+          <p>Wappalyzer-style technology stack detection. Frameworks, CDNs, analytics, and CMS identification.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="container">
+      <div class="section-title">
+        <h2>Simple Pricing</h2>
+        <p>Marshall is free for everyone. Pro adds team features and priority support.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <h3>Personal</h3>
+          <div class="price">$0</div>
+          <div class="price-sub">Free forever for individuals</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> Full browser + privacy suite</li>
+            <li><span class="check">✓</span> Ad blocking + tracker blocking</li>
+            <li><span class="check">✓</span> Tor integration</li>
+            <li><span class="check">✓</span> OSINT research tools</li>
+            <li><span class="check">✓</span> Dr. Marshall AI assistant</li>
+            <li><span class="check">✓</span> Community support</li>
+            <li><span class="x">—</span> Managed deployment</li>
+            <li><span class="x">—</span> Custom branding</li>
+          </ul>
+          <a href="https://github.com/bad-antics/marshall/releases" class="btn btn-outline">Download Free</a>
+        </div>
+        <div class="price-card featured">
+          <h3>Team</h3>
+          <div class="price">$9<span>/mo</span></div>
+          <div class="price-sub">For security teams and orgs</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> Everything in Personal</li>
+            <li><span class="check">✓</span> Centralized policy management</li>
+            <li><span class="check">✓</span> Extension allow/deny lists</li>
+            <li><span class="check">✓</span> Custom proxy chain configs</li>
+            <li><span class="check">✓</span> Priority updates</li>
+            <li><span class="check">✓</span> Priority support</li>
+            <li><span class="check">✓</span> Team dashboard</li>
+            <li><span class="x">—</span> Custom branding</li>
+          </ul>
+          <a href="https://github.com/sponsors/bad-antics" class="btn btn-primary">Start Team Trial →</a>
+        </div>
+        <div class="price-card">
+          <h3>Enterprise</h3>
+          <div class="price">$49<span>/mo</span></div>
+          <div class="price-sub">For organizations at scale</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> Everything in Team</li>
+            <li><span class="check">✓</span> Custom branding</li>
+            <li><span class="check">✓</span> MDM integration</li>
+            <li><span class="check">✓</span> SSO / SAML support</li>
+            <li><span class="check">✓</span> Compliance reporting</li>
+            <li><span class="check">✓</span> SLA guarantee</li>
+            <li><span class="check">✓</span> Dedicated support</li>
+            <li><span class="check">✓</span> Source access</li>
+          </ul>
+          <a href="mailto:badxantics@gmail.com?subject=Marshall%20Enterprise" class="btn btn-outline">Contact Sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background: var(--bg2);">
+    <div class="container">
+      <div class="section-title">
+        <h2>Install Anywhere</h2>
+        <p>Native packages for every major Linux distribution and packaging format.</p>
+      </div>
+      <div class="layers-grid" style="max-width: 900px; margin: 0 auto;">
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">🦀</h3>
+          <h3>Cargo</h3>
+          <p>cargo install marshall-browser. Build from source with Rust 1.70+.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">📦</h3>
+          <h3>Flatpak</h3>
+          <p>Sandboxed Flatpak package on Flathub. One-click install on any distro.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">🟠</h3>
+          <h3>Snap</h3>
+          <p>Available on Snap Store for Ubuntu, Mint, and other snap-enabled distros.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">🏗️</h3>
+          <h3>AUR</h3>
+          <p>Arch User Repository package. yay -S marshall-browser for Arch/Manjaro.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">📋</h3>
+          <h3>AppImage</h3>
+          <p>Portable AppImage — download, chmod +x, run. No installation required.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">⬇️</h3>
+          <h3>Binary Release</h3>
+          <p>Pre-compiled x86_64 and ARM64 binaries on GitHub Releases.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="text-align: center; padding: 6rem 2rem;">
+    <div class="container">
+      <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">
+        Browse Without<br><span style="color: var(--accent);">Being Watched.</span>
+      </h2>
+      <p style="color: var(--text-dim); font-size: 1.1rem; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+        Rust performance. Zero telemetry. Built-in Tor. OSINT research tools. One download.
+      </p>
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="https://github.com/bad-antics/marshall/releases" class="btn btn-primary">⬇️ Download Marshall</a>
+        <a href="https://github.com/sponsors/bad-antics" class="btn btn-outline">💛 Sponsor</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/bad-antics/marshall">GitHub</a>
+      <a href="https://github.com/bad-antics/marshall/releases">Releases</a>
+      <a href="https://github.com/bad-antics/marshall-extensions">Extensions</a>
+      <a href="https://github.com/bad-antics/marshall/blob/main/LICENSE">License (MIT)</a>
+      <a href="https://github.com/sponsors/bad-antics">Sponsor</a>
+      <a href="mailto:badxantics@gmail.com">Contact</a>
+    </div>
+    <p>© 2026 NullSec / bad-antics. MIT Licensed. Built with 🖤 by the NullSec team.</p>
+  </footer>
+</body>
+</html>

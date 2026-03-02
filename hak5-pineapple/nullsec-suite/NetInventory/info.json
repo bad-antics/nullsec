@@ -1,0 +1,15 @@
+{
+    "name": "NetInventory",
+    "title": "Network Asset Inventory",
+    "description": "Comprehensive network discovery with ARP scan, ping sweep, port scanning, OS fingerprinting, device classification, and hostname resolution. Exports full CSV inventory of all network assets.",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 198,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": false
+    }
+}

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=NullSec AI
+Comment=AI-Powered Security Assistant
+Exec=python3 /home/antics/nullsec/nullsec-ai.py
+Icon=utilities-terminal
+Terminal=true
+Type=Application
+Categories=Security;Utility;
+Keywords=ai;security;assistant;

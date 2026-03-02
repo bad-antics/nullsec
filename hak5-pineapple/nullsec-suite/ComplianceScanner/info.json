@@ -1,0 +1,15 @@
+{
+    "name": "ComplianceScanner",
+    "title": "Compliance Scanner",
+    "description": "Automated wireless security compliance audit (PCI-DSS, HIPAA, NIST)",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "compliance",
+    "platform": "pineapple-pager",
+    "lines": 230,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

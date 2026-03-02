@@ -1,0 +1,15 @@
+{
+    "name": "VLANHopper",
+    "title": "VLAN Hopper",
+    "description": "VLAN hopping via DTP negotiation and double-tagging attacks",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "attack",
+    "platform": "pineapple-pager",
+    "lines": 175,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

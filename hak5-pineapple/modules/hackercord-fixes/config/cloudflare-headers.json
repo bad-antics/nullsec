@@ -1,0 +1,38 @@
+{
+  "name": "NullSec Security Headers — Cloudflare Transform Rules",
+  "description": "Import via CF Dashboard > Rules > Transform Rules > Modify Response Headers",
+  "rules": [
+    {
+      "expression": "true",
+      "action": "set",
+      "headers": {
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+        "X-Frame-Options": "SAMEORIGIN",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "camera=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), microphone=(self), fullscreen=(self)",
+        "X-XSS-Protection": "0",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Resource-Policy": "same-origin"
+      }
+    },
+    {
+      "expression": "http.request.uri.path eq \"/\" or http.request.uri.path eq \"/app\"",
+      "action": "set",
+      "headers": {
+        "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' wss:; media-src 'self' blob:; object-src 'none'; frame-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+      }
+    },
+    {
+      "expression": "true",
+      "action": "remove",
+      "headers": ["Server", "X-Powered-By"]
+    }
+  ],
+  "notes": {
+    "audit": "hackercord-audit.md — Finding C1 (No Security Headers) + M1 (Server Header Leak)",
+    "priority": "P0",
+    "effort": "1 hour (just import these rules in CF dashboard)",
+    "applied_by": "NullSec — @anonantics"
+  }
+}

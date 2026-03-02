@@ -1,0 +1,15 @@
+{
+    "name": "SignalMapper",
+    "title": "Signal Mapper",
+    "description": "WiFi signal strength survey and coverage mapping",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 185,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

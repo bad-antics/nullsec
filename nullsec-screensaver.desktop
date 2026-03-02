@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=NullSec Screensaver
+Comment=Cyberpunk Matrix-style Screensaver
+Exec=python3 /home/antics/nullsec/nullsec-screensaver.py
+Icon=preferences-desktop-screensaver
+Terminal=false
+Type=Application
+Categories=Utility;Screensaver;
+Keywords=screensaver;matrix;cyberpunk;

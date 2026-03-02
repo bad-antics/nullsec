@@ -1,0 +1,15 @@
+{
+    "name": "MACRotator",
+    "title": "MAC Address Rotator",
+    "description": "Automated MAC address rotation with vendor-specific OUI spoofing, configurable intervals, and activity logging. Restores original MAC on exit for clean stealth operations.",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "stealth",
+    "platform": "pineapple-pager",
+    "lines": 168,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": false
+    }
+}

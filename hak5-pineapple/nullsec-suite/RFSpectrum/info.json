@@ -1,0 +1,15 @@
+{
+    "name": "RFSpectrum",
+    "title": "RF Spectrum Analyzer",
+    "description": "Per-channel RF spectrum analysis across 2.4GHz and 5GHz bands. Measures AP density, client count, signal strength, overlap group interference, and recommends optimal deployment channels.",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 204,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

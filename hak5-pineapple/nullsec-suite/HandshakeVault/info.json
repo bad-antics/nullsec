@@ -1,0 +1,15 @@
+{
+    "name": "HandshakeVault",
+    "title": "Handshake Vault Manager",
+    "description": "Targeted WPA handshake capture with optional deauth acceleration, PMKID extraction, hashcat-format conversion, organized vault storage, and capture history tracking.",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "capture",
+    "platform": "pineapple-pager",
+    "lines": 236,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=N01D Start Menu
+Comment=Main application launcher
+Exec=python3 /home/antics/nullsec/n01d-desktop-menu.py
+Icon=/home/antics/nullsec/static/skull.png
+Terminal=false
+Type=Application
+Categories=Utility;System;
+Keywords=start;menu;launcher;apps;
+StartupNotify=false

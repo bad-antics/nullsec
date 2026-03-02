@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Network Intelligence{% endblock %}
+
+{% block content %}
+<!-- Local Info -->
+<div class="section-header">
+    <div class="section-title">🌐 Local Network</div>
+</div>
+<div class="stat-row" id="net-info">
+    <div class="stat-card">
+        <div class="stat-num" style="font-size:16px;" id="ni-ifaces">—</div>
+        <div class="stat-label">Interfaces</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" style="font-size:16px;" id="ni-arp">—</div>
+        <div class="stat-label">ARP Entries</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" style="font-size:16px;" id="ni-wifi">—</div>
+        <div class="stat-label">WiFi Status</div>
+    </div>
+</div>
+
+<!-- Port Scanner -->
+<div class="card" style="margin-bottom:24px;">
+    <div style="font-weight:600;margin-bottom:12px;">🔍 Port Scanner</div>
+    <div class="input-group">
+        <input type="text" id="scan-target" placeholder="Target IP or hostname" style="width:200px;">
+        <input type="text" id="scan-ports" placeholder="Ports (e.g. 22,80,443 or 1-1024)" style="flex:1;" value="22,80,443,8080,8443,3389,3306,5432">
+        <button class="btn btn-primary" onclick="runScan()">🔍 Scan</button>
+    </div>
+    <div id="scan-results" style="display:none;"></div>
+</div>
+
+<!-- Subnet Discovery -->
+<div class="card" style="margin-bottom:24px;">
+    <div style="font-weight:600;margin-bottom:12px;">📡 Subnet Discovery</div>
+    <div class="input-group">
+        <input type="text" id="disc-subnet" placeholder="Subnet (e.g. 192.168.40)" style="width:200px;" value="192.168.40">
+        <input type="text" id="disc-port" placeholder="Port to check" style="width:120px;" value="22">
+        <button class="btn btn-primary" onclick="runDiscover()">📡 Discover</button>
+    </div>
+    <div id="disc-results" style="display:none;"></div>
+</div>
+
+<!-- Interfaces Table -->
+<div class="table-wrap" style="margin-bottom:24px;">
+    <div class="table-header">
+        <div class="table-title">🔌 Network Interfaces</div>
+        <button class="btn btn-sm" onclick="loadNetInfo()">↻ Refresh</button>
+    </div>
+    <table>
+        <thead><tr><th>Interface</th><th>Addresses</th></tr></thead>
+        <tbody id="iface-tbody">
+            <tr><td colspan="2" class="loading"><div class="spinner"></div> Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ARP Table -->
+<div class="table-wrap">
+    <div class="table-header">
+        <div class="table-title">📋 ARP Table</div>
+    </div>
+    <table>
+        <thead><tr><th>IP Address</th><th>MAC Address</th><th>Interface</th></tr></thead>
+        <tbody id="arp-tbody">
+            <tr><td colspan="3" class="loading"><div class="spinner"></div> Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+async function loadNetInfo() {
+    // Interfaces
+    const ifaces = await NS.get('/network/api/interfaces');
+    NS.html('#ni-ifaces', Object.keys(ifaces).length);
+    NS.$('#iface-tbody').innerHTML = Object.entries(ifaces).map(([name, addrs]) => `
+        <tr>
+            <td style="font-weight:600;color:#00ff88;">${name}</td>
+            <td>${addrs.map(a => `<span class="badge badge-blue" style="margin:2px;">${a.address}</span>`).join(' ')}</td>
+        </tr>
+    `).join('');
+
+    // ARP
+    const arp = await NS.get('/network/api/arp');
+    NS.html('#ni-arp', arp.length);
+    NS.$('#arp-tbody').innerHTML = arp.map(a => `
+        <tr>
+            <td style="color:#00aaff;">${a.ip}</td>
+            <td style="font-family:monospace;">${a.mac}</td>
+            <td>${a.interface || '—'}</td>
+        </tr>
+    `).join('') || '<tr><td colspan="3" style="color:#888;">No ARP entries</td></tr>';
+
+    // WiFi
+    const wifi = await NS.get('/network/api/wifi');
+    NS.html('#ni-wifi', wifi.ssid || 'N/A');
+}
+
+async function runScan() {
+    const target = NS.$('#scan-target').value.trim();
+    const ports = NS.$('#scan-ports').value.trim();
+    if (!target) { NS.notify('Enter a target IP', 'warn'); return; }
+
+    const results = NS.$('#scan-results');
+    results.style.display = 'block';
+    results.innerHTML = '<div class="loading"><div class="spinner"></div> Scanning...</div>';
+
+    const data = await NS.scanTarget(target, ports);
+    
+    if (data.open_ports && data.open_ports.length) {
+        results.innerHTML = `
+            <div style="margin:8px 0;font-size:12px;color:#888;">
+                Scanned ${target} — ${data.open_ports.length} open port(s) found in ${data.scan_time || '?'}s
+            </div>
+            <table>
+                <thead><tr><th>Port</th><th>Status</th></tr></thead>
+                <tbody>
+                    ${data.open_ports.map(p => `<tr><td style="color:#00ff88;font-weight:600;">${p}</td><td><span class="badge badge-green">OPEN</span></td></tr>`).join('')}
+                </tbody>
+            </table>`;
+    } else {
+        results.innerHTML = '<div style="padding:12px;color:#888;">No open ports found</div>';
+    }
+}
+
+async function runDiscover() {
+    const subnet = NS.$('#disc-subnet').value.trim();
+    const port = NS.$('#disc-port').value.trim();
+    if (!subnet) { NS.notify('Enter a subnet', 'warn'); return; }
+
+    const results = NS.$('#disc-results');
+    results.style.display = 'block';
+    results.innerHTML = '<div class="loading"><div class="spinner"></div> Discovering hosts (this may take a moment)...</div>';
+
+    const data = await NS.discoverSubnet(subnet, port);
+    
+    if (data.alive_hosts && data.alive_hosts.length) {
+        results.innerHTML = `
+            <div style="margin:8px 0;font-size:12px;color:#888;">
+                Found ${data.alive_hosts.length} host(s) on ${subnet}.0/24 with port ${port} open
+            </div>
+            <table>
+                <thead><tr><th>IP Address</th><th>Status</th></tr></thead>
+                <tbody>
+                    ${data.alive_hosts.map(h => `<tr><td style="color:#00aaff;font-weight:600;">${h}</td><td><span class="badge badge-green">ALIVE</span></td></tr>`).join('')}
+                </tbody>
+            </table>`;
+    } else {
+        results.innerHTML = '<div style="padding:12px;color:#888;">No hosts found</div>';
+    }
+}
+
+loadNetInfo();
+</script>
+{% endblock %}

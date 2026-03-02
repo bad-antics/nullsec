@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ APP_NAME }}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/nullsec.css">
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="logo">⬡</span>
+            <span class="logo-text">NullSec</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/" class="{% if page == 'dashboard' %}active{% endif %}">
+                <span class="nav-icon">◉</span> Dashboard
+            </a></li>
+            <li><a href="/cluster" class="{% if page == 'cluster' %}active{% endif %}">
+                <span class="nav-icon">⬢</span> Cluster
+            </a></li>
+            <li><a href="/payloads" class="{% if page == 'payloads' %}active{% endif %}">
+                <span class="nav-icon">⚡</span> Payloads
+            </a></li>
+            <li><a href="/network" class="{% if page == 'network' %}active{% endif %}">
+                <span class="nav-icon">◎</span> Network
+            </a></li>
+            <li><a href="/loot" class="{% if page == 'loot' %}active{% endif %}">
+                <span class="nav-icon">◆</span> Loot
+            </a></li>
+            <li><a href="/terminal" class="{% if page == 'terminal' %}active{% endif %}">
+                <span class="nav-icon">▸</span> Terminal
+            </a></li>
+        </ul>
+        <div style="padding:0 20px;margin:8px 0;border-top:1px solid var(--border);padding-top:12px;">
+            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">App Network</div>
+        </div>
+        <ul class="nav-links" style="padding-top:0;">
+            <li><a href="http://localhost:9001" target="_blank"><span class="nav-icon">◉</span> Monitor</a></li>
+            <li><a href="http://localhost:9002" target="_blank"><span class="nav-icon">◎</span> Scanner</a></li>
+            <li><a href="http://localhost:9003" target="_blank"><span class="nav-icon">⚡</span> Bench</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <span class="version">v{{ APP_VERSION }}</span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+        <header class="topbar">
+            <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+            <div class="topbar-actions">
+                <span class="status-dot online" id="status-dot"></span>
+                <span class="status-text" id="status-text">Connected</span>
+            </div>
+        </header>
+        <div class="page-content">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <script src="/static/js/nullsec.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

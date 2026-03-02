@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Payloads{% endblock %}
+
+{% block content %}
+<!-- Stats -->
+<div class="stat-row" id="payload-stats">
+    <div class="stat-card">
+        <div class="stat-num" id="ps-total">—</div>
+        <div class="stat-label">Total Payloads</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="ps-info">—</div>
+        <div class="stat-label">With info.json</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="ps-payload">—</div>
+        <div class="stat-label">With payload.sh</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="ps-categories">—</div>
+        <div class="stat-label">Categories</div>
+    </div>
+</div>
+
+<!-- Search & Filter -->
+<div class="card" style="margin-bottom:24px;">
+    <div class="input-group">
+        <input type="search" id="payload-search" placeholder="Search payloads... (name, category, description)"
+               style="flex:1;" oninput="filterPayloads()">
+        <select id="payload-cat" onchange="filterPayloads()" style="min-width:150px;">
+            <option value="">All Categories</option>
+        </select>
+        <button class="btn btn-sm" onclick="loadPayloads()">↻ Refresh</button>
+    </div>
+</div>
+
+<!-- Payload Table -->
+<div class="table-wrap">
+    <div class="table-header">
+        <div class="table-title">📦 Payload Suite</div>
+        <div id="payload-count" style="font-size:12px;color:#888;"></div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Author</th>
+                <th>Files</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="payload-tbody">
+            <tr><td colspan="5" class="loading"><div class="spinner"></div> Loading payloads...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+let allPayloads = [];
+let categories = new Set();
+
+async function loadPayloads() {
+    // Stats
+    NS.get('/payloads/api/stats').then(s => {
+        NS.html('#ps-total', s.total);
+        NS.html('#ps-info', s.with_info_json || s.healthy || '—');
+        NS.html('#ps-payload', s.with_payload_sh || s.healthy || '—');
+        NS.html('#ps-categories', Object.keys(s.categories || {}).length);
+        
+        // Populate category dropdown
+        const sel = NS.$('#payload-cat');
+        sel.innerHTML = '<option value="">All Categories</option>';
+        Object.entries(s.categories || {}).sort((a, b) => b[1] - a[1]).forEach(([cat, count]) => {
+            sel.innerHTML += `<option value="${cat}">${cat} (${count})</option>`;
+        });
+    });
+
+    // Payload list
+    const resp = await NS.get('/payloads/api/list');
+    const data = resp.payloads || resp;
+    allPayloads = data;
+    data.forEach(p => { if (p.category) categories.add(p.category); });
+    renderPayloads(data);
+}
+
+function filterPayloads() {
+    const search = NS.$('#payload-search').value.toLowerCase();
+    const cat = NS.$('#payload-cat').value;
+    
+    let filtered = allPayloads;
+    if (search) {
+        filtered = filtered.filter(p => 
+            p.name.toLowerCase().includes(search) ||
+            (p.description || '').toLowerCase().includes(search) ||
+            (p.category || '').toLowerCase().includes(search) ||
+            (p.author || '').toLowerCase().includes(search)
+        );
+    }
+    if (cat) {
+        filtered = filtered.filter(p => p.category === cat);
+    }
+    renderPayloads(filtered);
+}
+
+function renderPayloads(payloads) {
+    NS.html('#payload-count', `${payloads.length} payloads`);
+    const tbody = NS.$('#payload-tbody');
+    
+    if (!payloads.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No payloads found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = payloads.map(p => `
+        <tr>
+            <td>
+                <a href="/payloads/view/${p.name}" style="color:#00ff88;text-decoration:none;font-weight:600;">
+                    ${p.name}
+                </a>
+                ${p.description ? `<div style="font-size:11px;color:#888;margin-top:2px;">${p.description.substring(0, 80)}${p.description.length > 80 ? '...' : ''}</div>` : ''}
+            </td>
+            <td><span class="badge badge-blue">${p.category || 'uncategorized'}</span></td>
+            <td style="color:#888;">${p.author || '—'}</td>
+            <td>
+                ${p.has_payload_sh ? '<span class="badge badge-green">payload.sh</span> ' : ''}
+                ${p.has_info_json ? '<span class="badge badge-purple">info.json</span>' : ''}
+            </td>
+            <td>
+                <a href="/payloads/view/${p.name}" class="btn btn-sm">View</a>
+            </td>
+        </tr>
+    `).join('');
+}
+
+loadPayloads();
+</script>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Cluster Manager{% endblock %}
+
+{% block content %}
+<!-- Summary Stats -->
+<div class="stat-row" id="cluster-stats">
+    <div class="stat-card">
+        <div class="stat-num" id="cs-online">—</div>
+        <div class="stat-label">Online</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="cs-cores">—</div>
+        <div class="stat-label">Cores</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="cs-ram">—</div>
+        <div class="stat-label">RAM (GB)</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="cs-disk">—</div>
+        <div class="stat-label">Disk Free</div>
+    </div>
+</div>
+
+<!-- Command Executor -->
+<div class="section-header">
+    <div class="section-title">⚡ Execute Command</div>
+</div>
+<div class="card" style="margin-bottom:24px;">
+    <div class="input-group">
+        <select id="exec-target" style="min-width:180px;">
+            <option value="__all__">🌐 All Nodes</option>
+        </select>
+        <input type="text" id="exec-cmd" placeholder="Enter command... (e.g. uptime, df -h, free -m)" style="flex:1;" 
+               onkeydown="if(event.key==='Enter') runExec()">
+        <button class="btn btn-primary" onclick="runExec()">▶ Execute</button>
+    </div>
+    <div id="exec-output" class="code-block" style="display:none;max-height:400px;overflow-y:auto;"></div>
+</div>
+
+<!-- Node Grid -->
+<div class="section-header">
+    <div class="section-title">🖥️ Cluster Nodes</div>
+    <button class="btn btn-sm" onclick="loadNodes()">↻ Refresh</button>
+</div>
+<div class="node-grid" id="node-grid">
+    <div class="loading"><div class="spinner"></div> Loading nodes...</div>
+</div>
+
+<script>
+let allNodes = [];
+
+async function loadNodes() {
+    const nodes = await NS.get('/cluster/api/nodes');
+    allNodes = nodes;
+    
+    // Update target dropdown
+    const sel = NS.$('#exec-target');
+    sel.innerHTML = '<option value="__all__">🌐 All Nodes</option>';
+    nodes.filter(n => n.online).forEach(n => {
+        sel.innerHTML += `<option value="${n.name}">${n.name} (${n.ip})</option>`;
+    });
+
+    // Stats
+    const summary = await NS.get('/cluster/api/summary');
+    NS.html('#cs-online', `${summary.online}/${summary.total}`);
+    NS.html('#cs-cores', summary.total_cores || '—');
+    NS.html('#cs-ram', summary.total_ram_gb ? summary.total_ram_gb.toFixed(0) : '—');
+    NS.html('#cs-disk', summary.total_disk_free || '—');
+
+    // Node cards
+    const grid = NS.$('#node-grid');
+    if (!nodes.length) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🖥️</div><div class="empty-text">No nodes in cluster</div></div>';
+        return;
+    }
+    grid.innerHTML = nodes.map(n => `
+        <div class="node-card ${n.online ? 'online' : 'offline'}">
+            <div class="node-name">
+                <span class="status-dot ${n.online ? 'online' : 'offline'}"></span>
+                ${n.name}
+                <span class="badge ${n.online ? 'badge-green' : 'badge-red'}" style="margin-left:auto;">
+                    ${n.online ? 'ONLINE' : 'OFFLINE'}
+                </span>
+            </div>
+            <div class="node-stats">
+                <div><div class="node-stat-label">IP</div><div class="node-stat-value">${n.ip}</div></div>
+                <div><div class="node-stat-label">User</div><div class="node-stat-value">${n.user}</div></div>
+                <div><div class="node-stat-label">Cores</div><div class="node-stat-value">${n.cores || '—'}</div></div>
+                <div><div class="node-stat-label">RAM</div><div class="node-stat-value">${n.ram_gb ? n.ram_gb.toFixed(1) + ' GB' : '—'}</div></div>
+                <div><div class="node-stat-label">Load</div><div class="node-stat-value">${n.load || '—'}</div></div>
+                <div><div class="node-stat-label">Hostname</div><div class="node-stat-value">${n.hostname || '—'}</div></div>
+                <div><div class="node-stat-label">Uptime</div><div class="node-stat-value">${n.uptime || '—'}</div></div>
+                <div><div class="node-stat-label">OS</div><div class="node-stat-value">${n.os_info || '—'}</div></div>
+            </div>
+            ${n.online ? `
+            <div style="margin-top:12px;display:flex;gap:6px;">
+                <a href="/terminal?node=${n.name}" class="btn btn-sm">🖥️ Terminal</a>
+                <button class="btn btn-sm" onclick="quickExec('${n.name}', 'uptime')">⏱ Uptime</button>
+                <button class="btn btn-sm" onclick="quickExec('${n.name}', 'free -m')">💾 Memory</button>
+            </div>` : ''}
+        </div>
+    `).join('');
+}
+
+async function runExec() {
+    const target = NS.$('#exec-target').value;
+    const cmd = NS.$('#exec-cmd').value.trim();
+    if (!cmd) return;
+
+    const output = NS.$('#exec-output');
+    output.style.display = 'block';
+    output.textContent = 'Executing...';
+
+    try {
+        if (target === '__all__') {
+            const data = await NS.execOnAll(cmd);
+            output.textContent = data.results.map(r => 
+                `━━━ ${r.node} ━━━\n${r.output || r.error || 'No output'}`
+            ).join('\n\n');
+        } else {
+            const data = await NS.execOnNode(target, cmd);
+            output.textContent = data.output || data.error || 'No output';
+        }
+    } catch (e) {
+        output.textContent = `Error: ${e.message}`;
+    }
+}
+
+async function quickExec(node, cmd) {
+    const output = NS.$('#exec-output');
+    output.style.display = 'block';
+    output.textContent = `[${node}] ${cmd}...`;
+    
+    const data = await NS.execOnNode(node, cmd);
+    output.textContent = `━━━ ${node}: ${cmd} ━━━\n${data.output || data.error || 'No output'}`;
+}
+
+loadNodes();
+NS.poll('cluster', '/cluster/api/summary', (d) => {
+    NS.html('#cs-online', `${d.online}/${d.total}`);
+    NS.html('#cs-cores', d.total_cores || '—');
+    NS.html('#cs-ram', d.total_ram_gb ? d.total_ram_gb.toFixed(0) : '—');
+}, 20000);
+</script>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Loot Viewer{% endblock %}
+
+{% block content %}
+<!-- Stats -->
+<div class="stat-row" id="loot-stats">
+    <div class="stat-card">
+        <div class="stat-num" id="ls-dirs">—</div>
+        <div class="stat-label">Loot Directories</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="ls-files">—</div>
+        <div class="stat-label">Total Files</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="ls-size">—</div>
+        <div class="stat-label">Total Size</div>
+    </div>
+</div>
+
+<!-- Search -->
+<div class="card" style="margin-bottom:24px;">
+    <div class="input-group">
+        <input type="search" id="loot-search" placeholder="Search loot content..." style="flex:1;"
+               onkeydown="if(event.key==='Enter') searchLoot()">
+        <button class="btn btn-primary" onclick="searchLoot()">🔍 Search</button>
+    </div>
+    <div id="search-results" style="display:none;"></div>
+</div>
+
+<!-- Loot Browser -->
+<div style="display:grid;grid-template-columns:280px 1fr;gap:16px;">
+    <!-- Directory List -->
+    <div class="table-wrap" style="max-height:600px;overflow-y:auto;">
+        <div class="table-header">
+            <div class="table-title">📁 Directories</div>
+        </div>
+        <div id="loot-dirs" style="padding:8px;">
+            <div class="loading"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+    <!-- File Viewer -->
+    <div>
+        <div class="table-wrap" id="file-list-wrap" style="margin-bottom:16px;display:none;">
+            <div class="table-header">
+                <div class="table-title" id="files-title">Files</div>
+            </div>
+            <table>
+                <thead><tr><th>Filename</th><th>Size</th><th>Actions</th></tr></thead>
+                <tbody id="files-tbody"></tbody>
+            </table>
+        </div>
+
+        <div class="card" id="file-viewer" style="display:none;">
+            <div class="card-header">
+                <div class="card-label" id="viewer-title">File Content</div>
+                <button class="btn btn-sm" onclick="NS.$('#file-viewer').style.display='none'">✕ Close</button>
+            </div>
+            <div class="code-block" id="viewer-content" style="max-height:500px;overflow-y:auto;"></div>
+        </div>
+
+        <div id="no-selection" class="empty-state">
+            <div class="empty-icon">💎</div>
+            <div class="empty-text">Select a loot directory to browse files</div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function loadLoot() {
+    // Stats
+    NS.get('/loot/api/stats').then(s => {
+        NS.html('#ls-dirs', s.total_dirs || 0);
+        NS.html('#ls-files', s.total_files || 0);
+        NS.html('#ls-size', s.total_size || '—');
+    });
+
+    // Directories
+    const dirs = await NS.get('/loot/api/dirs');
+    const el = NS.$('#loot-dirs');
+    
+    if (!dirs.length) {
+        el.innerHTML = '<div style="padding:16px;color:#888;text-align:center;">No loot directories found</div>';
+        return;
+    }
+    
+    el.innerHTML = dirs.map(d => `
+        <div onclick="browseDir('${d.name}')" 
+             style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #222;transition:background 0.15s;"
+             onmouseover="this.style.background='#1a1a1a'" onmouseout="this.style.background='transparent'">
+            <div style="color:#00ff88;font-weight:500;">📁 ${d.name}</div>
+            <div style="font-size:11px;color:#888;">${d.file_count || 0} files</div>
+        </div>
+    `).join('');
+}
+
+async function browseDir(name) {
+    NS.$('#no-selection').style.display = 'none';
+    NS.$('#file-list-wrap').style.display = 'block';
+    NS.html('#files-title', `📁 ${name}`);
+    
+    const files = await NS.browseLoot(name);
+    const tbody = NS.$('#files-tbody');
+    
+    if (!files.length) {
+        tbody.innerHTML = '<tr><td colspan="3" style="color:#888;">Empty directory</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = files.map(f => `
+        <tr>
+            <td style="color:#00aaff;">${f.name || f}</td>
+            <td style="color:#888;">${f.size || '—'}</td>
+            <td>
+                <button class="btn btn-sm" onclick="viewFile('${name}', '${f.name || f}')">👁 View</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function viewFile(dir, file) {
+    NS.$('#file-viewer').style.display = 'block';
+    NS.html('#viewer-title', `📄 ${dir}/${file}`);
+    NS.html('#viewer-content', 'Loading...');
+    
+    const data = await NS.readLoot(dir, file);
+    NS.html('#viewer-content', escapeHtml(data.content || data.error || 'Empty file'));
+}
+
+async function searchLoot() {
+    const q = NS.$('#loot-search').value.trim();
+    if (!q) return;
+    
+    const results = NS.$('#search-results');
+    results.style.display = 'block';
+    results.innerHTML = '<div class="loading"><div class="spinner"></div> Searching...</div>';
+    
+    const data = await NS.get(`/loot/api/search?q=${encodeURIComponent(q)}`);
+    
+    if (data.results && data.results.length) {
+        results.innerHTML = `
+            <div style="margin:8px 0;font-size:12px;color:#888;">${data.results.length} result(s)</div>
+            ${data.results.map(r => `
+                <div class="card" style="margin-bottom:8px;padding:12px;cursor:pointer;" 
+                     onclick="viewFile('${r.dir}', '${r.file}')">
+                    <div style="color:#00ff88;font-weight:600;">${r.dir}/${r.file}</div>
+                    <div style="font-size:12px;color:#888;margin-top:4px;">${r.preview || ''}</div>
+                </div>
+            `).join('')}`;
+    } else {
+        results.innerHTML = '<div style="padding:12px;color:#888;">No results found</div>';
+    }
+}
+
+function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+loadLoot();
+</script>
+{% endblock %}

@@ -1,0 +1,382 @@
+REM ═══════════════════════════════════════════════════════════
+REM  NullSec ECMOptimizer v1.0 — Flipper Zero BadUSB Payload
+REM  Optimizes Windows 10 for Automotive ECM/TCM/PCM Programming
+REM ═══════════════════════════════════════════════════════════
+REM  Author:  NullSec (bad-antics)
+REM  Target:  Windows 10
+REM  Deploy:  Flipper Zero BadUSB
+REM  What:    Power plan, USB/FTDI/serial, services, Defender,
+REM           visual effects, background apps, network, cleanup
+REM ═══════════════════════════════════════════════════════════
+
+ID 1234:5678 NullSec HID
+DEFAULT_DELAY 40
+
+REM ── Wait for USB enumeration ──
+DELAY 2000
+
+REM ── Open Run dialog ──
+GUI r
+DELAY 800
+
+REM ── Launch PowerShell as Administrator ──
+STRING powershell
+DELAY 200
+CTRL-SHIFT ENTER
+DELAY 3000
+
+REM ── Accept UAC prompt ──
+ALT y
+DELAY 2000
+
+REM ── Set execution policy and suppress errors ──
+STRING Set-ExecutionPolicy Bypass -Scope Process -Force; $ErrorActionPreference='SilentlyContinue'
+ENTER
+DELAY 500
+
+REM ── Banner ──
+STRING [Console]::Title='NullSec ECM Optimizer'; Write-Host "`n  NullSec ECM Optimizer v1.0 — Starting...`n" -ForegroundColor Red
+ENTER
+DELAY 300
+
+REM ══════════════════════════════════════════
+REM  RESTORE POINT
+REM ══════════════════════════════════════════
+STRING Write-Host '[*] Creating restore point...' -ForegroundColor Cyan
+ENTER
+DELAY 200
+STRING try { Enable-ComputerRestore -Drive 'C:\'; Checkpoint-Computer -Description 'NullSec ECM Optimizer' -RestorePointType MODIFY_SETTINGS } catch {}
+ENTER
+DELAY 5000
+
+REM ══════════════════════════════════════════
+REM  POWER PLAN
+REM ══════════════════════════════════════════
+STRING Write-Host '[*] Power plan optimization...' -ForegroundColor Cyan
+ENTER
+DELAY 200
+
+REM Activate Ultimate Performance (or High Performance fallback)
+STRING $u = powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 2>$null; if ($u -match 'GUID: ([a-f0-9-]+)') { powercfg /setactive $Matches[1] } else { powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c }
+ENTER
+DELAY 500
+
+REM Disable hibernate and all sleep timeouts
+STRING powercfg /hibernate off; powercfg /change standby-timeout-ac 0; powercfg /change standby-timeout-dc 0; powercfg /change monitor-timeout-ac 0; powercfg /change monitor-timeout-dc 0; powercfg /change hibernate-timeout-ac 0; powercfg /change hibernate-timeout-dc 0; powercfg /change disk-timeout-ac 0; powercfg /change disk-timeout-dc 0
+ENTER
+DELAY 500
+
+REM Disable USB selective suspend in power plan
+STRING $p = ((powercfg /getactivescheme) -replace '.*:\s*([a-f0-9-]+)\s.*','$1'); powercfg /setacvalueindex $p 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0; powercfg /setdcvalueindex $p 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0; powercfg /setactive $p
+ENTER
+DELAY 300
+
+REM CPU at 100%, disable PCI Express ASPM
+STRING powercfg /setacvalueindex $p 54533251-82be-4824-96c1-47b60b740d00 893dee8e-2bef-41e0-89c6-b55d0929964c 100; powercfg /setacvalueindex $p 54533251-82be-4824-96c1-47b60b740d00 bc5038f7-23e0-4960-96da-33abaf5935ec 100; powercfg /setacvalueindex $p 501a4d13-42af-4429-9fd1-a8218c268e20 ee12f906-d277-404b-b6da-e5fa1a576df5 0; powercfg /setactive $p
+ENTER
+DELAY 300
+
+REM Disable fast startup
+STRING Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power' -Name HiberbootEnabled -Value 0 -Type DWord -Force
+ENTER
+DELAY 200
+
+STRING Write-Host '[+] Power plan: Ultimate/High Performance, no sleep, CPU 100%' -ForegroundColor Green
+ENTER
+DELAY 200
+
+REM ══════════════════════════════════════════
+REM  USB OPTIMIZATION
+REM ══════════════════════════════════════════
+STRING Write-Host '[*] USB optimization...' -ForegroundColor Cyan
+ENTER
+DELAY 200
+
+REM Registry-level USB selective suspend disable
+STRING New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\USB' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\USB' -Name DisableSelectiveSuspend -Value 1 -Type DWord -Force
+ENTER
+DELAY 300
+
+REM Disable power management on all USB devices
+STRING Get-PnpDevice -Class USB -Status OK -EA 0 | % { $dp="HKLM:\SYSTEM\CurrentControlSet\Enum\$($_.InstanceId)\Device Parameters"; if(Test-Path $dp){ Set-ItemProperty $dp -Name EnhancedPowerManagementEnabled -Value 0 -Type DWord -Force; Set-ItemProperty $dp -Name AllowIdleIrpInD3 -Value 0 -Type DWord -Force; Set-ItemProperty $dp -Name SelectiveSuspendEnabled -Value 0 -Type DWord -Force } }
+ENTER
+DELAY 1000
+
+REM Disable USB hub power management via WMI
+STRING try { Get-WmiObject MSPower_DeviceEnable -Namespace root\wmi -EA Stop | ? { $_.InstanceName -match 'USB' } | % { $_.Enable=$false; $_.Put() | Out-Null } } catch {}
+ENTER
+DELAY 500
+
+STRING Write-Host '[+] USB selective suspend OFF, power management OFF on all USB devices' -ForegroundColor Green
+ENTER
+DELAY 200
+
+REM ══════════════════════════════════════════
+REM  FTDI / SERIAL PORT OPTIMIZATION
+REM ══════════════════════════════════════════
+STRING Write-Host '[*] FTDI/serial port optimization...' -ForegroundColor Cyan
+ENTER
+DELAY 200
+
+REM Set FTDI latency timer to 1ms (default 16ms kills ECM timing)
+STRING Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Enum' -Recurse -EA 0 | ? {$_.PSPath -match 'FTDI|VID_0403'} | % { $dp=Join-Path $_.PSPath 'Device Parameters'; if(Test-Path $dp){ Set-ItemProperty $dp LatencyTimer -Value 1 -Type DWord -Force; Set-ItemProperty $dp BulkInPipeTransferSize -Value 65536 -Type DWord -Force; Set-ItemProperty $dp BulkOutPipeTransferSize -Value 65536 -Type DWord -Force } }
+ENTER
+DELAY 1000
+
+REM CH340/CH341 and CP210x optimization
+STRING Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Enum' -Recurse -EA 0 | ? {$_.PSPath -match 'VID_1A86|VID_10C4'} | % { $dp=Join-Path $_.PSPath 'Device Parameters'; if(Test-Path $dp){ Set-ItemProperty $dp LatencyTimer -Value 1 -Type DWord -Force -EA 0 } }
+ENTER
+DELAY 500
+
+STRING Write-Host '[+] FTDI latency 1ms, serial buffers 64KB, CH340/CP210x optimized' -ForegroundColor Green
+ENTER
+DELAY 200
+
+REM ══════════════════════════════════════════
+REM  DISABLE SERVICES
+REM ══════════════════════════════════════════
+STRING Write-Host '[*] Disabling unnecessary services...' -ForegroundColor Cyan
+ENTER
+DELAY 200
+
+STRING $svcs = @('SysMain','WSearch','DiagTrack','dmwappushservice','DoSvc','MapsBroker','lfsvc','RetailDemo','wisvc','WMPNetworkSvc','XblAuthManager','XblGameSave','XboxGipSvc','XboxNetApiSvc','WerSvc','wercplsupport','Fax','TabletInputService','PhoneSvc','icssvc','WbioSrvc','PcaSvc','AJRouter','SharedAccess','RemoteRegistry','TrkWks','SCardSvr','ScDeviceEnum','SEMgrSvc','SSDPSRV','CDPSvc'); $c=0; $svcs | % { $s=Get-Service $_ -EA 0; if($s){ Stop-Service $_ -Force -EA 0; Set-Service $_ -StartupType Disabled -EA 0; $c++ } }; Write-Host "[+] $c services disabled" -ForegroundColor Green
+ENTER
+DELAY 2000
+
+REM Pause Windows Update
+STRING Stop-Service wuauserv,BITS,UsoSvc -Force -EA 0; Set-Service wuauserv -StartupType Disabled -EA 0; Set-Service UsoSvc -StartupType Disabled -EA 0; Write-Host '[+] Windows Update PAUSED (prevents mid-flash reboot)' -ForegroundColor Green
+ENTER
+DELAY 500
+
+REM ══════════════════════════════════════════
+REM  WINDOWS DEFENDER
+REM ══════════════════════════════════════════
+STRING Write-Host '[*] Configuring Windows Defender for ECM...' -ForegroundColor Cyan
+ENTER
+DELAY 200
+
+REM Disable real-time monitoring (AV scans cause serial timing failures)
+STRING Set-MpPreference -DisableRealtimeMonitoring $true -DisableBehaviorMonitoring $true -DisableIOAVProtection $true -MAPSReporting 0 -SubmitSamplesConsent 2 -EA 0
+ENTER
+DELAY 500
+
+REM Add ECM tool path exclusions
+STRING @('C:\Program Files\HP Tuners','C:\Program Files (x86)\HP Tuners','C:\Program Files\EFI Live','C:\Program Files (x86)\EFI Live','C:\Program Files\SCT','C:\Program Files (x86)\SCT','C:\Program Files\COBB','C:\Program Files (x86)\COBB','C:\Program Files\Hondata','C:\Program Files (x86)\Hondata','C:\Program Files\ECUFlash','C:\Program Files (x86)\ECUFlash','C:\Program Files\Tactrix','C:\Program Files (x86)\Tactrix','C:\Program Files\TunerPro','C:\Program Files (x86)\TunerPro','C:\Program Files\PCM Hammer','C:\Program Files (x86)\PCM Hammer','C:\Program Files\Drew Technologies','C:\Program Files (x86)\Drew Technologies','C:\EFILive','C:\HPTuners','C:\PCMHammer') | % { Add-MpPreference -ExclusionPath $_ -EA 0 }
+ENTER
+DELAY 1000
+
+REM Add ECM file extension exclusions
+STRING @('.bin','.hex','.s19','.mot','.cal','.hpt','.tun','.map','.rom','.ecu','.dsg','.j2534','.ols','.ori','.mod','.a2l','.elf') | % { Add-MpPreference -ExclusionExtension $_ -EA 0 }
+ENTER
+DELAY 500
+
+REM Add ECM process exclusions
+STRING @('VCM Suite.exe','VCM Scanner.exe','VCM Editor.exe','EFILive_Scan.exe','EFILive_Tune.exe','FlashScan.exe','AutoCal.exe','SCTDevice.exe','Accesstuner.exe','COBBAccessport.exe','HondataFlashPro.exe','ECUFlash.exe','RomRaider.exe','TunerPro.exe','PCMHammer.exe','FORSCAN.exe','FORScan.exe') | % { Add-MpPreference -ExclusionProcess $_ -EA 0 }
+ENTER
+DELAY 500
+
+STRING Write-Host '[+] Defender: real-time OFF, ECM exclusions added' -ForegroundColor Green
+ENTER
+DELAY 200
+
+REM ══════════════════════════════════════════
+REM  VISUAL EFFECTS / UI
+REM ══════════════════════════════════════════
+STRING Write-Host '[*] Disabling visual effects...' -ForegroundColor Cyan
+ENTER
+DELAY 200
+
+REM Best performance mode
+STRING New-Item 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects' -Force -EA 0 | Out-Null; Set-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects' VisualFXSetting -Value 2 -Type DWord -Force
+ENTER
+DELAY 200
+
+REM Disable transparency, animations, menu delay
+STRING Set-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize' EnableTransparency -Value 0 -Type DWord -Force -EA 0; Set-ItemProperty 'HKCU:\Control Panel\Desktop' MenuShowDelay -Value '0' -Force -EA 0; Set-ItemProperty 'HKCU:\Control Panel\Desktop' DragFullWindows -Value '0' -Force -EA 0; Set-ItemProperty 'HKCU:\Software\Microsoft\Windows\DWM' EnableAeroPeek -Value 0 -Type DWord -Force -EA 0
+ENTER
+DELAY 200
+
+REM Disable Game Bar / Game DVR
+STRING Set-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\GameDVR' AppCaptureEnabled -Value 0 -Type DWord -Force -EA 0; Set-ItemProperty 'HKCU:\System\GameConfigStore' GameDVR_Enabled -Value 0 -Type DWord -Force -EA 0; New-Item 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR' -Force -EA 0 | Out-Null; Set-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR' AllowGameDVR -Value 0 -Type DWord -Force -EA 0
+ENTER
+DELAY 200
+
+STRING Write-Host '[+] Visual effects, transparency, animations, Game Bar disabled' -ForegroundColor Green
+ENTER
+DELAY 200
+
+REM ══════════════════════════════════════════
+REM  BACKGROUND APPS / TELEMETRY
+REM ══════════════════════════════════════════
+STRING Write-Host '[*] Disabling background apps and telemetry...' -ForegroundColor Cyan
+ENTER
+DELAY 200
+
+REM Background apps off
+STRING Set-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications' GlobalUserDisabled -Value 1 -Type DWord -Force -EA 0; New-Item 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy' -Force -EA 0 | Out-Null; Set-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy' LetAppsRunInBackground -Value 2 -Type DWord -Force
+ENTER
+DELAY 200
+
+REM Cortana off
+STRING New-Item 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' -Force -EA 0 | Out-Null; Set-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' AllowCortana -Value 0 -Type DWord -Force; Set-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' AllowCloudSearch -Value 0 -Type DWord -Force
+ENTER
+DELAY 200
+
+REM Telemetry off
+STRING @('HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection','HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection') | % { New-Item $_ -Force -EA 0 | Out-Null; Set-ItemProperty $_ AllowTelemetry -Value 0 -Type DWord -Force }
+ENTER
+DELAY 200
+
+REM OneDrive off
+STRING New-Item 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive' -Force -EA 0 | Out-Null; Set-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive' DisableFileSyncNGSC -Value 1 -Type DWord -Force; Stop-Process -Name OneDrive -Force -EA 0
+ENTER
+DELAY 200
+
+REM Tips and suggestions off
+STRING @('SoftLandingEnabled','SubscribedContent-338388Enabled','SubscribedContent-310093Enabled','SubscribedContent-338389Enabled','SystemPaneSuggestionsEnabled','SilentInstalledAppsEnabled') | % { Set-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' $_ -Value 0 -Type DWord -Force -EA 0 }
+ENTER
+DELAY 200
+
+STRING Write-Host '[+] Background apps, Cortana, telemetry, OneDrive, tips disabled' -ForegroundColor Green
+ENTER
+DELAY 200
+
+REM ══════════════════════════════════════════
+REM  NETWORK OPTIMIZATION
+REM ══════════════════════════════════════════
+STRING Write-Host '[*] Network optimization...' -ForegroundColor Cyan
+ENTER
+DELAY 200
+
+REM Disable Nagle's algorithm and network throttling
+STRING $tp='HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters'; Set-ItemProperty $tp TcpAckFrequency -Value 1 -Type DWord -Force; Set-ItemProperty $tp TCPNoDelay -Value 1 -Type DWord -Force; Set-ItemProperty $tp TcpDelAckTicks -Value 0 -Type DWord -Force; Get-ChildItem "$tp\Interfaces" | % { Set-ItemProperty $_.PSPath TcpAckFrequency -Value 1 -Type DWord -Force; Set-ItemProperty $_.PSPath TCPNoDelay -Value 1 -Type DWord -Force }
+ENTER
+DELAY 500
+
+STRING $mm='HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile'; Set-ItemProperty $mm NetworkThrottlingIndex -Value 0xffffffff -Type DWord -Force; Set-ItemProperty $mm SystemResponsiveness -Value 0 -Type DWord -Force; ipconfig /flushdns | Out-Null
+ENTER
+DELAY 300
+
+STRING Write-Host '[+] Nagle disabled, network throttling off, DNS flushed' -ForegroundColor Green
+ENTER
+DELAY 200
+
+REM ══════════════════════════════════════════
+REM  MEMORY / PROCESS OPTIMIZATION
+REM ══════════════════════════════════════════
+STRING Write-Host '[*] Memory and process optimization...' -ForegroundColor Cyan
+ENTER
+DELAY 200
+
+REM Keep drivers in RAM, optimize for foreground apps
+STRING $m='HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management'; Set-ItemProperty $m DisablePagingExecutive -Value 1 -Type DWord -Force; Set-ItemProperty $m LargeSystemCache -Value 1 -Type DWord -Force; Set-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl' Win32PrioritySeparation -Value 38 -Type DWord -Force
+ENTER
+DELAY 300
+
+REM MMCSS task profile for ECM tools
+STRING $mp='HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\ECM Programming'; New-Item $mp -Force -EA 0 | Out-Null; Set-ItemProperty $mp Affinity -Value 0 -Type DWord -Force; Set-ItemProperty $mp 'Background Only' -Value 'False' -Force; Set-ItemProperty $mp 'Clock Rate' -Value 10000 -Type DWord -Force; Set-ItemProperty $mp Priority -Value 6 -Type DWord -Force; Set-ItemProperty $mp 'Scheduling Category' -Value 'High' -Force; Set-ItemProperty $mp 'SFIO Priority' -Value 'High' -Force
+ENTER
+DELAY 300
+
+REM Boost any running ECM tool processes to High priority
+STRING @('VCM Suite','VCM Scanner','VCM Editor','EFILive_Scan','EFILive_Tune','FlashScan','AutoCal','SCTDevice','Accesstuner','COBBAccessport','HondataFlashPro','ECUFlash','TunerPro','PCMHammer','FORSCAN','FORScan') | % { $pr=Get-Process $_ -EA 0; if($pr){ $pr.PriorityClass='High'; Write-Host "[+] Boosted $_ to HIGH priority" -ForegroundColor Green } }
+ENTER
+DELAY 500
+
+STRING Write-Host '[+] Memory optimized, paging exec OFF, foreground prioritized' -ForegroundColor Green
+ENTER
+DELAY 200
+
+REM ══════════════════════════════════════════
+REM  SCHEDULED TASKS
+REM ══════════════════════════════════════════
+STRING Write-Host '[*] Disabling unnecessary scheduled tasks...' -ForegroundColor Cyan
+ENTER
+DELAY 200
+
+STRING $tasks=@('\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser','\Microsoft\Windows\Application Experience\ProgramDataUpdater','\Microsoft\Windows\Customer Experience Improvement Program\Consolidator','\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip','\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector','\Microsoft\Windows\Maps\MapsUpdateTask','\Microsoft\Windows\Windows Error Reporting\QueueReporting','\Microsoft\XblGameSave\XblGameSaveTask','\Microsoft\Windows\Power Efficiency Diagnostics\AnalyzeSystem'); $tc=0; $tasks | % { try { Disable-ScheduledTask $_ -EA Stop | Out-Null; $tc++ } catch {} }; Write-Host "[+] $tc scheduled tasks disabled" -ForegroundColor Green
+ENTER
+DELAY 1000
+
+REM ══════════════════════════════════════════
+REM  DISK CLEANUP
+REM ══════════════════════════════════════════
+STRING Write-Host '[*] Cleaning temp files...' -ForegroundColor Cyan
+ENTER
+DELAY 200
+
+STRING Remove-Item "$env:TEMP\*" -Recurse -Force -EA 0; Remove-Item 'C:\Windows\Temp\*' -Recurse -Force -EA 0; Remove-Item 'C:\Windows\Prefetch\*' -Force -EA 0; Remove-Item "$env:LOCALAPPDATA\Microsoft\Windows\INetCache\*" -Recurse -Force -EA 0; Remove-Item 'C:\Windows\SoftwareDistribution\Download\*' -Recurse -Force -EA 0; Clear-RecycleBin -Force -EA 0
+ENTER
+DELAY 1000
+
+STRING $free=[math]::Round(((Get-PSDrive C).Free/1GB),2); Write-Host "[+] Temp files cleaned. Free space: ${free}GB" -ForegroundColor Green
+ENTER
+DELAY 200
+
+REM ══════════════════════════════════════════
+REM  NOTIFICATIONS
+REM ══════════════════════════════════════════
+STRING New-Item 'HKCU:\Software\Policies\Microsoft\Windows\Explorer' -Force -EA 0 | Out-Null; Set-ItemProperty 'HKCU:\Software\Policies\Microsoft\Windows\Explorer' DisableNotificationCenter -Value 1 -Type DWord -Force; Write-Host '[+] Notifications disabled' -ForegroundColor Green
+ENTER
+DELAY 200
+
+REM ══════════════════════════════════════════
+REM  FINAL SUMMARY
+REM ══════════════════════════════════════════
+STRING Write-Host ''
+ENTER
+DELAY 100
+STRING Write-Host '  =========================================' -ForegroundColor Green
+ENTER
+DELAY 100
+STRING Write-Host '   NullSec ECM Optimizer — COMPLETE' -ForegroundColor Green
+ENTER
+DELAY 100
+STRING Write-Host '  =========================================' -ForegroundColor Green
+ENTER
+DELAY 100
+STRING Write-Host ''
+ENTER
+DELAY 100
+STRING Write-Host '  [+] Power:     Ultimate/High Performance, CPU 100%' -ForegroundColor Green
+ENTER
+DELAY 100
+STRING Write-Host '  [+] USB:       Selective suspend OFF everywhere' -ForegroundColor Green
+ENTER
+DELAY 100
+STRING Write-Host '  [+] FTDI:      Latency 1ms (was 16ms)' -ForegroundColor Green
+ENTER
+DELAY 100
+STRING Write-Host '  [+] Services:  30+ non-essential disabled' -ForegroundColor Green
+ENTER
+DELAY 100
+STRING Write-Host '  [+] Update:    PAUSED (prevents mid-flash reboot)' -ForegroundColor Green
+ENTER
+DELAY 100
+STRING Write-Host '  [+] Defender:  Real-time OFF, ECM exclusions set' -ForegroundColor Green
+ENTER
+DELAY 100
+STRING Write-Host '  [+] Visual:    Best performance mode' -ForegroundColor Green
+ENTER
+DELAY 100
+STRING Write-Host '  [+] Network:   Nagle OFF, throttling OFF' -ForegroundColor Green
+ENTER
+DELAY 100
+STRING Write-Host '  [+] Memory:    Paging exec OFF, foreground priority' -ForegroundColor Green
+ENTER
+DELAY 100
+STRING Write-Host ''
+ENTER
+DELAY 100
+STRING Write-Host '  [!] REBOOT recommended for full effect' -ForegroundColor Yellow
+ENTER
+DELAY 100
+STRING Write-Host '  [!] Unplug/replug ECM tool USB after reboot' -ForegroundColor Yellow
+ENTER
+DELAY 100
+STRING Write-Host '  [!] To revert: Set-Service wuauserv -StartupType Manual; Start-Service wuauserv; Set-MpPreference -DisableRealtimeMonitoring $false' -ForegroundColor Yellow
+ENTER
+DELAY 100
+STRING Write-Host ''
+ENTER
+DELAY 500

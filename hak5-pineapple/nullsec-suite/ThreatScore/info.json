@@ -1,0 +1,15 @@
+{
+    "name": "ThreatScore",
+    "title": "Wireless Threat Scorer",
+    "description": "Score wireless networks by threat level analyzing encryption, cipher, auth method, client exposure, signal anomalies, rogue AP indicators, and duplicate SSIDs. Generates environment-wide threat assessment.",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 222,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

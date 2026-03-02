@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Report — n01d Inspector</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --surface2: #1e1e1e;
+            --border: #2a2a2a;
+            --text: #e0e0e0;
+            --dim: #666;
+            --accent: #ff2d2d;
+            --green: #4caf50;
+            --yellow: #ffd600;
+            --cyan: #00bcd4;
+            --orange: #ff6b35;
+            --mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--mono);
+            padding: 2rem;
+        }
+        a { color: var(--cyan); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .back { margin-bottom: 1.5rem; font-size: 0.85rem; }
+        h1 { color: var(--accent); font-size: 1.3rem; margin-bottom: 0.5rem; }
+        h2 { color: var(--cyan); font-size: 1rem; margin: 1.5rem 0 0.8rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+        h3 { color: var(--orange); font-size: 0.9rem; margin: 1rem 0 0.5rem; }
+
+        .risk-meter {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        .risk-meter .score {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+        .risk-meter .score.low { color: var(--green); }
+        .risk-meter .score.med { color: var(--yellow); }
+        .risk-meter .score.high { color: var(--orange); }
+        .risk-meter .score.crit { color: var(--accent); }
+        .risk-meter .label { color: var(--dim); font-size: 0.75rem; margin-top: 0.3rem; }
+
+        .bar-track {
+            width: 100%;
+            height: 10px;
+            background: var(--surface2);
+            border-radius: 5px;
+            margin-top: 0.8rem;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 1s;
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        .card .label { color: var(--dim); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+        .card .value { font-size: 1.1rem; margin-top: 0.3rem; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin: 0.5rem 0; }
+        th { text-align: left; color: var(--dim); padding: 0.5rem; border-bottom: 1px solid var(--border); }
+        td { padding: 0.5rem; border-bottom: 1px solid var(--surface2); }
+        tr:hover { background: var(--surface2); }
+
+        .sev-critical { color: var(--accent); }
+        .sev-high { color: var(--orange); }
+        .sev-medium { color: var(--yellow); }
+        .sev-low { color: var(--green); }
+
+        .spectrogram-img {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .no-data { color: var(--dim); font-style: italic; padding: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="back"><a href="/">← Back to Inspector</a></div>
+
+    <h1>◉ SCAN REPORT</h1>
+    <p style="color:var(--dim);font-size:0.8rem">{{ scan.filename }} — {{ scan.id }}</p>
+
+    <div id="report"></div>
+
+    <script>
+        const scanId = "{{ scan_id }}";
+
+        fetch(`/scan/${scanId}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    document.getElementById('report').innerHTML = `<p class="no-data">Scan failed: ${data.error}</p>`;
+                    return;
+                }
+                if (data.status !== 'complete' || !data.results) {
+                    document.getElementById('report').innerHTML = `<p class="no-data">Scan still in progress (${data.progress}%)...</p>`;
+                    setTimeout(() => location.reload(), 3000);
+                    return;
+                }
+
+                const r = data.results;
+                const scanDir = data.scan_dir || '';
+                let html = '';
+
+                // risk meter
+                const risk = r.combined_risk_score || 0;
+                const riskClass = risk >= 70 ? 'crit' : risk >= 40 ? 'high' : risk >= 15 ? 'med' : 'low';
+                const barColor = risk >= 70 ? 'var(--accent)' : risk >= 40 ? 'var(--orange)' : risk >= 15 ? 'var(--yellow)' : 'var(--green)';
+                html += `
+                    <div class="risk-meter">
+                        <div class="score ${riskClass}">${risk.toFixed(0)}</div>
+                        <div class="label">COMBINED RISK SCORE</div>
+                        <div class="bar-track"><div class="bar-fill" style="width:${risk}%;background:${barColor}"></div></div>
+                    </div>
+                `;
+
+                // audio overview
+                if (r.audio) {
+                    html += '<h2>📊 Audio Properties</h2><div class="grid">';
+                    const a = r.audio;
+                    html += card('Sample Rate', `${a.sample_rate} Hz`);
+                    html += card('Duration', `${a.duration_sec}s`);
+                    html += card('Channels', a.n_channels);
+                    html += card('Noise Floor', `${a.noise_floor_db} dB`);
+                    html += card('Dynamic Range', `${a.dynamic_range_db} dB`);
+                    html += '</div>';
+                }
+
+                // spectrogram
+                if (scanDir) {
+                    html += '<h2>📈 Spectrogram</h2>';
+                    html += `<img class="spectrogram-img" src="/output/${scanDir}/spectrogram_ch0.png" onerror="this.style.display='none'">`;
+                    html += `<img class="spectrogram-img" src="/output/${scanDir}/heatmap_ch0.png" onerror="this.style.display='none'">`;
+                }
+
+                // subliminal
+                if (r.subliminal) {
+                    const s = r.subliminal;
+                    html += '<h2>🔴 Subliminal Analysis</h2>';
+                    html += `<div class="grid">`;
+                    html += card('Subliminal Risk', `${s.risk_score}/100`);
+                    html += card('Infrasonic Energy', `${(s.infrasonic_energy_ratio * 100).toFixed(4)}%`);
+                    html += card('Ultrasonic Energy', `${(s.ultrasonic_energy_ratio * 100).toFixed(4)}%`);
+                    html += card('Subliminal Duration', `${s.total_subliminal_duration_sec}s`);
+                    html += `</div>`;
+
+                    if (s.beacon_candidates && s.beacon_candidates.length) {
+                        html += '<h3>⚠️ Ultrasonic Beacons</h3>';
+                        html += '<table><tr><th>#</th><th>Freq (Hz)</th><th>Duration</th><th>Peak dB</th><th>Confidence</th></tr>';
+                        s.beacon_candidates.forEach((b, i) => {
+                            html += `<tr><td>${i+1}</td><td>${b.freq_hz?.toFixed(1)}</td><td>${b.duration_sec?.toFixed(2)}s</td><td>${b.peak_db?.toFixed(1)}</td><td>${b.confidence?.toFixed(2)}</td></tr>`;
+                        });
+                        html += '</table>';
+                    }
+
+                    if (s.events && s.events.length) {
+                        html += '<h3>Subliminal Events</h3>';
+                        html += eventTable(s.events, 'subliminal');
+                    }
+                }
+
+                // VFL
+                if (r.vfl) {
+                    const v = r.vfl;
+                    html += '<h2>🟡 Variable Frequency Layers</h2>';
+                    html += `<div class="grid">`;
+                    html += card('VFL Risk', `${v.risk_score}/100`);
+                    html += card('Layers Detected', v.layers_detected);
+                    html += card('Dominant Type', v.dominant_layer_type || 'None');
+                    html += card('Spectral Entropy', v.spectral_entropy_mean?.toFixed(4));
+                    html += `</div>`;
+
+                    if (v.events && v.events.length) {
+                        html += '<h3>VFL Events</h3>';
+                        html += eventTable(v.events, 'vfl');
+                    }
+                }
+
+                document.getElementById('report').innerHTML = html;
+            });
+
+        function card(label, value) {
+            return `<div class="card"><div class="label">${label}</div><div class="value">${value}</div></div>`;
+        }
+
+        function eventTable(events, type) {
+            let html = '<table><tr><th>#</th><th>Type</th><th>Severity</th><th>Time</th><th>Freq</th><th>Confidence</th><th>Description</th></tr>';
+            events.forEach((e, i) => {
+                const sev = e.severity || 'info';
+                html += `<tr>
+                    <td>${i+1}</td>
+                    <td>${e.event_type || e.layer_type}</td>
+                    <td class="sev-${sev}">${sev}</td>
+                    <td>${e.start_sec?.toFixed(2)}–${e.end_sec?.toFixed(2)}s</td>
+                    <td>${e.freq_lo_hz?.toFixed(0)}–${e.freq_hi_hz?.toFixed(0)} Hz</td>
+                    <td>${e.confidence?.toFixed(2)}</td>
+                    <td>${(e.description || '').substring(0, 80)}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            return html;
+        }
+    </script>
+</body>
+</html>

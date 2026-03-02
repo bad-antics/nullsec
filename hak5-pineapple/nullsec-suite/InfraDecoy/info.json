@@ -1,0 +1,15 @@
+{
+    "name": "InfraDecoy",
+    "title": "Infra Decoy",
+    "description": "Deploy fake network infrastructure as honeypot lures",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "defense",
+    "platform": "pineapple-pager",
+    "lines": 200,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NullSec Bench</title>
+    <link rel="stylesheet" href="/static/css/nullsec.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <span class="logo">⚡</span>
+            <span class="logo-text">Bench</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/" class="active"><span class="nav-icon">⚡</span> Benchmarks</a></li>
+        </ul>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section">App Network</div>
+        <ul class="nav-links">
+            <li><a href="http://localhost:9000"><span class="nav-icon">⬡</span> Hub</a></li>
+            <li><a href="http://localhost:9001"><span class="nav-icon">◉</span> Monitor</a></li>
+            <li><a href="http://localhost:9002"><span class="nav-icon">◎</span> Scanner</a></li>
+        </ul>
+        <div class="sidebar-footer"><span class="version">v1.0.0</span></div>
+    </nav>
+
+    <main class="content">
+        <header class="topbar">
+            <h1 class="page-title">⚡ Cluster Benchmarks</h1>
+            <div class="topbar-actions">
+                <span class="status-dot" id="ws-dot"></span>
+                <span class="status-text" id="ws-status">Ready</span>
+            </div>
+        </header>
+        <div class="page-content">
+
+            <!-- Quick Actions -->
+            <div class="card-grid" style="margin-bottom:24px;">
+                <div class="card" style="cursor:pointer;" onclick="benchLocal()">
+                    <div class="card-icon">🖥️</div>
+                    <div style="font-weight:600;margin:8px 0;">Benchmark This Machine</div>
+                    <div class="card-sub">CPU, Memory, Disk I/O, Network latency</div>
+                </div>
+                <div class="card" style="cursor:pointer;" onclick="benchCluster()">
+                    <div class="card-icon">🌐</div>
+                    <div style="font-weight:600;margin:8px 0;">Benchmark Entire Cluster</div>
+                    <div class="card-sub">Compare CPU and network across all nodes</div>
+                </div>
+            </div>
+
+            <!-- Node Selection -->
+            <div class="section-header">
+                <div class="section-title">🖥️ Cluster Nodes</div>
+            </div>
+            <div class="node-grid" style="margin-bottom:24px;">
+                {% for n in nodes %}
+                <div class="node-card {{ 'online' if n.online else 'offline' }}">
+                    <div class="node-name">
+                        <span class="status-dot {{ 'online' if n.online else 'offline' }}"></span>
+                        {{ n.name }}
+                        <span class="badge {{ 'badge-green' if n.online else 'badge-red' }}" style="margin-left:auto;">
+                            {{ n.role.upper() }}
+                        </span>
+                    </div>
+                    <div class="node-stats">
+                        <div><div class="node-stat-label">IP</div><div class="node-stat-value">{{ n.ip }}</div></div>
+                        <div><div class="node-stat-label">Cores</div><div class="node-stat-value">{{ n.cores }}</div></div>
+                        <div><div class="node-stat-label">RAM</div><div class="node-stat-value">{{ (n.ram_mb / 1024) | round(1) }} GB</div></div>
+                        <div><div class="node-stat-label">OS</div><div class="node-stat-value">{{ n.os_type }}</div></div>
+                    </div>
+                    {% if n.online %}
+                    <div style="margin-top:12px;">
+                        <button class="btn btn-sm" onclick="benchNode('{{ n.name }}')">⚡ Benchmark</button>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Progress -->
+            <div id="progress-area" style="display:none;">
+                <div class="section-header">
+                    <div class="section-title">⏳ Running...</div>
+                </div>
+                <div class="card" style="padding:20px;" id="progress-card">
+                    <div class="loading"><div class="spinner"></div> <span id="progress-text">Starting benchmark...</span></div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div id="results-area" style="margin-top:24px;">
+                <div class="section-header">
+                    <div class="section-title">📊 Results</div>
+                </div>
+                <div id="results-content">
+                    <div class="empty-state"><div class="empty-icon">⚡</div><div class="empty-text">Run a benchmark to see results</div></div>
+                </div>
+            </div>
+
+            <!-- Comparison Chart -->
+            <div id="chart-area" style="display:none;margin-top:24px;">
+                <div class="section-header">
+                    <div class="section-title">📈 Comparison</div>
+                </div>
+                <div class="card" style="padding:16px;">
+                    <canvas id="compare-chart" height="250"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+<style>
+.result-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; }
+.result-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
+.result-card h3 { color:var(--green); font-size:14px; margin-bottom:12px; }
+.result-metric { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border); font-size:13px; }
+.result-metric:last-child { border:none; }
+.result-metric .label { color:var(--text-dim); }
+.result-metric .value { color:var(--green); font-weight:600; }
+</style>
+
+<script>
+const COLORS = ['#00ff88','#00aaff','#ff4444','#ffcc00','#aa66ff','#ff8800','#00e5ff','#ff66aa'];
+let compareChart = null;
+
+async function api(endpoint, body={}) {
+    const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+    return res.json();
+}
+
+function showProgress(msg) {
+    document.getElementById('progress-area').style.display = 'block';
+    document.getElementById('progress-text').textContent = msg || 'Running...';
+}
+function hideProgress() {
+    document.getElementById('progress-area').style.display = 'none';
+}
+
+// ─── Local Benchmark ────────────────────────────────────────────────────────
+
+async function benchLocal() {
+    showProgress('Running local benchmarks (CPU, Memory, Disk, Network)...');
+    try {
+        const data = await api('/api/bench/local', { tests: ['cpu', 'memory', 'disk', 'network'] });
+        hideProgress();
+        renderLocalResults(data);
+    } catch(e) {
+        hideProgress();
+        document.getElementById('results-content').innerHTML = `<div class="card" style="padding:20px;color:var(--red);">❌ ${e.message}</div>`;
+    }
+}
+
+function renderLocalResults(data) {
+    const el = document.getElementById('results-content');
+    const t = data.tests;
+    let html = `<div class="result-grid">`;
+
+    if (t.cpu) {
+        html += `<div class="result-card">
+            <h3>🧮 CPU — ${data.node}</h3>
+            <div class="result-metric"><span class="label">Single-Thread</span><span class="value">${t.cpu.single_thread_mbps} MB/s</span></div>
+            <div class="result-metric"><span class="label">Multi-Thread</span><span class="value">${t.cpu.multi_thread_mbps} MB/s</span></div>
+            <div class="result-metric"><span class="label">Cores Used</span><span class="value">${t.cpu.cores_used}</span></div>
+            <div class="result-metric"><span class="label">Duration</span><span class="value">${t.cpu.duration_sec}s</span></div>
+        </div>`;
+    }
+    if (t.memory) {
+        html += `<div class="result-card">
+            <h3>🧠 Memory</h3>
+            <div class="result-metric"><span class="label">Write Speed</span><span class="value">${t.memory.write_mbps} MB/s</span></div>
+            <div class="result-metric"><span class="label">Read Speed</span><span class="value">${t.memory.read_mbps} MB/s</span></div>
+            <div class="result-metric"><span class="label">Test Size</span><span class="value">${t.memory.size_mb} MB</span></div>
+        </div>`;
+    }
+    if (t.disk) {
+        html += `<div class="result-card">
+            <h3>💾 Disk I/O</h3>
+            <div class="result-metric"><span class="label">Write Speed</span><span class="value">${t.disk.write_mbps} MB/s</span></div>
+            <div class="result-metric"><span class="label">Read Speed</span><span class="value">${t.disk.read_mbps} MB/s</span></div>
+            <div class="result-metric"><span class="label">Test Size</span><span class="value">${t.disk.size_mb} MB</span></div>
+        </div>`;
+    }
+    if (t.network) {
+        html += `<div class="result-card">
+            <h3>🌐 Network (→ ${t.network.target})</h3>
+            <div class="result-metric"><span class="label">Avg Latency</span><span class="value">${t.network.avg_ms}ms</span></div>
+            <div class="result-metric"><span class="label">Min</span><span class="value">${t.network.min_ms}ms</span></div>
+            <div class="result-metric"><span class="label">Max</span><span class="value">${t.network.max_ms}ms</span></div>
+            <div class="result-metric"><span class="label">Lost</span><span class="value">${t.network.lost || 0}</span></div>
+        </div>`;
+    }
+
+    html += '</div>';
+    el.innerHTML = html;
+}
+
+// ─── Node Benchmark ─────────────────────────────────────────────────────────
+
+async function benchNode(name) {
+    showProgress(`Running benchmarks on ${name}...`);
+    try {
+        const data = await api(`/api/bench/node/${name}`, { tests: ['cpu', 'network'] });
+        hideProgress();
+        renderNodeResult(data);
+    } catch(e) {
+        hideProgress();
+        document.getElementById('results-content').innerHTML = `<div class="card" style="padding:20px;color:var(--red);">❌ ${e.message}</div>`;
+    }
+}
+
+function renderNodeResult(data) {
+    const el = document.getElementById('results-content');
+    const t = data.tests;
+    let html = `<div class="result-grid">`;
+
+    if (t.cpu) {
+        html += `<div class="result-card">
+            <h3>🧮 CPU — ${data.node}</h3>
+            <div class="result-metric"><span class="label">SHA-256 Rate</span><span class="value">${t.cpu.single_thread_mbps || 0} MB/s</span></div>
+            <div class="result-metric"><span class="label">Duration</span><span class="value">${t.cpu.duration_sec || 0}s</span></div>
+            ${t.cpu.error ? `<div style="color:var(--red);margin-top:8px;">⚠ ${t.cpu.error}</div>` : ''}
+        </div>`;
+    }
+    if (t.network) {
+        html += `<div class="result-card">
+            <h3>🌐 Network — ${data.node}</h3>
+            <div class="result-metric"><span class="label">Avg Latency</span><span class="value">${t.network.avg_ms}ms</span></div>
+            <div class="result-metric"><span class="label">Min / Max</span><span class="value">${t.network.min_ms} / ${t.network.max_ms}ms</span></div>
+        </div>`;
+    }
+
+    html += '</div>';
+    el.innerHTML = html;
+}
+
+// ─── Cluster Benchmark ──────────────────────────────────────────────────────
+
+async function benchCluster() {
+    showProgress('Running cluster-wide benchmark... this may take a few minutes.');
+    try {
+        const data = await api('/api/bench/cluster', { tests: ['cpu', 'network'] });
+        hideProgress();
+        renderClusterResults(data);
+    } catch(e) {
+        hideProgress();
+        document.getElementById('results-content').innerHTML = `<div class="card" style="padding:20px;color:var(--red);">❌ ${e.message}</div>`;
+    }
+}
+
+function renderClusterResults(data) {
+    const el = document.getElementById('results-content');
+    let html = `<div class="result-grid">`;
+
+    data.nodes.forEach(n => {
+        const t = n.tests || {};
+        const cpuRate = t.cpu?.single_thread_mbps || t.cpu?.single_thread_mbps || 0;
+        const netLatency = t.network?.avg_ms || '—';
+        html += `<div class="result-card">
+            <h3>${n.error ? '❌' : '✅'} ${n.node}</h3>
+            <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">${n.ip}</div>
+            ${n.error ? `<div style="color:var(--red);">${n.error}</div>` : `
+                <div class="result-metric"><span class="label">CPU (SHA-256)</span><span class="value">${cpuRate} MB/s</span></div>
+                <div class="result-metric"><span class="label">Network Latency</span><span class="value">${netLatency}ms</span></div>
+            `}
+        </div>`;
+    });
+
+    html += '</div>';
+    el.innerHTML = html;
+
+    // Draw comparison chart
+    drawComparisonChart(data.nodes);
+}
+
+function drawComparisonChart(nodes) {
+    const area = document.getElementById('chart-area');
+    area.style.display = 'block';
+
+    const validNodes = nodes.filter(n => !n.error && n.tests?.cpu);
+    const labels = validNodes.map(n => n.node);
+    const cpuData = validNodes.map(n => n.tests.cpu?.single_thread_mbps || 0);
+    const netData = validNodes.map(n => n.tests.network?.avg_ms || 0);
+
+    if (compareChart) compareChart.destroy();
+
+    const ctx = document.getElementById('compare-chart').getContext('2d');
+    compareChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'CPU SHA-256 (MB/s)',
+                    data: cpuData,
+                    backgroundColor: 'rgba(0,255,136,0.6)',
+                    borderColor: '#00ff88',
+                    borderWidth: 1,
+                    yAxisID: 'y',
+                },
+                {
+                    label: 'Network Latency (ms)',
+                    data: netData,
+                    backgroundColor: 'rgba(0,170,255,0.6)',
+                    borderColor: '#00aaff',
+                    borderWidth: 1,
+                    yAxisID: 'y1',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { grid: { color: '#222' }, ticks: { color: '#888', font: { family: 'monospace' } } },
+                y: {
+                    position: 'left',
+                    grid: { color: '#222' },
+                    ticks: { color: '#00ff88', font: { family: 'monospace' } },
+                    title: { display: true, text: 'CPU MB/s', color: '#00ff88' }
+                },
+                y1: {
+                    position: 'right',
+                    grid: { drawOnChartArea: false },
+                    ticks: { color: '#00aaff', font: { family: 'monospace' } },
+                    title: { display: true, text: 'Latency ms', color: '#00aaff' }
+                }
+            },
+            plugins: { legend: { labels: { color: '#888', font: { family: 'monospace' } } } }
+        }
+    });
+}
+
+// ─── WebSocket ──────────────────────────────────────────────────────────────
+
+function connectWS() {
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${proto}//${location.host}/ws`);
+    const dot = document.getElementById('ws-dot');
+    const status = document.getElementById('ws-status');
+
+    ws.onopen = () => { dot.className = 'status-dot online'; status.textContent = 'Connected'; };
+    ws.onclose = () => { dot.className = 'status-dot offline'; status.textContent = 'Disconnected'; setTimeout(connectWS, 3000); };
+    ws.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        if (data.type === 'progress') {
+            document.getElementById('progress-text').textContent = data.msg;
+            status.textContent = data.msg;
+        }
+        if (data.type === 'bench_start') showProgress(`Benchmarking ${data.node}...`);
+        if (data.type === 'bench_complete') { hideProgress(); status.textContent = 'Ready'; }
+        if (data.type === 'cluster_bench_start') showProgress(`Benchmarking ${data.nodes} nodes...`);
+        if (data.type === 'cluster_bench_complete') { hideProgress(); status.textContent = 'Ready'; }
+    };
+}
+connectWS();
+</script>
+</body>
+</html>

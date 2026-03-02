@@ -1,0 +1,15 @@
+{
+    "name": "BeaconDecoder",
+    "title": "Beacon Decoder",
+    "description": "Decode and analyze 802.11 beacon frame contents in detail",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "recon",
+    "platform": "pineapple-pager",
+    "lines": 210,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

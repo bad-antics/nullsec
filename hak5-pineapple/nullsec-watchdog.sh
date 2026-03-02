@@ -12,10 +12,21 @@ STATE_DIR="${CLUSTER_DIR}/watchdog-state"
 SSH_OPTS="-o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o LogLevel=ERROR"
 CHECK_INTERVAL=60
 MAX_FAILURES=3
+RUNNING=true
 
 mkdir -p "$STATE_DIR"
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"; }
+
+# ── Graceful shutdown on SIGTERM/SIGINT ──
+cleanup() {
+    log "Watchdog shutting down (received signal)"
+    RUNNING=false
+    # Kill any child processes (ssh, sleep, ping)
+    kill -- -$$ 2>/dev/null
+    exit 0
+}
+trap cleanup SIGTERM SIGINT SIGHUP EXIT
 
 check_node() {
     local hostname="$1" ip="$2" user="$3" port="$4" os="$5"
@@ -67,7 +78,7 @@ print('WOL sent')
 # ── Main Loop ──
 log "Watchdog started — monitoring $(grep -c '|' "$NODES_FILE" 2>/dev/null || echo 0) nodes"
 
-while true; do
+while $RUNNING; do
     online=0
     offline=0
     total=0
@@ -75,6 +86,7 @@ while true; do
     while IFS='|' read -r hostname ip user port os arch cores ram gpu role tags; do
         [[ -z "$hostname" || "$hostname" == "#"* ]] && continue
         [[ "$ip" == "127.0.0.1" ]] && { ((total++)); ((online++)); continue; }
+        $RUNNING || break
         ((total++))
 
         if check_node "$hostname" "$ip" "$user" "$port" "$os"; then
@@ -89,5 +101,9 @@ while true; do
         log "Status: ${online}/${total} online, ${offline} offline"
     fi
 
-    sleep "$CHECK_INTERVAL"
+    # Interruptible sleep — exits immediately on signal
+    sleep "$CHECK_INTERVAL" &
+    wait $! 2>/dev/null
 done
+
+log "Watchdog stopped gracefully"

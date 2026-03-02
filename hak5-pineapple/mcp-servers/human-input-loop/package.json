@@ -1,0 +1,14 @@
+{
+  "name": "human-in-the-loop-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for human input without consuming Copilot premium requests",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest"
+  }
+}

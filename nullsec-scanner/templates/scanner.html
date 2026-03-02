@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NullSec Scanner</title>
+    <link rel="stylesheet" href="/static/css/nullsec.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <span class="logo">◎</span>
+            <span class="logo-text">Scanner</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/" class="active"><span class="nav-icon">◎</span> Scanner</a></li>
+        </ul>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section">App Network</div>
+        <ul class="nav-links">
+            <li><a href="http://localhost:9000"><span class="nav-icon">⬡</span> Hub</a></li>
+            <li><a href="http://localhost:9001"><span class="nav-icon">◉</span> Monitor</a></li>
+            <li><a href="http://localhost:9003"><span class="nav-icon">⚡</span> Bench</a></li>
+        </ul>
+        <div class="sidebar-footer"><span class="version">v1.0.0</span></div>
+    </nav>
+
+    <main class="content">
+        <header class="topbar">
+            <h1 class="page-title">🔍 Network Scanner</h1>
+            <div class="topbar-actions">
+                <span class="status-dot" id="ws-dot"></span>
+                <span class="status-text" id="ws-status">Ready</span>
+            </div>
+        </header>
+        <div class="page-content">
+
+            <!-- Scanner Tabs -->
+            <div class="tab-bar">
+                <button class="tab active" data-tab="scan" onclick="switchTab('scan')">🎯 Port Scan</button>
+                <button class="tab" data-tab="discover" onclick="switchTab('discover')">🌐 Subnet Discovery</button>
+                <button class="tab" data-tab="fingerprint" onclick="switchTab('fingerprint')">🔬 Fingerprint</button>
+                <button class="tab" data-tab="history" onclick="switchTab('history')">📋 History</button>
+            </div>
+
+            <!-- Port Scan Tab -->
+            <div class="tab-content active" id="tab-scan">
+                <div class="card" style="padding:20px;margin-bottom:24px;">
+                    <div class="input-group">
+                        <input type="text" id="scan-target" placeholder="Target (IP or hostname)" style="flex:2;">
+                        <select id="scan-group" style="flex:1;">
+                            <option value="quick">Quick (23 ports)</option>
+                            <option value="web">Web Ports</option>
+                            <option value="database">Database Ports</option>
+                            <option value="full">Full (1-1024)</option>
+                        </select>
+                        <input type="text" id="scan-custom" placeholder="Custom: 80,443,8080 or 1-100" style="flex:1.5;">
+                        <button class="btn btn-primary" id="btn-scan" onclick="runScan()">⚡ Scan</button>
+                    </div>
+                    <div style="font-size:11px;color:var(--text-dim);">
+                        Tip: Use custom ports like <code style="color:var(--green)">22,80,443,3389</code> or ranges like <code style="color:var(--green)">1-1024</code>
+                    </div>
+                </div>
+                <div id="scan-results"></div>
+            </div>
+
+            <!-- Subnet Discovery Tab -->
+            <div class="tab-content" id="tab-discover">
+                <div class="card" style="padding:20px;margin-bottom:24px;">
+                    <div class="input-group">
+                        <input type="text" id="disc-subnet" placeholder="Subnet (e.g. 192.168.40.0/24)" value="192.168.40.0/24" style="flex:2;">
+                        <input type="text" id="disc-port" placeholder="Probe port" value="22" style="flex:0.5;">
+                        <button class="btn btn-primary" onclick="runDiscover()">🌐 Discover</button>
+                    </div>
+                </div>
+                <div id="discover-results"></div>
+            </div>
+
+            <!-- Fingerprint Tab -->
+            <div class="tab-content" id="tab-fingerprint">
+                <div class="card" style="padding:20px;margin-bottom:24px;">
+                    <div class="input-group">
+                        <input type="text" id="fp-target" placeholder="Target IP or hostname" style="flex:2;">
+                        <button class="btn btn-primary" onclick="runFingerprint()">🔬 Fingerprint</button>
+                    </div>
+                </div>
+                <div id="fingerprint-results"></div>
+            </div>
+
+            <!-- History Tab -->
+            <div class="tab-content" id="tab-history">
+                <div id="history-list"></div>
+            </div>
+
+        </div>
+    </main>
+
+<style>
+.tab-bar { display:flex; gap:4px; margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+.tab { background:none; border:1px solid transparent; border-radius:var(--radius-sm) var(--radius-sm) 0 0;
+       padding:8px 16px; color:var(--text-dim); font-family:inherit; font-size:13px; cursor:pointer; transition:all 0.15s; }
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--green); border-color:var(--border); border-bottom-color:var(--bg-dark); background:var(--bg-card); }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+code { font-family:inherit; }
+.port-row { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--border); font-size:13px; }
+.port-row:hover { background:var(--bg-card-hover); }
+.port-num { font-weight:600; color:var(--green); width:60px; }
+.port-service { color:var(--blue); width:100px; }
+.port-latency { color:var(--text-dim); width:80px; }
+.port-banner { color:var(--text-dim); font-size:11px; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.host-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px; border-left:3px solid var(--green); }
+.host-card .host-ip { font-weight:700; color:var(--green); font-size:15px; }
+.host-card .host-name { color:var(--text-dim); font-size:12px; margin-left:8px; }
+.host-card .host-services { margin-top:8px; display:flex; flex-wrap:wrap; gap:6px; }
+.scan-status { padding:16px; text-align:center; color:var(--text-dim); }
+.scan-status .spinner { display:inline-block; margin-right:8px; }
+</style>
+
+<script>
+function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelector(`[data-tab="${name}"]`).classList.add('active');
+    document.getElementById(`tab-${name}`).classList.add('active');
+    if (name === 'history') loadHistory();
+}
+
+async function api(endpoint, body) {
+    const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+    return res.json();
+}
+
+// ─── Port Scan ──────────────────────────────────────────────────────────────
+
+async function runScan() {
+    const target = document.getElementById('scan-target').value.trim();
+    if (!target) { alert('Enter a target'); return; }
+
+    const group = document.getElementById('scan-group').value;
+    const custom = document.getElementById('scan-custom').value.trim();
+    const results = document.getElementById('scan-results');
+    results.innerHTML = '<div class="scan-status"><div class="spinner"></div> Scanning ' + target + '...</div>';
+
+    document.getElementById('btn-scan').disabled = true;
+
+    try {
+        const data = await api('/api/scan', { target, port_group: group, ports: custom });
+        if (data.error) {
+            results.innerHTML = `<div class="card" style="padding:20px;color:var(--red);">❌ ${data.error}</div>`;
+            return;
+        }
+        renderScanResults(data);
+    } catch(e) {
+        results.innerHTML = `<div class="card" style="padding:20px;color:var(--red);">❌ ${e.message}</div>`;
+    } finally {
+        document.getElementById('btn-scan').disabled = false;
+    }
+}
+
+function renderScanResults(data) {
+    const el = document.getElementById('scan-results');
+    let html = `
+        <div class="stat-row" style="margin-bottom:16px;">
+            <div class="stat-card"><div class="stat-num" style="color:var(--green);">${data.open_count}</div><div class="stat-label">Open Ports</div></div>
+            <div class="stat-card"><div class="stat-num">${data.closed_count}</div><div class="stat-label">Closed</div></div>
+            <div class="stat-card"><div class="stat-num">${data.ports_scanned}</div><div class="stat-label">Scanned</div></div>
+            <div class="stat-card"><div class="stat-num">${data.duration_sec}s</div><div class="stat-label">Duration</div></div>
+        </div>
+        <div class="card" style="margin-bottom:16px;padding:12px 16px;font-size:12px;color:var(--text-dim);">
+            Target: <span style="color:var(--green);font-weight:600;">${data.target}</span>
+            ${data.hostname ? ` (${data.hostname})` : ''}
+            — IP: <span style="color:var(--blue);">${data.ip}</span>
+            — ${data.timestamp}
+        </div>`;
+
+    if (data.open_ports.length > 0) {
+        html += `<div class="table-wrap">
+            <div class="table-header"><div class="table-title">Open Ports</div></div>`;
+        data.open_ports.forEach(p => {
+            html += `<div class="port-row">
+                <div class="port-num">${p.port}</div>
+                <div class="port-service">${p.service}</div>
+                <div class="port-latency">${p.latency_ms}ms</div>
+                <div class="port-banner">${escHtml(p.banner) || '—'}</div>
+            </div>`;
+        });
+        html += '</div>';
+    } else {
+        html += '<div class="card" style="padding:20px;text-align:center;color:var(--text-dim);">No open ports found</div>';
+    }
+    el.innerHTML = html;
+}
+
+// ─── Subnet Discovery ───────────────────────────────────────────────────────
+
+async function runDiscover() {
+    const subnet = document.getElementById('disc-subnet').value.trim();
+    const port = document.getElementById('disc-port').value.trim();
+    const results = document.getElementById('discover-results');
+    results.innerHTML = '<div class="scan-status"><div class="spinner"></div> Discovering hosts on ' + subnet + '...</div>';
+
+    try {
+        const data = await api('/api/discover', { subnet, port: parseInt(port) });
+        if (data.error) {
+            results.innerHTML = `<div class="card" style="padding:20px;color:var(--red);">❌ ${data.error}</div>`;
+            return;
+        }
+        renderDiscoverResults(data);
+    } catch(e) {
+        results.innerHTML = `<div class="card" style="padding:20px;color:var(--red);">❌ ${e.message}</div>`;
+    }
+}
+
+function renderDiscoverResults(data) {
+    const el = document.getElementById('discover-results');
+    let html = `
+        <div class="stat-row" style="margin-bottom:16px;">
+            <div class="stat-card"><div class="stat-num" style="color:var(--green);">${data.hosts_found}</div><div class="stat-label">Hosts Found</div></div>
+            <div class="stat-card"><div class="stat-num">${data.ips_scanned}</div><div class="stat-label">IPs Scanned</div></div>
+            <div class="stat-card"><div class="stat-num">${data.duration_sec}s</div><div class="stat-label">Duration</div></div>
+        </div>`;
+
+    data.hosts.forEach(h => {
+        html += `<div class="host-card">
+            <div>
+                <span class="host-ip">${h.ip}</span>
+                <span class="host-name">${h.hostname || ''}</span>
+                <span style="float:right;color:var(--text-dim);font-size:11px;">${h.latency_ms}ms</span>
+            </div>
+            <div class="host-services">
+                ${h.services.map(s => `<span class="badge badge-blue">${s}</span>`).join('')}
+            </div>
+        </div>`;
+    });
+
+    if (data.hosts.length === 0) {
+        html += '<div class="card" style="padding:20px;text-align:center;color:var(--text-dim);">No hosts found</div>';
+    }
+    el.innerHTML = html;
+}
+
+// ─── Fingerprint ────────────────────────────────────────────────────────────
+
+async function runFingerprint() {
+    const target = document.getElementById('fp-target').value.trim();
+    if (!target) { alert('Enter a target'); return; }
+    const results = document.getElementById('fingerprint-results');
+    results.innerHTML = '<div class="scan-status"><div class="spinner"></div> Fingerprinting ' + target + '...</div>';
+
+    try {
+        const data = await api('/api/fingerprint', { target });
+        if (data.error) {
+            results.innerHTML = `<div class="card" style="padding:20px;color:var(--red);">❌ ${data.error}</div>`;
+            return;
+        }
+        renderFingerprint(data);
+    } catch(e) {
+        results.innerHTML = `<div class="card" style="padding:20px;color:var(--red);">❌ ${e.message}</div>`;
+    }
+}
+
+function renderFingerprint(data) {
+    const el = document.getElementById('fingerprint-results');
+    let html = `
+        <div class="card" style="padding:20px;margin-bottom:16px;">
+            <h3 style="color:var(--green);margin-bottom:12px;">🔬 ${data.target} ${data.hostname ? '(' + data.hostname + ')' : ''}</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div><span style="color:var(--text-dim);">IP:</span> <span style="color:var(--blue);">${data.ip}</span></div>
+                <div><span style="color:var(--text-dim);">Duration:</span> ${data.duration_sec}s</div>
+                <div><span style="color:var(--text-dim);">OS Hints:</span> ${data.os_hints.map(o => `<span class="badge badge-purple">${o}</span>`).join(' ') || '—'}</div>
+                <div><span style="color:var(--text-dim);">Services:</span> ${data.services.map(s => `<span class="badge badge-blue">${s}</span>`).join(' ') || '—'}</div>
+            </div>
+        </div>`;
+
+    if (data.open_ports.length > 0) {
+        html += '<div class="table-wrap"><div class="table-header"><div class="table-title">Open Ports</div></div>';
+        data.open_ports.forEach(p => {
+            html += `<div class="port-row">
+                <div class="port-num">${p.port}</div>
+                <div class="port-service">${p.service}</div>
+                <div class="port-latency">${p.latency_ms}ms</div>
+                <div class="port-banner">${escHtml(p.banner) || '—'}</div>
+            </div>`;
+        });
+        html += '</div>';
+    }
+
+    if (Object.keys(data.banners).length > 0) {
+        html += '<div class="section-header" style="margin-top:16px;"><div class="section-title">Service Banners</div></div>';
+        for (const [port, banner] of Object.entries(data.banners)) {
+            html += `<div class="code-block" style="margin-bottom:8px;"><strong style="color:var(--green);">Port ${port}:</strong>\n${escHtml(banner)}</div>`;
+        }
+    }
+
+    el.innerHTML = html;
+}
+
+// ─── History ────────────────────────────────────────────────────────────────
+
+async function loadHistory() {
+    const el = document.getElementById('history-list');
+    try {
+        const res = await fetch('/api/history');
+        const data = await res.json();
+        if (!data.scans.length) {
+            el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No scans yet. Run a scan to see history.</div></div>';
+            return;
+        }
+        el.innerHTML = data.scans.reverse().map(s => `
+            <div class="card" style="padding:16px;margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <span class="badge badge-${s.type === 'port_scan' ? 'green' : s.type === 'subnet_discovery' ? 'blue' : 'purple'}">${s.type}</span>
+                        <strong style="margin-left:8px;">${s.target || s.subnet || '—'}</strong>
+                    </div>
+                    <span style="color:var(--text-dim);font-size:11px;">${s.timestamp || ''}</span>
+                </div>
+                <div style="margin-top:8px;font-size:12px;color:var(--text-dim);">
+                    ${s.open_count !== undefined ? s.open_count + ' open ports' : ''}
+                    ${s.hosts_found !== undefined ? s.hosts_found + ' hosts found' : ''}
+                    — ${s.duration_sec}s
+                </div>
+            </div>
+        `).join('');
+    } catch(e) {
+        el.innerHTML = '<div class="card" style="padding:20px;color:var(--red);">Failed to load history</div>';
+    }
+}
+
+// ─── WebSocket ──────────────────────────────────────────────────────────────
+
+function connectWS() {
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${proto}//${location.host}/ws`);
+    const dot = document.getElementById('ws-dot');
+    const status = document.getElementById('ws-status');
+
+    ws.onopen = () => { dot.className = 'status-dot online'; status.textContent = 'Connected'; };
+    ws.onclose = () => { dot.className = 'status-dot offline'; status.textContent = 'Disconnected'; setTimeout(connectWS, 3000); };
+    ws.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        if (data.type === 'scan_start') status.textContent = `Scanning ${data.target} (${data.ports} ports)...`;
+        if (data.type === 'scan_complete') status.textContent = 'Ready';
+        if (data.type === 'discover_start') status.textContent = `Discovering ${data.subnet}...`;
+        if (data.type === 'discover_complete') status.textContent = 'Ready';
+    };
+}
+connectWS();
+
+function escHtml(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>

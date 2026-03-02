@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RCE Shield — Remote Code Execution Hardening for PC Gamers</title>
+  <meta name="description" content="Security hardening toolkit for PC gamers. Scan game launchers, anti-cheat, mods, overlays, peripherals & network for RCE vulnerabilities. eBPF kernel monitoring.">
+  <meta name="keywords" content="gaming security, RCE protection, anti-cheat audit, game launcher security, mod scanner, eBPF, PC gamer security">
+  <meta property="og:title" content="RCE Shield — Protecting Gamers from Threats They Don't See Coming">
+  <meta property="og:description" content="Scan game launchers, anti-cheat, mods, overlays, peripherals & network for Remote Code Execution vulnerabilities.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bad-antics.github.io/rce-shield/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #111118;
+      --bg3: #1a1a24;
+      --accent: #00ff88;
+      --accent2: #00ccff;
+      --accent-dim: #00ff8830;
+      --danger: #ff4444;
+      --warning: #ffaa00;
+      --text: #e0e0e8;
+      --text-dim: #8888a0;
+      --border: #2a2a3a;
+      --card: #14141e;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+    a { color: var(--accent); text-decoration: none; transition: opacity .2s; }
+    a:hover { opacity: .8; }
+    code, pre { font-family: var(--mono); }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; backdrop-filter: blur(20px); background: rgba(10,10,15,0.85); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+    .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .nav-brand { font-weight: 800; font-size: 1.1rem; color: var(--accent); display: flex; align-items: center; gap: .5rem; }
+    .nav-brand span { color: var(--text-dim); font-weight: 400; font-size: .85rem; }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a { color: var(--text-dim); font-size: .9rem; font-weight: 500; }
+    .nav-links a:hover { color: var(--accent); }
+    .btn { display: inline-flex; align-items: center; gap: .5rem; padding: .6rem 1.4rem; border-radius: 8px; font-weight: 600; font-size: .9rem; transition: all .2s; border: none; cursor: pointer; }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-primary:hover { background: #33ffaa; transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-dim); }
+    .btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    .btn-outline:hover { background: var(--accent-dim); }
+
+    .hero { padding: 10rem 2rem 6rem; text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at 50% 0%, var(--accent-dim) 0%, transparent 60%); pointer-events: none; }
+    .hero h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; }
+    .hero h1 .accent { color: var(--accent); }
+    .hero h1 .accent2 { color: var(--accent2); }
+    .hero .subtitle { font-size: 1.25rem; color: var(--text-dim); max-width: 700px; margin: 0 auto 2.5rem; }
+    .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
+    .hero-install { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 2rem; font-family: var(--mono); font-size: 1rem; color: var(--accent); display: inline-flex; align-items: center; gap: 1rem; max-width: 600px; margin: 0 auto; }
+    .hero-install .dollar { color: var(--text-dim); }
+    .copy-btn { background: var(--border); border: none; color: var(--text-dim); padding: .3rem .6rem; border-radius: 4px; cursor: pointer; font-size: .75rem; font-family: var(--font); }
+    .copy-btn:hover { color: var(--accent); }
+
+    .stats { display: flex; justify-content: center; gap: 4rem; padding: 2rem 2rem; flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat-num { font-size: 2.5rem; font-weight: 800; color: var(--accent); font-family: var(--mono); }
+    .stat-label { font-size: .85rem; color: var(--text-dim); margin-top: .25rem; }
+
+    section { padding: 5rem 2rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .section-title { text-align: center; margin-bottom: 3rem; }
+    .section-title h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: .5rem; }
+    .section-title p { color: var(--text-dim); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+
+    .layers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .layer-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; transition: transform .2s, border-color .2s; }
+    .layer-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+    .layer-card h3 { font-size: 1.1rem; margin-bottom: .5rem; }
+    .layer-card p { color: var(--text-dim); font-size: .9rem; }
+
+    .scan-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+    .scan-table th, .scan-table td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--border); font-size: .85rem; }
+    .scan-table th { color: var(--text-dim); font-weight: 700; font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; }
+    .scan-table td:first-child { color: var(--accent); font-weight: 600; white-space: nowrap; }
+    .scan-table td:last-child { color: var(--text-dim); }
+
+    .cli-demo { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; max-width: 700px; margin: 2rem auto 0; overflow: hidden; }
+    .cli-header { display: flex; align-items: center; gap: .5rem; padding: .75rem 1rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .cli-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .cli-dot.r { background: #ff5f57; }
+    .cli-dot.y { background: #febc2e; }
+    .cli-dot.g { background: #28c840; }
+    .cli-title { font-size: .75rem; color: var(--text-dim); margin-left: .5rem; font-family: var(--mono); }
+    .cli-body { padding: 1.5rem; font-family: var(--mono); font-size: .85rem; line-height: 1.8; }
+    .cli-body .prompt { color: var(--accent); }
+    .cli-body .cmd { color: var(--text); }
+    .cli-body .out { color: var(--text-dim); }
+    .cli-body .ok { color: var(--accent); }
+    .cli-body .warn { color: var(--warning); }
+    .cli-body .crit { color: var(--danger); }
+
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+    .price-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; text-align: center; transition: transform .2s, border-color .2s; position: relative; }
+    .price-card:hover { transform: translateY(-4px); }
+    .price-card.featured { border-color: var(--accent); box-shadow: 0 0 40px var(--accent-dim); }
+    .price-card.featured::before { content: 'RECOMMENDED'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #000; padding: .25rem 1rem; border-radius: 12px; font-size: .7rem; font-weight: 800; }
+    .price-card h3 { font-size: 1.3rem; margin-bottom: .5rem; }
+    .price-card .price { font-size: 3rem; font-weight: 800; margin: 1rem 0; font-family: var(--mono); }
+    .price-card .price span { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
+    .price-card .price-sub { color: var(--text-dim); font-size: .9rem; margin-bottom: 1.5rem; }
+    .price-features { list-style: none; text-align: left; margin-bottom: 2rem; }
+    .price-features li { padding: .5rem 0; display: flex; align-items: center; gap: .75rem; font-size: .9rem; }
+    .price-features .check { color: var(--accent); font-weight: bold; }
+    .price-features .x { color: var(--text-dim); }
+    .price-card .btn { width: 100%; justify-content: center; }
+
+    .output-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+    .output-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+    .output-card .out-icon { font-size: 1.5rem; margin-bottom: .5rem; }
+    .output-card h4 { font-size: .95rem; margin-bottom: .25rem; }
+    .output-card p { color: var(--text-dim); font-size: .8rem; }
+
+    footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--text-dim); font-size: .85rem; }
+    footer .footer-links { display: flex; gap: 2rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; }
+
+    @media (max-width: 768px) {
+      .nav-links { gap: 1rem; }
+      .stats { gap: 2rem; }
+      .hero { padding: 8rem 1.5rem 4rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <div class="nav-brand">🛡️ RCE Shield <span>by NullSec</span></div>
+      <div class="nav-links">
+        <a href="#scanners">Scanners</a>
+        <a href="#threats">Threats</a>
+        <a href="#pricing">Pricing</a>
+        <a href="https://github.com/bad-antics/rce-shield" target="_blank">GitHub</a>
+        <a href="#pricing" class="btn btn-primary">Get Shield</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>
+      <span class="accent">Harden</span> Your<br>
+      Gaming <span class="accent2">Rig.</span>
+    </h1>
+    <p class="subtitle">
+      RCE Shield scans your game launchers, anti-cheat drivers, mods, overlays, peripherals, and
+      network for Remote Code Execution vulnerabilities. Auto-fix with backup. Real-time eBPF monitoring.
+    </p>
+    <div class="hero-cta">
+      <a href="https://github.com/bad-antics/rce-shield" class="btn btn-primary">Install RCE Shield →</a>
+      <a href="https://github.com/bad-antics/rce-shield" class="btn btn-outline" target="_blank">⭐ Star on GitHub</a>
+    </div>
+    <div class="hero-install">
+      <span><span class="dollar">$</span> pip install rce-shield && rce-shield scan --full</span>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('pip install rce-shield && rce-shield scan --full');this.textContent='Copied!'">Copy</button>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Scan Modules</div></div>
+    <div class="stat"><div class="stat-num">20+</div><div class="stat-label">Software Targets</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Output Formats</div></div>
+    <div class="stat"><div class="stat-num">0</div><div class="stat-label">Deps on Target</div></div>
+  </div>
+
+  <section id="scanners">
+    <div class="container">
+      <div class="section-title">
+        <h2>6 Scan Modules</h2>
+        <p>Every attack surface a gamer exposes — scanned, scored, and remediated.</p>
+      </div>
+      <div class="layers-grid">
+        <div class="layer-card">
+          <div style="font-size:1.5rem; margin-bottom:.75rem;">🎮</div>
+          <h3>Game Launchers</h3>
+          <p>Steam, Epic, Battle.net, EA App, GOG Galaxy. Protocol handler validation, auto-update MITM, DLL hijacking, privilege escalation, workshop audit.</p>
+        </div>
+        <div class="layer-card">
+          <div style="font-size:1.5rem; margin-bottom:.75rem;">🛡️</div>
+          <h3>Anti-Cheat Drivers</h3>
+          <p>EAC, BattlEye, Riot Vanguard, FACEIT. Kernel driver signatures, service ACLs, known CVEs, ring-0 attack surface, boot-time audit.</p>
+        </div>
+        <div class="layer-card">
+          <div style="font-size:1.5rem; margin-bottom:.75rem;">🔌</div>
+          <h3>Mods & Plugins</h3>
+          <p>Nexus/Vortex, CurseForge, Thunderstore, Steam Workshop. Fractureiser detection, obfuscated code analysis, sandbox escape, symlink attacks.</p>
+        </div>
+        <div class="layer-card">
+          <div style="font-size:1.5rem; margin-bottom:.75rem;">📡</div>
+          <h3>Network Exposure</h3>
+          <p>Open port enumeration, UPnP/NAT-PMP audit, game streaming security (Parsec, Moonlight, Steam Link), voice chat protocol analysis, DDoS assessment.</p>
+        </div>
+        <div class="layer-card">
+          <div style="font-size:1.5rem; margin-bottom:.75rem;">🖥️</div>
+          <h3>Overlays & Hooks</h3>
+          <p>Discord, GeForce Experience, AMD Adrenalin, OBS. DLL injection detection, WebSocket/HTTP API exposure, telemetry endpoints, browser source sandboxing.</p>
+        </div>
+        <div class="layer-card">
+          <div style="font-size:1.5rem; margin-bottom:.75rem;">⌨️</div>
+          <h3>Peripherals</h3>
+          <p>Razer Synapse, iCUE, Logitech G Hub. Auto-update integrity, background service privileges, macro engine sandbox, USB HID attack surface.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="threats" style="background: var(--bg2);">
+    <div class="container">
+      <div class="section-title">
+        <h2>Why Gamers Are Targets</h2>
+        <p>Your gaming setup has more attack surface than most enterprise networks.</p>
+      </div>
+      <div class="layers-grid">
+        <div class="layer-card">
+          <h3>🔑 Elevated Privileges</h3>
+          <p>Game launchers run with admin rights. Anti-cheat loads kernel drivers. One exploit = full system access.</p>
+        </div>
+        <div class="layer-card">
+          <h3>📦 Untrusted Mods</h3>
+          <p>Mods from Nexus, CurseForge, and Workshop execute arbitrary code. The Fractureiser incident proved this at scale.</p>
+        </div>
+        <div class="layer-card">
+          <h3>🔗 Kernel-Level Access</h3>
+          <p>EAC, BattlEye, and Vanguard operate at ring-0. A compromised anti-cheat is a rootkit with a different name.</p>
+        </div>
+        <div class="layer-card">
+          <h3>🌐 Open Ports</h3>
+          <p>Multiplayer, voice chat, game streaming, and UPnP all punch holes in your firewall. Most gamers never audit them.</p>
+        </div>
+        <div class="layer-card">
+          <h3>💉 DLL Injection</h3>
+          <p>Discord, GeForce, and AMD overlays inject DLLs into every game process. Each hook is a potential attack vector.</p>
+        </div>
+        <div class="layer-card">
+          <h3>🔄 Auto-Update RCE</h3>
+          <p>Razer Synapse, iCUE, and Logitech G Hub auto-update with SYSTEM privileges. MITM = instant code execution.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-title">
+        <h2>Live Demo</h2>
+        <p>What a full scan looks like on a typical gaming PC.</p>
+      </div>
+      <div class="cli-demo">
+        <div class="cli-header">
+          <div class="cli-dot r"></div><div class="cli-dot y"></div><div class="cli-dot g"></div>
+          <span class="cli-title">rce-shield — full scan</span>
+        </div>
+        <div class="cli-body">
+          <span class="prompt">$</span> <span class="cmd">rce-shield scan --full</span><br><br>
+          <span class="ok">🛡️ RCE Shield v1.0.0 — Full System Scan</span><br>
+          <span class="out">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span><br><br>
+          <span class="ok">[1/6] Scanning game launchers...</span><br>
+          <span class="out">&nbsp;&nbsp;✅ Steam — protocol handler secure</span><br>
+          <span class="warn">&nbsp;&nbsp;⚠️ Epic Games — Unreal Engine CVE-2023-36340</span><br>
+          <span class="out">&nbsp;&nbsp;✅ Battle.net — agent process OK</span><br><br>
+          <span class="ok">[2/6] Auditing anti-cheat drivers...</span><br>
+          <span class="out">&nbsp;&nbsp;✅ EAC — driver signature valid</span><br>
+          <span class="crit">&nbsp;&nbsp;🔴 Riot Vanguard — boot driver, ring-0 access</span><br>
+          <span class="out">&nbsp;&nbsp;✅ BattlEye — memory protection OK</span><br><br>
+          <span class="ok">[3/6] Scanning mods & plugins...</span><br>
+          <span class="out">&nbsp;&nbsp;✅ 142 mods scanned, 0 Fractureiser patterns</span><br>
+          <span class="warn">&nbsp;&nbsp;⚠️ 3 mods with obfuscated code detected</span><br><br>
+          <span class="ok">[4/6] Network exposure audit...</span><br>
+          <span class="crit">&nbsp;&nbsp;🔴 UPnP enabled — 4 forwarded ports exposed</span><br>
+          <span class="warn">&nbsp;&nbsp;⚠️ Discord RPC on localhost:6463</span><br><br>
+          <span class="ok">[5/6] Overlay & hook analysis...</span><br>
+          <span class="out">&nbsp;&nbsp;✅ Discord overlay — sandboxed</span><br>
+          <span class="warn">&nbsp;&nbsp;⚠️ GeForce Experience — telemetry active</span><br><br>
+          <span class="ok">[6/6] Peripheral software audit...</span><br>
+          <span class="warn">&nbsp;&nbsp;⚠️ Razer Synapse — SYSTEM-level auto-update</span><br><br>
+          <span class="out">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span><br>
+          <span class="ok">Score: 72/100</span> &nbsp; <span class="crit">Critical: 2</span> &nbsp; <span class="warn">Warnings: 4</span> &nbsp; <span class="out">Info: 8</span><br>
+          <span class="out">Run `rce-shield fix --auto` to remediate</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background: var(--bg2);">
+    <div class="container">
+      <div class="section-title">
+        <h2>Output Formats</h2>
+        <p>Export findings in any format your workflow needs.</p>
+      </div>
+      <div class="output-grid">
+        <div class="output-card">
+          <div class="out-icon">🖥️</div>
+          <h4>Terminal</h4>
+          <p>Color-coded severity with progress bars</p>
+        </div>
+        <div class="output-card">
+          <div class="out-icon">📊</div>
+          <h4>HTML</h4>
+          <p>Interactive dashboard with risk scores</p>
+        </div>
+        <div class="output-card">
+          <div class="out-icon">📋</div>
+          <h4>JSON</h4>
+          <p>Machine-readable for CI/CD pipelines</p>
+        </div>
+        <div class="output-card">
+          <div class="out-icon">📑</div>
+          <h4>CSV</h4>
+          <p>Spreadsheet-compatible export</p>
+        </div>
+        <div class="output-card">
+          <div class="out-icon">🔒</div>
+          <h4>SARIF</h4>
+          <p>GitHub Security tab integration</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="container">
+      <div class="section-title">
+        <h2>Pricing</h2>
+        <p>Free for personal use. Pro adds real-time monitoring and auto-fix.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <h3>Gamer</h3>
+          <div class="price">$0</div>
+          <div class="price-sub">Free — protect your rig</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> All 6 scan modules</li>
+            <li><span class="check">✓</span> Terminal + JSON output</li>
+            <li><span class="check">✓</span> CVE vulnerability matching</li>
+            <li><span class="check">✓</span> Manual remediation guides</li>
+            <li><span class="check">✓</span> Community support</li>
+            <li><span class="x">—</span> Auto-fix engine</li>
+            <li><span class="x">—</span> Real-time monitoring</li>
+            <li><span class="x">—</span> HTML/SARIF reports</li>
+          </ul>
+          <a href="https://github.com/bad-antics/rce-shield" class="btn btn-outline">Install Free</a>
+        </div>
+        <div class="price-card featured">
+          <h3>Pro Gamer</h3>
+          <div class="price">$9<span>/mo</span></div>
+          <div class="price-sub">For serious gamers & streamers</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> Everything in Gamer</li>
+            <li><span class="check">✓</span> Auto-fix with backup</li>
+            <li><span class="check">✓</span> Real-time eBPF monitoring</li>
+            <li><span class="check">✓</span> HTML dashboard reports</li>
+            <li><span class="check">✓</span> SARIF GitHub integration</li>
+            <li><span class="check">✓</span> Priority CVE updates</li>
+            <li><span class="check">✓</span> Discord support channel</li>
+            <li><span class="x">—</span> Fleet management</li>
+          </ul>
+          <a href="https://github.com/sponsors/bad-antics" class="btn btn-primary">Go Pro →</a>
+        </div>
+        <div class="price-card">
+          <h3>Esports Org</h3>
+          <div class="price">$49<span>/mo</span></div>
+          <div class="price-sub">For teams & tournaments</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> Everything in Pro</li>
+            <li><span class="check">✓</span> Fleet scan (up to 50 PCs)</li>
+            <li><span class="check">✓</span> Centralized dashboard</li>
+            <li><span class="check">✓</span> Custom policy enforcement</li>
+            <li><span class="check">✓</span> Tournament hardening mode</li>
+            <li><span class="check">✓</span> Compliance reporting</li>
+            <li><span class="check">✓</span> Dedicated support</li>
+            <li><span class="check">✓</span> API access</li>
+          </ul>
+          <a href="mailto:badxantics@gmail.com?subject=RCE%20Shield%20Esports" class="btn btn-outline">Contact Sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="text-align: center; padding: 6rem 2rem; background: var(--bg2);">
+    <div class="container">
+      <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">
+        Protect Your Rig from<br><span style="color: var(--accent);">Threats You Don't See Coming.</span>
+      </h2>
+      <p style="color: var(--text-dim); font-size: 1.1rem; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+        One command. Six scan modules. Every attack surface covered.
+      </p>
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="https://github.com/bad-antics/rce-shield" class="btn btn-primary">🛡️ Install RCE Shield</a>
+        <a href="https://github.com/sponsors/bad-antics" class="btn btn-outline">💛 Sponsor</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/bad-antics/rce-shield">GitHub</a>
+      <a href="https://github.com/bad-antics/rce-shield/issues">Issues</a>
+      <a href="https://github.com/bad-antics/rce-shield/blob/main/LICENSE">License (MIT)</a>
+      <a href="https://github.com/sponsors/bad-antics">Sponsor</a>
+      <a href="mailto:badxantics@gmail.com">Contact</a>
+    </div>
+    <p>© 2026 NullSec / bad-antics. MIT Licensed. Defensive use only — scan your own systems.</p>
+  </footer>
+</body>
+</html>

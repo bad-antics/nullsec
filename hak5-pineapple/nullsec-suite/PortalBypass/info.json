@@ -1,0 +1,15 @@
+{
+    "name": "PortalBypass",
+    "title": "Captive Portal Bypass",
+    "description": "Detect and bypass captive portals using MAC cloning from authenticated clients, DNS tunneling checks, direct IP probing, and portal page capture with form field extraction.",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "attack",
+    "platform": "pineapple-pager",
+    "lines": 213,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": false
+    }
+}

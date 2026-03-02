@@ -243,6 +243,17 @@ setup_firewall() {
     sysctl -w net.ipv4.ip_forward=1 > /dev/null
     sysctl -w net.ipv6.conf.all.forwarding=1 > /dev/null
 
+    # ─── Mesh-optimized kernel tuning ───
+    sysctl -w net.ipv4.tcp_slow_start_after_idle=0 > /dev/null 2>&1
+    sysctl -w net.ipv4.tcp_mtu_probing=1 > /dev/null 2>&1
+    sysctl -w net.ipv4.neigh.default.gc_thresh1=1024 > /dev/null 2>&1
+    sysctl -w net.ipv4.neigh.default.gc_thresh2=4096 > /dev/null 2>&1
+    sysctl -w net.ipv4.neigh.default.gc_thresh3=8192 > /dev/null 2>&1
+    sysctl -w net.ipv4.tcp_keepalive_time=60 > /dev/null 2>&1
+    sysctl -w net.ipv4.tcp_keepalive_intvl=10 > /dev/null 2>&1
+    sysctl -w net.ipv4.tcp_keepalive_probes=6 > /dev/null 2>&1
+    log "Mesh kernel tuning applied (neighbor tables, keepalive, MTU probing)"
+
     # Make persistent
     if ! grep -q "net.ipv4.ip_forward=1" /etc/sysctl.conf 2>/dev/null; then
         cat >> /etc/sysctl.conf << 'SYSCTL'
@@ -509,12 +520,14 @@ PEERJOIN
 
     # Set batman-adv parameters
     # Gateway mode: server (this machine shares internet to mesh)
-    batctl meshif "$BAT_IFACE" gw_mode server 2>/dev/null || \
-    batctl gw_mode server 2>/dev/null || true
+    # Announce real bandwidth (default 10/2 MBit is way too low)
+    batctl meshif "$BAT_IFACE" gw_mode server 1000mbit/1000mbit 2>/dev/null || \
+    batctl gw_mode server 1000mbit/1000mbit 2>/dev/null || true
 
     # Originator interval (ms) - how often we announce ourselves
-    batctl meshif "$BAT_IFACE" orig_interval 1000 2>/dev/null || \
-    batctl orig_interval 1000 2>/dev/null || true
+    # 500ms = faster convergence for small mesh (default 1000ms)
+    batctl meshif "$BAT_IFACE" orig_interval 500 2>/dev/null || \
+    batctl orig_interval 500 2>/dev/null || true
 
     # Enable distributed ARP table
     batctl meshif "$BAT_IFACE" distributed_arp_table 1 2>/dev/null || \
@@ -531,6 +544,24 @@ PEERJOIN
     # Set hop penalty (lower = prefer this gateway)
     batctl meshif "$BAT_IFACE" hop_penalty 15 2>/dev/null || \
     batctl hop_penalty 15 2>/dev/null || true
+
+    # Enable network coding (XOR-based, improves multi-hop throughput)
+    batctl meshif "$BAT_IFACE" network_coding 1 2>/dev/null || \
+    batctl nc 1 2>/dev/null || true
+
+    # ─── Interface Performance Tuning ───
+    # Increase transmit queue to prevent drops under load
+    ip link set "$BAT_IFACE" txqueuelen 5000 2>/dev/null || true
+
+    # Smart queuing discipline (CAKE > fq_codel > default)
+    tc qdisc replace dev "$BAT_IFACE" root cake bandwidth 1gbit 2>/dev/null || \
+        tc qdisc replace dev "$BAT_IFACE" root fq_codel 2>/dev/null || true
+
+    # Tune transport interface
+    if [[ -n "$mesh_transport" ]]; then
+        local transport_if="$MESH_IFACE"
+        ip link set "$transport_if" txqueuelen 5000 2>/dev/null || true
+    fi
 
     log "batman-adv configured ✓"
     log "  Mesh ID:      ${MESH_ID}"
@@ -1204,6 +1235,7 @@ show_help() {
     echo -e "  ${CYAN}mesh${NC}        Setup batman-adv mesh only (Phase 3)"
     echo -e "  ${CYAN}pineapple${NC}   Setup Pineapple integration (Phase 4)"
     echo -e "  ${CYAN}flipper${NC}     Setup Flipper Zero bridge (Phase 5)"
+    echo -e "  ${CYAN}optimize${NC}    Tune mesh for max performance (run after setup)"
     echo -e "  ${CYAN}status${NC}      Show mesh network status"
     echo -e "  ${CYAN}monitor${NC}     Real-time mesh monitoring (installs tools)"
     echo -e "  ${CYAN}teardown${NC}    Remove all mesh components"
@@ -1284,6 +1316,18 @@ main() {
             check_root
             banner
             setup_flipper
+            ;;
+        optimize|tune|perf)
+            check_root
+            banner
+            SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+            if [[ -x "${SCRIPT_DIR}/nullsec-mesh-optimize.sh" ]]; then
+                exec "${SCRIPT_DIR}/nullsec-mesh-optimize.sh" "${2:-}"
+            else
+                err "nullsec-mesh-optimize.sh not found in ${SCRIPT_DIR}"
+                info "Download it or run: ./nullsec-mesh-setup.sh setup"
+                exit 1
+            fi
             ;;
         status|stat)
             banner

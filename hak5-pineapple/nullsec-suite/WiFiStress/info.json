@@ -1,0 +1,15 @@
+{
+    "name": "WiFiStress",
+    "title": "WiFi Stress Tester",
+    "description": "Test wireless infrastructure resilience with auth flood, deauth recovery, and channel saturation analysis. Measures baseline performance and grades AP robustness under load.",
+    "author": "bad-antics",
+    "version": "1.0.0",
+    "category": "general",
+    "platform": "pineapple-pager",
+    "lines": 186,
+    "firmware": ">=2.0",
+    "props": {
+        "interface": true,
+        "monitor_mode": true
+    }
+}

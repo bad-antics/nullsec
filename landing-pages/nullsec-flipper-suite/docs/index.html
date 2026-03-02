@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NullSec Flipper Suite — 430+ Files for Flipper Zero</title>
+  <meta name="description" content="The largest open-source payload collection for Flipper Zero. 80 BadUSB, 40 SubGHz, 16 IR remotes, NFC/RFID templates, 81 animations. Compatible with all firmware.">
+  <meta name="keywords" content="flipper zero, badusb, subghz, infrared, nfc, rfid, flipper payloads, hacking tools, pentest">
+  <meta property="og:title" content="NullSec Flipper Suite — 430+ Files for Flipper Zero">
+  <meta property="og:description" content="Professional Flipper Zero payload collection. BadUSB, SubGHz, IR, NFC, RFID, iButton, animations.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bad-antics.github.io/nullsec-flipper-suite/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #111118;
+      --bg3: #1a1a24;
+      --accent: #ff6b35;
+      --accent2: #00ccff;
+      --accent-dim: #ff6b3530;
+      --danger: #ff4444;
+      --warning: #ffaa00;
+      --green: #00ff88;
+      --text: #e0e0e8;
+      --text-dim: #8888a0;
+      --border: #2a2a3a;
+      --card: #14141e;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+    a { color: var(--accent); text-decoration: none; transition: opacity .2s; }
+    a:hover { opacity: .8; }
+    code, pre { font-family: var(--mono); }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; backdrop-filter: blur(20px); background: rgba(10,10,15,0.85); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+    .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .nav-brand { font-weight: 800; font-size: 1.1rem; color: var(--accent); display: flex; align-items: center; gap: .5rem; }
+    .nav-brand span { color: var(--text-dim); font-weight: 400; font-size: .85rem; }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a { color: var(--text-dim); font-size: .9rem; font-weight: 500; }
+    .nav-links a:hover { color: var(--accent); }
+    .btn { display: inline-flex; align-items: center; gap: .5rem; padding: .6rem 1.4rem; border-radius: 8px; font-weight: 600; font-size: .9rem; transition: all .2s; border: none; cursor: pointer; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #e85d2c; transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-dim); }
+    .btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    .btn-outline:hover { background: var(--accent-dim); }
+
+    .hero { padding: 10rem 2rem 6rem; text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at 50% 0%, var(--accent-dim) 0%, transparent 60%); pointer-events: none; }
+    .hero h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; }
+    .hero h1 .accent { color: var(--accent); }
+    .hero h1 .accent2 { color: var(--accent2); }
+    .hero .subtitle { font-size: 1.25rem; color: var(--text-dim); max-width: 680px; margin: 0 auto 2.5rem; }
+    .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
+    .hero-install { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 2rem; font-family: var(--mono); font-size: .9rem; color: var(--accent); display: inline-flex; align-items: center; gap: 1rem; max-width: 650px; margin: 0 auto; }
+    .hero-install .dollar { color: var(--text-dim); }
+    .copy-btn { background: var(--border); border: none; color: var(--text-dim); padding: .3rem .6rem; border-radius: 4px; cursor: pointer; font-size: .75rem; font-family: var(--font); }
+    .copy-btn:hover { color: var(--accent); }
+
+    .stats { display: flex; justify-content: center; gap: 4rem; padding: 2rem 2rem; flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat-num { font-size: 2.5rem; font-weight: 800; color: var(--accent); font-family: var(--mono); }
+    .stat-label { font-size: .85rem; color: var(--text-dim); margin-top: .25rem; }
+
+    section { padding: 5rem 2rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .section-title { text-align: center; margin-bottom: 3rem; }
+    .section-title h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: .5rem; }
+    .section-title p { color: var(--text-dim); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+
+    .layers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .layer-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; transition: transform .2s, border-color .2s; }
+    .layer-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+    .layer-card h3 { font-size: 1.1rem; margin-bottom: .5rem; display: flex; align-items: center; gap: .5rem; }
+    .layer-card p { color: var(--text-dim); font-size: .9rem; }
+    .layer-card .count { background: var(--accent-dim); color: var(--accent); padding: .15rem .5rem; border-radius: 6px; font-size: .75rem; font-weight: 700; font-family: var(--mono); }
+
+    .firmware-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
+    .fw-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center; transition: transform .2s, border-color .2s; }
+    .fw-card:hover { transform: translateY(-4px); border-color: var(--green); }
+    .fw-card .fw-icon { font-size: 2rem; margin-bottom: .75rem; }
+    .fw-card h3 { font-size: 1rem; margin-bottom: .25rem; }
+    .fw-card p { color: var(--text-dim); font-size: .8rem; }
+    .fw-card .compat { color: var(--green); font-weight: 700; font-size: .8rem; margin-top: .5rem; }
+
+    .usecases-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .usecase-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; }
+    .usecase-card .icon { font-size: 2rem; margin-bottom: 1rem; }
+    .usecase-card h3 { font-size: 1.1rem; margin-bottom: .5rem; }
+    .usecase-card p { color: var(--text-dim); font-size: .9rem; }
+
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+    .price-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; text-align: center; transition: transform .2s, border-color .2s; position: relative; }
+    .price-card:hover { transform: translateY(-4px); }
+    .price-card.featured { border-color: var(--accent); box-shadow: 0 0 40px var(--accent-dim); }
+    .price-card.featured::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: .25rem 1rem; border-radius: 12px; font-size: .7rem; font-weight: 800; }
+    .price-card h3 { font-size: 1.3rem; margin-bottom: .5rem; }
+    .price-card .price { font-size: 3rem; font-weight: 800; margin: 1rem 0; font-family: var(--mono); }
+    .price-card .price span { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
+    .price-card .price-sub { color: var(--text-dim); font-size: .9rem; margin-bottom: 1.5rem; }
+    .price-features { list-style: none; text-align: left; margin-bottom: 2rem; }
+    .price-features li { padding: .5rem 0; display: flex; align-items: center; gap: .75rem; font-size: .9rem; }
+    .price-features .check { color: var(--green); font-weight: bold; }
+    .price-features .x { color: var(--text-dim); }
+    .price-card .btn { width: 100%; justify-content: center; }
+
+    .cli-demo { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; max-width: 700px; margin: 2rem auto 0; overflow: hidden; }
+    .cli-header { display: flex; align-items: center; gap: .5rem; padding: .75rem 1rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .cli-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .cli-dot.r { background: #ff5f57; }
+    .cli-dot.y { background: #febc2e; }
+    .cli-dot.g { background: #28c840; }
+    .cli-title { font-size: .75rem; color: var(--text-dim); margin-left: .5rem; font-family: var(--mono); }
+    .cli-body { padding: 1.5rem; font-family: var(--mono); font-size: .85rem; line-height: 1.8; }
+    .cli-body .prompt { color: var(--accent); }
+    .cli-body .cmd { color: var(--text); }
+    .cli-body .out { color: var(--text-dim); }
+    .cli-body .ok { color: var(--green); }
+    .cli-body .warn { color: var(--warning); }
+
+    footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--text-dim); font-size: .85rem; }
+    footer .footer-links { display: flex; gap: 2rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; }
+
+    @media (max-width: 768px) {
+      .nav-links { gap: 1rem; }
+      .stats { gap: 2rem; }
+      .hero { padding: 8rem 1.5rem 4rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <div class="nav-brand">🐬 NullSec Flipper Suite <span>by NullSec</span></div>
+      <div class="nav-links">
+        <a href="#payloads">Payloads</a>
+        <a href="#firmware">Firmware</a>
+        <a href="#pricing">Pricing</a>
+        <a href="https://github.com/bad-antics/nullsec-flipper-suite" target="_blank">GitHub</a>
+        <a href="#pricing" class="btn btn-primary">Get Suite</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>
+      <span class="accent">430+</span> Files.<br>
+      One <span class="accent2">Flipper.</span>
+    </h1>
+    <p class="subtitle">
+      The largest open-source payload collection for Flipper Zero. BadUSB scripts, SubGHz signals,
+      IR remotes, NFC/RFID templates, and custom animations. Ready to deploy.
+    </p>
+    <div class="hero-cta">
+      <a href="https://github.com/bad-antics/nullsec-flipper-suite/releases" class="btn btn-primary">Download Suite →</a>
+      <a href="https://github.com/bad-antics/nullsec-flipper-suite" class="btn btn-outline" target="_blank">⭐ Star on GitHub</a>
+    </div>
+    <div class="hero-install">
+      <span><span class="dollar">$</span> git clone https://github.com/bad-antics/nullsec-flipper-suite.git</span>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('git clone https://github.com/bad-antics/nullsec-flipper-suite.git');this.textContent='Copied!'">Copy</button>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">430+</div><div class="stat-label">Total Files</div></div>
+    <div class="stat"><div class="stat-num">80</div><div class="stat-label">BadUSB Scripts</div></div>
+    <div class="stat"><div class="stat-num">40</div><div class="stat-label">SubGHz Signals</div></div>
+    <div class="stat"><div class="stat-num">16</div><div class="stat-label">IR Remotes</div></div>
+    <div class="stat"><div class="stat-num">81</div><div class="stat-label">Animations</div></div>
+  </div>
+
+  <section id="payloads">
+    <div class="container">
+      <div class="section-title">
+        <h2>Payload Categories</h2>
+        <p>Every signal, script, and template organized by protocol. Drag, drop, deploy.</p>
+      </div>
+      <div class="layers-grid">
+        <div class="layer-card">
+          <h3>⌨️ BadUSB <span class="count">80</span></h3>
+          <p>Keystroke injection payloads for Windows, macOS, and Linux. Reverse shells, exfiltration scripts, system profilers, Wi-Fi credential harvesters, and persistence installers.</p>
+        </div>
+        <div class="layer-card">
+          <h3>📻 SubGHz <span class="count">40</span></h3>
+          <p>Pre-captured signals for 315 MHz, 433 MHz, 868 MHz, and 915 MHz. Garage doors, gate openers, weather stations, car keyfobs, doorbells, and IoT devices.</p>
+        </div>
+        <div class="layer-card">
+          <h3>📡 Infrared <span class="count">16</span></h3>
+          <p>Universal remote databases for TVs, projectors, ACs, soundbars, set-top boxes, fans, and LED strips. Samsung, LG, Sony, Vizio, Roku, and more.</p>
+        </div>
+        <div class="layer-card">
+          <h3>💳 NFC/RFID</h3>
+          <p>Mifare Classic, NTAG, and DESFire templates. Badge cloning profiles, access card dumps, NFC tag emulation data. UID spoofing presets.</p>
+        </div>
+        <div class="layer-card">
+          <h3>🔑 iButton</h3>
+          <p>Dallas/Maxim iButton key templates for building access, elevator controls, and intercom systems. DS1990A, DS1961S, and Cyfral protocols.</p>
+        </div>
+        <div class="layer-card">
+          <h3>🎨 Animations <span class="count">81</span></h3>
+          <p>Custom Flipper screen animations. Matrix rain, NullSec branding, hacker aesthetics, retro pixel art, holiday themes, and idle animations.</p>
+        </div>
+        <div class="layer-card">
+          <h3>🎵 Music</h3>
+          <p>RTTTL ringtone files for the Flipper piezo speaker. Game themes, memes, notification tones, and custom alert sounds.</p>
+        </div>
+        <div class="layer-card">
+          <h3>🔧 Configs</h3>
+          <p>Pre-built Flipper configuration profiles for different engagement types. Red team, physical pentest, CTF competition, and daily carry profiles.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background: var(--bg2);">
+    <div class="container">
+      <div class="section-title">
+        <h2>BadUSB Highlights</h2>
+        <p>80 production-ready scripts across offensive, recon, and stealth categories.</p>
+      </div>
+      <div class="cli-demo">
+        <div class="cli-header">
+          <div class="cli-dot r"></div><div class="cli-dot y"></div><div class="cli-dot g"></div>
+          <span class="cli-title">flipper_zero — badusb</span>
+        </div>
+        <div class="cli-body">
+          <span class="out">📁 badusb/</span><br>
+          <span class="out">├── windows/</span><br>
+          <span class="ok">│   ├── reverse-shell.txt</span> <span class="out">&nbsp;&nbsp;# PowerShell reverse TCP</span><br>
+          <span class="ok">│   ├── wifi-stealer.txt</span> <span class="out">&nbsp;&nbsp;&nbsp;# Dump saved WiFi creds</span><br>
+          <span class="ok">│   ├── sysinfo-exfil.txt</span> <span class="out">&nbsp;&nbsp;# Hardware + network recon</span><br>
+          <span class="ok">│   ├── disable-defender.txt</span> <span class="out"># Kill AV + firewall</span><br>
+          <span class="ok">│   ├── persistence.txt</span> <span class="out">&nbsp;&nbsp;&nbsp;&nbsp;# Registry run key backdoor</span><br>
+          <span class="ok">│   └── 35+ more...</span><br>
+          <span class="out">├── macos/</span><br>
+          <span class="ok">│   ├── safari-creds.txt</span> <span class="out">&nbsp;&nbsp;# Keychain credential dump</span><br>
+          <span class="ok">│   ├── ssh-backdoor.txt</span> <span class="out">&nbsp;&nbsp;# Install SSH reverse tunnel</span><br>
+          <span class="ok">│   └── 15+ more...</span><br>
+          <span class="out">└── linux/</span><br>
+          <span class="ok">&nbsp;&nbsp;&nbsp;&nbsp;├── cron-backdoor.txt</span> <span class="out">&nbsp;# Cron-based persistence</span><br>
+          <span class="ok">&nbsp;&nbsp;&nbsp;&nbsp;├── shadow-dump.txt</span> <span class="out">&nbsp;&nbsp;&nbsp;# /etc/shadow exfiltration</span><br>
+          <span class="ok">&nbsp;&nbsp;&nbsp;&nbsp;└── 15+ more...</span><br>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="firmware">
+    <div class="container">
+      <div class="section-title">
+        <h2>Works With Every Firmware</h2>
+        <p>Tested and verified on all major Flipper Zero firmware builds.</p>
+      </div>
+      <div class="firmware-grid">
+        <div class="fw-card">
+          <div class="fw-icon">📱</div>
+          <h3>Official</h3>
+          <p>Stock Flipper Labs firmware</p>
+          <div class="compat">✅ Full Compatibility</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-icon">🚀</div>
+          <h3>Momentum</h3>
+          <p>Community-driven feature firmware</p>
+          <div class="compat">✅ Full Compatibility</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-icon">⚡</div>
+          <h3>Xtreme</h3>
+          <p>Power-user custom firmware</p>
+          <div class="compat">✅ Full Compatibility</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-icon">🔓</div>
+          <h3>Unleashed</h3>
+          <p>Unlocked frequency firmware</p>
+          <div class="compat">✅ Full Compatibility</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-icon">🏴‍☠️</div>
+          <h3>RogueMaster</h3>
+          <p>All-in-one custom firmware</p>
+          <div class="compat">✅ Full Compatibility</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background: var(--bg2);">
+    <div class="container">
+      <div class="section-title">
+        <h2>Use Cases</h2>
+        <p>From authorized pentests to CTF competitions, the suite has you covered.</p>
+      </div>
+      <div class="usecases-grid">
+        <div class="usecase-card">
+          <div class="icon">🔴</div>
+          <h3>Red Team Engagements</h3>
+          <p>Physical access payloads for authorized penetration tests. Badge cloning, keystroke injection, and wireless signal replay.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🏆</div>
+          <h3>CTF Competitions</h3>
+          <p>Pre-built challenge solvers for hardware CTF events. RF analysis, NFC cracking, and rapid BadUSB deployment.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">📚</div>
+          <h3>Security Research</h3>
+          <p>Reference implementations for studying wireless protocols, access control systems, and embedded security.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🏠</div>
+          <h3>Home Automation</h3>
+          <p>Control IR devices, capture garage frequencies, manage NFC tags for smart home experimentation.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🎓</div>
+          <h3>Education & Training</h3>
+          <p>Teach wireless security concepts with real-world payload examples. Documented scripts for classroom use.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🎨</div>
+          <h3>Personalization</h3>
+          <p>81 custom animations, music files, and branding assets. Make your Flipper uniquely yours.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="container">
+      <div class="section-title">
+        <h2>Get the Suite</h2>
+        <p>Free for the community. Pro includes custom payloads and priority updates.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <h3>Community</h3>
+          <div class="price">$0</div>
+          <div class="price-sub">Free forever — open source</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> Full 430+ file collection</li>
+            <li><span class="check">✓</span> All BadUSB scripts</li>
+            <li><span class="check">✓</span> SubGHz, IR, NFC, RFID</li>
+            <li><span class="check">✓</span> 81 custom animations</li>
+            <li><span class="check">✓</span> All firmware compatibility</li>
+            <li><span class="check">✓</span> Community support</li>
+            <li><span class="x">—</span> Custom payload requests</li>
+            <li><span class="x">—</span> Priority updates</li>
+          </ul>
+          <a href="https://github.com/bad-antics/nullsec-flipper-suite" class="btn btn-outline">Clone Free</a>
+        </div>
+        <div class="price-card featured">
+          <h3>Pro</h3>
+          <div class="price">$19<span>/mo</span></div>
+          <div class="price-sub">For active pentesters</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> Everything in Community</li>
+            <li><span class="check">✓</span> Monthly new payload drops</li>
+            <li><span class="check">✓</span> Custom payload requests (2/mo)</li>
+            <li><span class="check">✓</span> Target-specific SubGHz captures</li>
+            <li><span class="check">✓</span> Priority GitHub support</li>
+            <li><span class="check">✓</span> Early access to beta scripts</li>
+            <li><span class="check">✓</span> Private Discord channel</li>
+            <li><span class="x">—</span> Bulk licensing</li>
+          </ul>
+          <a href="https://github.com/sponsors/bad-antics" class="btn btn-primary">Go Pro →</a>
+        </div>
+        <div class="price-card">
+          <h3>Team</h3>
+          <div class="price">$99<span>/mo</span></div>
+          <div class="price-sub">For security firms</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> Everything in Pro</li>
+            <li><span class="check">✓</span> Unlimited payload requests</li>
+            <li><span class="check">✓</span> Custom branding & animations</li>
+            <li><span class="check">✓</span> Engagement-specific packages</li>
+            <li><span class="check">✓</span> Multi-device deployment tool</li>
+            <li><span class="check">✓</span> Dedicated Slack/Teams channel</li>
+            <li><span class="check">✓</span> Up to 10 team members</li>
+            <li><span class="check">✓</span> Invoice billing</li>
+          </ul>
+          <a href="mailto:badxantics@gmail.com?subject=Flipper%20Suite%20Team" class="btn btn-outline">Contact Sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="text-align: center; padding: 6rem 2rem;">
+    <div class="container">
+      <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">
+        Your Flipper.<br><span style="color: var(--accent);">Fully Loaded.</span>
+      </h2>
+      <p style="color: var(--text-dim); font-size: 1.1rem; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+        430+ files. Every protocol. Every firmware. One git clone.
+      </p>
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="https://github.com/bad-antics/nullsec-flipper-suite" class="btn btn-primary">⬇️ Get the Suite</a>
+        <a href="https://github.com/sponsors/bad-antics" class="btn btn-outline">💛 Sponsor</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/bad-antics/nullsec-flipper-suite">GitHub</a>
+      <a href="https://github.com/bad-antics/nullsec-flipper-suite/releases">Releases</a>
+      <a href="https://github.com/bad-antics/nullsec-flipper-suite/blob/main/LICENSE">License (MIT)</a>
+      <a href="https://github.com/sponsors/bad-antics">Sponsor</a>
+      <a href="mailto:badxantics@gmail.com">Contact</a>
+    </div>
+    <p>© 2026 NullSec / bad-antics. MIT Licensed. For authorized security testing only.</p>
+  </footer>
+</body>
+</html>

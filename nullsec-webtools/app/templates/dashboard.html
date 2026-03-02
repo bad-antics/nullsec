@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stat Row -->
+<div class="stat-row" id="stats">
+    <div class="stat-card">
+        <div class="stat-num" id="s-nodes">—</div>
+        <div class="stat-label">Nodes Online</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="s-cores">—</div>
+        <div class="stat-label">Total Cores</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="s-ram">—</div>
+        <div class="stat-label">RAM (GB)</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="s-payloads">—</div>
+        <div class="stat-label">Payloads</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="s-tools">—</div>
+        <div class="stat-label">Tools</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num" id="s-loot">—</div>
+        <div class="stat-label">Loot Dirs</div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="section-header">
+    <div class="section-title">⚡ Quick Actions</div>
+</div>
+<div class="card-grid" style="margin-bottom:24px;">
+    <a href="/cluster" class="card" style="text-decoration:none;color:inherit;">
+        <div class="card-icon">🖥️</div>
+        <div style="font-weight:600;margin:8px 0;">Cluster Manager</div>
+        <div class="card-sub">Execute commands across all nodes, monitor health</div>
+    </a>
+    <a href="/payloads" class="card" style="text-decoration:none;color:inherit;">
+        <div class="card-icon">📦</div>
+        <div style="font-weight:600;margin:8px 0;">Payload Browser</div>
+        <div class="card-sub">Browse, search, and validate 163+ payloads</div>
+    </a>
+    <a href="/network" class="card" style="text-decoration:none;color:inherit;">
+        <div class="card-icon">🔍</div>
+        <div style="font-weight:600;margin:8px 0;">Network Intel</div>
+        <div class="card-sub">Scan targets, discover hosts, analyze traffic</div>
+    </a>
+    <a href="/loot" class="card" style="text-decoration:none;color:inherit;">
+        <div class="card-icon">💎</div>
+        <div style="font-weight:600;margin:8px 0;">Loot Viewer</div>
+        <div class="card-sub">Browse captured data and exfiltrated files</div>
+    </a>
+    <a href="/terminal" class="card" style="text-decoration:none;color:inherit;">
+        <div class="card-icon">🖥️</div>
+        <div style="font-weight:600;margin:8px 0;">Web Terminal</div>
+        <div class="card-sub">SSH into any cluster node from the browser</div>
+    </a>
+</div>
+
+<!-- App Network -->
+<div class="section-header">
+    <div class="section-title">🌐 NullSec App Network</div>
+</div>
+<div class="card-grid" style="margin-bottom:24px;">
+    <a href="http://localhost:9001" target="_blank" class="card" style="text-decoration:none;color:inherit;border-left:3px solid var(--cyan);">
+        <div class="card-icon">◉</div>
+        <div style="font-weight:600;margin:8px 0;color:var(--cyan);">NullSec Monitor</div>
+        <div class="card-sub">Real-time cluster monitoring with live CPU/RAM graphs, alerts, WebSocket feed</div>
+        <div style="margin-top:8px;"><span class="badge badge-blue">:9001</span></div>
+    </a>
+    <a href="http://localhost:9002" target="_blank" class="card" style="text-decoration:none;color:inherit;border-left:3px solid var(--orange);">
+        <div class="card-icon">◎</div>
+        <div style="font-weight:600;margin:8px 0;color:var(--orange);">NullSec Scanner</div>
+        <div class="card-sub">Port scanning, subnet discovery, host fingerprinting, service detection</div>
+        <div style="margin-top:8px;"><span class="badge badge-orange">:9002</span></div>
+    </a>
+    <a href="http://localhost:9003" target="_blank" class="card" style="text-decoration:none;color:inherit;border-left:3px solid var(--purple);">
+        <div class="card-icon">⚡</div>
+        <div style="font-weight:600;margin:8px 0;color:var(--purple);">NullSec Bench</div>
+        <div class="card-sub">Cluster benchmarking — CPU, memory, disk I/O, network latency comparison</div>
+        <div style="margin-top:8px;"><span class="badge badge-purple">:9003</span></div>
+    </a>
+</div>
+
+<!-- Cluster Overview -->
+<div class="section-header">
+    <div class="section-title">🖥️ Cluster Nodes</div>
+    <button class="btn btn-sm" onclick="refreshDashboard()">↻ Refresh</button>
+</div>
+<div class="node-grid" id="node-grid">
+    <div class="loading"><div class="spinner"></div> Loading cluster data...</div>
+</div>
+
+<script>
+function refreshDashboard() {
+    // Stats
+    NS.get('/api/dashboard/stats').then(d => {
+        NS.html('#s-nodes', `${d.nodes_online || 0}/${d.total_nodes || 0}`);
+        NS.html('#s-cores', d.total_cores || '—');
+        NS.html('#s-ram', d.total_ram_gb ? d.total_ram_gb.toFixed(0) : '—');
+        NS.html('#s-payloads', d.total_payloads || '—');
+        NS.html('#s-tools', d.total_tools || '—');
+        NS.html('#s-loot', d.loot_dirs || '—');
+    });
+
+    // Nodes
+    NS.get('/cluster/api/nodes').then(nodes => {
+        const grid = NS.$('#node-grid');
+        if (!nodes.length) {
+            grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🖥️</div><div class="empty-text">No nodes configured</div></div>';
+            return;
+        }
+        grid.innerHTML = nodes.map(n => `
+            <div class="node-card ${n.online ? 'online' : 'offline'}">
+                <div class="node-name">
+                    <span class="status-dot ${n.online ? 'online' : 'offline'}"></span>
+                    ${n.name}
+                    <span class="badge ${n.online ? 'badge-green' : 'badge-red'}" style="margin-left:auto;">
+                        ${n.online ? 'ONLINE' : 'OFFLINE'}
+                    </span>
+                </div>
+                <div class="node-stats">
+                    <div><div class="node-stat-label">IP</div><div class="node-stat-value">${n.ip}</div></div>
+                    <div><div class="node-stat-label">Cores</div><div class="node-stat-value">${n.cores || '—'}</div></div>
+                    <div><div class="node-stat-label">RAM</div><div class="node-stat-value">${n.ram_gb ? n.ram_gb.toFixed(1) + ' GB' : '—'}</div></div>
+                    <div><div class="node-stat-label">Load</div><div class="node-stat-value">${n.load || '—'}</div></div>
+                    <div><div class="node-stat-label">Uptime</div><div class="node-stat-value">${n.uptime || '—'}</div></div>
+                    <div><div class="node-stat-label">OS</div><div class="node-stat-value">${n.os_info || '—'}</div></div>
+                </div>
+            </div>
+        `).join('');
+    });
+}
+
+refreshDashboard();
+NS.poll('dash', '/api/dashboard/stats', (d) => {
+    NS.html('#s-nodes', `${d.nodes_online || 0}/${d.total_nodes || 0}`);
+    NS.html('#s-cores', d.total_cores || '—');
+    NS.html('#s-ram', d.total_ram_gb ? d.total_ram_gb.toFixed(0) : '—');
+}, 30000);
+</script>
+{% endblock %}

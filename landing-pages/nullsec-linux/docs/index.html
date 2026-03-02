@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NullSec Linux — Security-Focused Linux Distribution</title>
+  <meta name="description" content="Security-focused Linux distribution with 140+ tools, custom kernel 6.17.13, 5 specialized editions. Cloud, AI/ML, Automotive, Hardware Hacking.">
+  <meta name="keywords" content="linux distro, security distribution, penetration testing, kali alternative, parrot alternative, ethical hacking, red team, blue team, CTF, cybersecurity">
+  <meta property="og:title" content="NullSec Linux — 140+ Security Tools, Custom Kernel">
+  <meta property="og:description" content="Security-focused Linux distribution with 140+ tools, 5 editions, custom kernel 6.17.13, and zero telemetry.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bad-antics.github.io/nullsec-linux/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #111118;
+      --bg3: #1a1a24;
+      --accent: #00ff88;
+      --accent2: #00ccff;
+      --accent-dim: #00ff8830;
+      --danger: #ff4444;
+      --warning: #ffaa00;
+      --text: #e0e0e8;
+      --text-dim: #8888a0;
+      --border: #2a2a3a;
+      --card: #14141e;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+    a { color: var(--accent); text-decoration: none; transition: opacity .2s; }
+    a:hover { opacity: .8; }
+    code, pre { font-family: var(--mono); }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; backdrop-filter: blur(20px); background: rgba(10,10,15,0.85); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+    .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .nav-brand { font-weight: 800; font-size: 1.1rem; color: var(--accent); display: flex; align-items: center; gap: .5rem; }
+    .nav-brand span { color: var(--text-dim); font-weight: 400; font-size: .85rem; }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a { color: var(--text-dim); font-size: .9rem; font-weight: 500; }
+    .nav-links a:hover { color: var(--accent); }
+    .btn { display: inline-flex; align-items: center; gap: .5rem; padding: .6rem 1.4rem; border-radius: 8px; font-weight: 600; font-size: .9rem; transition: all .2s; border: none; cursor: pointer; }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-primary:hover { background: #00ff99; transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-dim); }
+    .btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    .btn-outline:hover { background: var(--accent-dim); }
+
+    .hero { padding: 10rem 2rem 6rem; text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at 50% 0%, var(--accent-dim) 0%, transparent 60%); pointer-events: none; }
+    .hero h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; }
+    .hero h1 .accent { color: var(--accent); }
+    .hero h1 .accent2 { color: var(--accent2); }
+    .hero .subtitle { font-size: 1.25rem; color: var(--text-dim); max-width: 680px; margin: 0 auto 2.5rem; }
+    .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
+    .hero-install { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 2rem; font-family: var(--mono); font-size: 1rem; color: var(--accent); display: inline-flex; align-items: center; gap: 1rem; max-width: 600px; margin: 0 auto; }
+    .hero-install .dollar { color: var(--text-dim); }
+    .copy-btn { background: var(--border); border: none; color: var(--text-dim); padding: .3rem .6rem; border-radius: 4px; cursor: pointer; font-size: .75rem; font-family: var(--font); }
+    .copy-btn:hover { color: var(--accent); }
+
+    .stats { display: flex; justify-content: center; gap: 4rem; padding: 2rem 2rem; flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat-num { font-size: 2.5rem; font-weight: 800; color: var(--accent); font-family: var(--mono); }
+    .stat-label { font-size: .85rem; color: var(--text-dim); margin-top: .25rem; }
+
+    section { padding: 5rem 2rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .section-title { text-align: center; margin-bottom: 3rem; }
+    .section-title h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: .5rem; }
+    .section-title p { color: var(--text-dim); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+
+    .layers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .layer-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; transition: transform .2s, border-color .2s; }
+    .layer-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+    .layer-num { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: var(--accent-dim); color: var(--accent); font-weight: 800; font-size: .85rem; margin-bottom: .75rem; }
+    .layer-card h3 { font-size: 1.1rem; margin-bottom: .5rem; }
+    .layer-card p { color: var(--text-dim); font-size: .9rem; }
+    .layer-card .icon { font-size: 2rem; margin-bottom: 1rem; }
+
+    .demo-section { background: var(--bg2); }
+    .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+    .code-block { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .code-header { display: flex; align-items: center; gap: .5rem; padding: .75rem 1rem; background: var(--bg3); border-bottom: 1px solid var(--border); font-size: .8rem; color: var(--text-dim); }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dot.r { background: #ff5f57; }
+    .code-dot.y { background: #febc2e; }
+    .code-dot.g { background: #28c840; }
+    .code-block pre { padding: 1.25rem; font-size: .85rem; line-height: 1.7; overflow-x: auto; color: var(--text); }
+    .code-block .kw { color: #c678dd; }
+    .code-block .fn { color: #61afef; }
+    .code-block .str { color: #98c379; }
+    .code-block .cmt { color: #5c6370; font-style: italic; }
+    .code-block .num { color: #d19a66; }
+
+    .cli-demo { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; max-width: 700px; margin: 0 auto; overflow: hidden; }
+    .cli-demo .term-bar { background: var(--bg3); padding: .6rem 1rem; display: flex; align-items: center; gap: .5rem; border-bottom: 1px solid var(--border); }
+    .cli-demo pre { padding: 1.5rem; font-size: .85rem; line-height: 1.8; overflow-x: auto; }
+    .cli-green { color: var(--accent); }
+    .cli-red { color: var(--danger); }
+    .cli-yellow { color: var(--warning); }
+    .cli-dim { color: var(--text-dim); }
+    .cli-cyan { color: var(--accent2); }
+    .cli-bold { font-weight: 700; }
+
+    .usecases-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .usecase-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; }
+    .usecase-card .icon { font-size: 2rem; margin-bottom: 1rem; }
+    .usecase-card h3 { font-size: 1.1rem; margin-bottom: .5rem; }
+    .usecase-card p { color: var(--text-dim); font-size: .9rem; }
+
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+    .price-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; text-align: center; transition: transform .2s, border-color .2s; position: relative; }
+    .price-card:hover { transform: translateY(-4px); }
+    .price-card.featured { border-color: var(--accent); box-shadow: 0 0 40px var(--accent-dim); }
+    .price-card.featured::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #000; padding: .25rem 1rem; border-radius: 12px; font-size: .7rem; font-weight: 800; }
+    .price-card h3 { font-size: 1.3rem; margin-bottom: .5rem; }
+    .price-card .price { font-size: 3rem; font-weight: 800; margin: 1rem 0; font-family: var(--mono); }
+    .price-card .price span { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
+    .price-card .price-sub { color: var(--text-dim); font-size: .9rem; margin-bottom: 1.5rem; }
+    .price-features { list-style: none; text-align: left; margin-bottom: 2rem; }
+    .price-features li { padding: .5rem 0; display: flex; align-items: center; gap: .75rem; font-size: .9rem; }
+    .price-features .check { color: var(--accent); font-weight: bold; }
+    .price-features .x { color: var(--text-dim); }
+    .price-card .btn { width: 100%; justify-content: center; }
+
+    .editions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
+    .edition-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: center; transition: transform .2s, border-color .2s; }
+    .edition-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+    .edition-card .edition-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .edition-card h3 { font-size: 1.1rem; margin-bottom: .5rem; }
+    .edition-card p { color: var(--text-dim); font-size: .85rem; }
+    .edition-card .size { font-family: var(--mono); color: var(--accent2); font-size: .8rem; margin-top: .75rem; }
+
+    .tools-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+    .tools-table th, .tools-table td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--border); font-size: .9rem; }
+    .tools-table th { color: var(--accent); font-weight: 700; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; }
+    .tools-table td:first-child { font-family: var(--mono); color: var(--accent2); font-weight: 600; }
+    .tools-table td:nth-child(2) { color: var(--text-dim); }
+
+    footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--text-dim); font-size: .85rem; }
+    footer .footer-links { display: flex; gap: 2rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; }
+
+    @media (max-width: 768px) {
+      .demo-grid { grid-template-columns: 1fr; }
+      .nav-links { gap: 1rem; }
+      .stats { gap: 2rem; }
+      .hero { padding: 8rem 1.5rem 4rem; }
+      .editions-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <div class="nav-brand">🔒 NullSec Linux <span>v5.0</span></div>
+      <div class="nav-links">
+        <a href="#editions">Editions</a>
+        <a href="#tools">Tools</a>
+        <a href="#pricing">Pricing</a>
+        <a href="https://github.com/bad-antics/nullsec-linux" target="_blank">GitHub</a>
+        <a href="#pricing" class="btn btn-primary">Download Free</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>
+      <span class="accent">140+</span> Security Tools.<br>
+      One <span class="accent2">Distribution.</span>
+    </h1>
+    <p class="subtitle">
+      Security-focused Linux distribution with a custom kernel, zero telemetry,
+      5 specialized editions, and everything you need for red team, blue team, and research.
+    </p>
+    <div class="hero-cta">
+      <a href="#pricing" class="btn btn-primary">Download Free →</a>
+      <a href="https://github.com/bad-antics/nullsec-linux" class="btn btn-outline" target="_blank">⭐ Star on GitHub</a>
+    </div>
+    <div class="hero-install">
+      <span><span class="dollar">$</span> wget https://bad-antics.github.io/nullsec-linux-5.0.iso</span>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('wget https://bad-antics.github.io/nullsec-linux-5.0.iso');this.textContent='Copied!'">Copy</button>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">140+</div><div class="stat-label">Security Tools</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Editions</div></div>
+    <div class="stat"><div class="stat-num">6.17</div><div class="stat-label">Custom Kernel</div></div>
+    <div class="stat"><div class="stat-num">4</div><div class="stat-label">Architectures</div></div>
+    <div class="stat"><div class="stat-num">0</div><div class="stat-label">Telemetry</div></div>
+  </div>
+
+  <section id="editions">
+    <div class="container">
+      <div class="section-title">
+        <h2>5 Specialized Editions</h2>
+        <p>Purpose-built images for every security discipline. All hardened from the kernel up.</p>
+      </div>
+      <div class="editions-grid">
+        <div class="edition-card">
+          <div class="edition-icon">🐧</div>
+          <h3>Standard</h3>
+          <p>Full 140+ tool suite for general penetration testing and security research.</p>
+          <div class="size">5.8 GB ISO</div>
+        </div>
+        <div class="edition-card">
+          <div class="edition-icon">☁️</div>
+          <h3>Cloud Pentest</h3>
+          <p>AWS, GCP, Azure, and Kubernetes security auditing tools pre-configured.</p>
+          <div class="size">3.5 GB ISO</div>
+        </div>
+        <div class="edition-card">
+          <div class="edition-icon">🤖</div>
+          <h3>AI/ML Security</h3>
+          <p>LLM red teaming, adversarial ML, model auditing, and prompt injection testing.</p>
+          <div class="size">6.5 GB ISO</div>
+        </div>
+        <div class="edition-card">
+          <div class="edition-icon">🔧</div>
+          <h3>Hardware Hacking</h3>
+          <p>SDR, RFID, JTAG, fault injection, and embedded systems research tools.</p>
+          <div class="size">4.2 GB ISO</div>
+        </div>
+        <div class="edition-card">
+          <div class="edition-icon">🚗</div>
+          <h3>Automotive</h3>
+          <p>CAN bus analysis, OBD-II diagnostics, UDS protocol, and key fob research.</p>
+          <div class="size">3.8 GB ISO</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" style="background: var(--bg2);">
+    <div class="container">
+      <div class="section-title">
+        <h2>Hardened From Kernel Up</h2>
+        <p>Every layer of the stack is security-configured out of the box.</p>
+      </div>
+      <div class="layers-grid">
+        <div class="layer-card">
+          <div class="layer-num">1</div>
+          <h3>Custom Kernel 6.17.13</h3>
+          <p>Built from vanilla kernel.org sources. KASLR, SMEP/SMAP, PTI, Retpoline, module signing, lockdown mode.</p>
+        </div>
+        <div class="layer-card">
+          <div class="layer-num">2</div>
+          <h3>Zero Telemetry</h3>
+          <p>Completely stripped. No phone-home, no analytics, no tracking. Full disk encryption with LUKS2 + Argon2id.</p>
+        </div>
+        <div class="layer-card">
+          <div class="layer-num">3</div>
+          <h3>Network Security</h3>
+          <p>nftables firewall, SYN cookies, IPv6 privacy extensions, Wireguard built-in, DNS-over-HTTPS.</p>
+        </div>
+        <div class="layer-card">
+          <div class="layer-num">4</div>
+          <h3>Binary Protection</h3>
+          <p>PIE, Full RELRO, Stack canaries, FORTIFY_SOURCE=3, NX/DEP, CET/IBT, shadow stack, CFI.</p>
+        </div>
+        <div class="layer-card">
+          <div class="layer-num">5</div>
+          <h3>Application Sandbox</h3>
+          <p>AppArmor + SELinux profiles, Seccomp-bpf filters, namespace isolation, Landlock LSM, Bubblewrap.</p>
+        </div>
+        <div class="layer-card">
+          <div class="layer-num">6</div>
+          <h3>Anonymity Suite</h3>
+          <p>Tor/I2P/Lokinet integration, MAC spoofing on boot, anti-forensics capabilities, stealth live boot.</p>
+        </div>
+        <div class="layer-card">
+          <div class="layer-num">7</div>
+          <h3>Secure Boot</h3>
+          <p>Custom signing keys, TPM integration, IMA/EVM integrity measurement, verified boot chain.</p>
+        </div>
+        <div class="layer-card">
+          <div class="layer-num">8</div>
+          <h3>Multi-Architecture</h3>
+          <p>AMD64, ARM64 (Raspberry Pi 5, Apple Silicon), RISC-V (StarFive VisionFive 2). Native on all.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tools">
+    <div class="container">
+      <div class="section-title">
+        <h2>140+ Pre-Installed Tools</h2>
+        <p>Written in 15+ languages. Every tool purpose-built by the NullSec team.</p>
+      </div>
+      <div class="demo-grid">
+        <div>
+          <h3 style="margin-bottom: 1rem; color: var(--accent);">⚔️ Offensive</h3>
+          <table class="tools-table">
+            <tr><td>nullsec-injector</td><td>Rust</td><td>Memory-safe process injection</td></tr>
+            <tr><td>nullsec-shellcraft</td><td>Racket</td><td>Shellcode generation DSL</td></tr>
+            <tr><td>nullsec-exploit</td><td>C</td><td>Binary exploitation framework</td></tr>
+            <tr><td>nullsec-c2</td><td>Go</td><td>Command & control server</td></tr>
+            <tr><td>nullsec-webfuzz</td><td>Rust</td><td>Web application fuzzer</td></tr>
+            <tr><td>nullsec-sqlinject</td><td>Python</td><td>SQL injection toolkit</td></tr>
+          </table>
+          <h3 style="margin: 2rem 0 1rem; color: var(--accent2);">🔬 Analysis</h3>
+          <table class="tools-table">
+            <tr><td>nullsec-memcorrupt</td><td>Zig</td><td>Memory corruption analysis</td></tr>
+            <tr><td>nullsec-bingaze</td><td>C++20</td><td>Binary analysis</td></tr>
+            <tr><td>nullsec-kernspy</td><td>Go</td><td>Kernel module analyzer</td></tr>
+            <tr><td>nullsec-hashwitch</td><td>Julia</td><td>Hash analysis engine</td></tr>
+          </table>
+        </div>
+        <div>
+          <h3 style="margin-bottom: 1rem; color: var(--accent);">🌐 Network</h3>
+          <table class="tools-table">
+            <tr><td>nullsec-netprobe</td><td>Nim</td><td>Stealthy network recon</td></tr>
+            <tr><td>nullsec-portscan</td><td>Elixir</td><td>Async port scanner</td></tr>
+            <tr><td>nullsec-netseer</td><td>Haskell</td><td>Traffic analysis</td></tr>
+            <tr><td>nullsec-dnsenum</td><td>Go</td><td>DNS enumeration</td></tr>
+            <tr><td>nullsec-arpwatch</td><td>C</td><td>ARP monitoring</td></tr>
+          </table>
+          <h3 style="margin: 2rem 0 1rem; color: var(--accent2);">🛡️ Defense</h3>
+          <table class="tools-table">
+            <tr><td>nullsec-cppsentry</td><td>C++20</td><td>Packet sentinel</td></tr>
+            <tr><td>nullsec-clusterguard</td><td>Erlang</td><td>Distributed IDS</td></tr>
+            <tr><td>nullsec-luashield</td><td>Lua</td><td>WAF rules engine</td></tr>
+            <tr><td>nullsec-beaconhunt</td><td>Go</td><td>C2 beacon detector</td></tr>
+            <tr><td>nullsec-cryptwrap</td><td>Ada</td><td>Formally verified crypto</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="demo-section">
+    <div class="container">
+      <div class="section-title">
+        <h2>Boot &amp; Go in 60 Seconds</h2>
+        <p>Flash, boot, hack. Zero configuration needed.</p>
+      </div>
+      <div class="cli-demo">
+        <div class="term-bar">
+          <span class="code-dot r"></span>
+          <span class="code-dot y"></span>
+          <span class="code-dot g"></span>
+          <span style="color: var(--text-dim); font-size: .8rem; margin-left: .5rem;">Terminal</span>
+        </div>
+        <pre>
+<span class="cli-dim">$</span> <span class="cli-bold">sudo dd if=nullsec-pro-5.0.iso of=/dev/sdX bs=4M status=progress</span>
+<span class="cli-dim">  4.2 GB copied, 89s, 47.2 MB/s</span>
+
+<span class="cli-dim"># Boot into NullSec Linux...</span>
+
+<span class="cli-dim">$</span> <span class="cli-bold">nullsec-update</span>
+<span class="cli-green">  ✓ System packages updated</span>
+<span class="cli-green">  ✓ 140 security tools verified</span>
+<span class="cli-green">  ✓ Kernel 6.17.13 — current</span>
+
+<span class="cli-dim">$</span> <span class="cli-bold">nullsec-harden --profile maximum</span>
+<span class="cli-green">  ✓ Kernel lockdown: integrity</span>
+<span class="cli-green">  ✓ AppArmor: enforcing</span>
+<span class="cli-green">  ✓ Firewall: locked</span>
+<span class="cli-green">  ✓ ASLR: full randomization</span>
+
+<span class="cli-dim">$</span> <span class="cli-bold">nullsec-anon --tor --mac-spoof --dns-over-tor</span>
+<span class="cli-green">  ✓ Tor circuit established</span>
+<span class="cli-green">  ✓ MAC address randomized</span>
+<span class="cli-green">  ✓ DNS routing through Tor</span>
+<span class="cli-cyan">  → You are anonymous.</span>
+
+<span class="cli-dim">$</span> <span class="cli-bold">nullsec-framework</span>
+<span class="cli-green">  NullSec Framework v5.0</span>
+<span class="cli-dim">  140 tools loaded. Ready.</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-title">
+        <h2>Built For Every Team</h2>
+        <p>Whether you're attacking, defending, or researching — NullSec has your edition.</p>
+      </div>
+      <div class="usecases-grid">
+        <div class="usecase-card">
+          <div class="icon">⚔️</div>
+          <h3>Red Team Operations</h3>
+          <p>Full offensive toolkit with C2, exploitation, lateral movement, and persistence tools.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🛡️</div>
+          <h3>Blue Team Defense</h3>
+          <p>IDS, packet analysis, log correlation, C2 beacon detection, and incident response tools.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🏆</div>
+          <h3>CTF Competitions</h3>
+          <p>Binary analysis, crypto tools, pwn frameworks, web exploits — everything for competition day.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">☁️</div>
+          <h3>Cloud Security</h3>
+          <p>AWS, GCP, Azure, Kubernetes auditing. Terraform scanning. Container secrets extraction.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🔍</div>
+          <h3>Digital Forensics</h3>
+          <p>RAM analysis, disk imaging, timeline reconstruction, memory forensics, and evidence preservation.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🤖</div>
+          <h3>AI Security Research</h3>
+          <p>LLM red teaming, prompt injection testing, adversarial ML, model auditing, data poisoning research.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" style="background: var(--bg2);">
+    <div class="container">
+      <div class="section-title">
+        <h2>Simple Pricing</h2>
+        <p>Standard edition is free forever. Pro editions unlock hardened images and premium tools.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <h3>Community</h3>
+          <div class="price">$0</div>
+          <div class="price-sub">Free forever</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> Standard edition ISO</li>
+            <li><span class="check">✓</span> 140+ security tools</li>
+            <li><span class="check">✓</span> Custom kernel 6.17.13</li>
+            <li><span class="check">✓</span> Live boot images</li>
+            <li><span class="check">✓</span> Community support</li>
+            <li><span class="x">—</span> Pro hardened images</li>
+            <li><span class="x">—</span> Cloud/AI/Hardware editions</li>
+            <li><span class="x">—</span> Priority updates</li>
+          </ul>
+          <a href="https://github.com/bad-antics/nullsec-linux/releases" class="btn btn-outline">Download Free</a>
+        </div>
+        <div class="price-card featured">
+          <h3>Pro</h3>
+          <div class="price">$49<span>/yr</span></div>
+          <div class="price-sub">For professionals and teams</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> All 5 specialized editions</li>
+            <li><span class="check">✓</span> Kernel lockdown + KSPP</li>
+            <li><span class="check">✓</span> Full disk encryption</li>
+            <li><span class="check">✓</span> Secure boot with custom keys</li>
+            <li><span class="check">✓</span> Anti-forensics suite</li>
+            <li><span class="check">✓</span> Priority updates</li>
+            <li><span class="check">✓</span> Pro Discord access</li>
+            <li><span class="x">—</span> Custom builds</li>
+          </ul>
+          <a href="https://github.com/sponsors/bad-antics" class="btn btn-primary">Get Pro →</a>
+        </div>
+        <div class="price-card">
+          <h3>Enterprise</h3>
+          <div class="price">$199<span>/yr</span></div>
+          <div class="price-sub">For security teams at scale</div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> Everything in Pro</li>
+            <li><span class="check">✓</span> Custom edition builds</li>
+            <li><span class="check">✓</span> OVA/AMI cloud images</li>
+            <li><span class="check">✓</span> Compliance hardening</li>
+            <li><span class="check">✓</span> SLA guarantee</li>
+            <li><span class="check">✓</span> Dedicated support</li>
+            <li><span class="check">✓</span> Team licenses (10+)</li>
+            <li><span class="check">✓</span> Branding removal</li>
+          </ul>
+          <a href="mailto:badxantics@gmail.com?subject=NullSec%20Linux%20Enterprise" class="btn btn-outline">Contact Sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-title">
+        <h2>Runs Everywhere</h2>
+        <p>Native support for every major architecture and deployment target.</p>
+      </div>
+      <div class="layers-grid" style="max-width: 900px; margin: 0 auto;">
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">💻</h3>
+          <h3>AMD64 / x86_64</h3>
+          <p>Standard 64-bit PCs, workstations, servers. Full edition support.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">🍎</h3>
+          <h3>Apple Silicon</h3>
+          <p>M1/M2/M3/M4 native via Asahi Linux. Full hardware acceleration.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">🥧</h3>
+          <h3>ARM64 / RPi 5</h3>
+          <p>Raspberry Pi 4/5, ARM servers. Drop-in SD card image.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">⚡</h3>
+          <h3>RISC-V</h3>
+          <p>StarFive VisionFive 2 support for emerging open hardware.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">🐳</h3>
+          <h3>Docker / OCI</h3>
+          <p>Containerized toolkit for CI/CD pipelines and cloud deployments.</p>
+        </div>
+        <div class="layer-card" style="text-align:center;">
+          <h3 style="font-size:1.5rem; margin-bottom: .25rem;">☁️</h3>
+          <h3>Cloud Images</h3>
+          <p>Pre-built OVA, AMI, and GCP images. Deploy in minutes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background: var(--bg2); text-align: center; padding: 6rem 2rem;">
+    <div class="container">
+      <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">
+        Your Security Distro.<br><span style="color: var(--accent);">Download Now.</span>
+      </h2>
+      <p style="color: var(--text-dim); font-size: 1.1rem; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+        140+ tools. Custom kernel. Zero telemetry. Five editions. One download.
+      </p>
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="https://github.com/bad-antics/nullsec-linux/releases" class="btn btn-primary">⬇️ Download Free</a>
+        <a href="https://github.com/sponsors/bad-antics" class="btn btn-outline">💛 Sponsor</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/bad-antics/nullsec-linux">GitHub</a>
+      <a href="https://github.com/bad-antics/nullsec-linux/releases">Releases</a>
+      <a href="https://github.com/bad-antics/nullsec-linux/blob/main/LICENSE">License</a>
+      <a href="https://github.com/sponsors/bad-antics">Sponsor</a>
+      <a href="mailto:badxantics@gmail.com">Contact</a>
+    </div>
+    <p>© 2026 NullSec / bad-antics. Built with 🖤 by the NullSec team.</p>
+  </footer>
+</body>
+</html>

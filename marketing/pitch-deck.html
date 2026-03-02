@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bad-antics | Security Products & Services</title>
+<style>
+:root{--bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#30363d;--text:#e6edf3;--text2:#8b949e;--blue:#58a6ff;--green:#3fb950;--purple:#a371f7;--yellow:#d29922;--red:#f85149}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:960px;margin:0 auto;padding:0 24px}
+.hero{padding:60px 0 40px;text-align:center;background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%)}
+.hero h1{font-size:2.8rem;font-weight:800;margin-bottom:8px;background:linear-gradient(135deg,var(--text) 0%,var(--blue) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero .sub{color:var(--text2);font-size:1.1rem;margin-bottom:24px}
+.hero .contact{font-size:1rem;color:var(--green);font-weight:600}
+.stats{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;margin:32px 0}
+.stat{text-align:center}
+.stat .num{font-size:2rem;font-weight:800;color:var(--blue)}
+.stat .label{font-size:.8rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+h2{font-size:1.4rem;font-weight:700;margin:48px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:32px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;transition:border-color .2s}
+.card:hover{border-color:var(--blue)}
+.card h3{font-size:1.1rem;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.card p{color:var(--text2);font-size:.9rem;margin-bottom:12px}
+.card .pricing{font-size:.85rem;font-weight:600}
+.card .pricing .free{color:var(--green)}
+.card .pricing .paid{color:var(--yellow)}
+.card .pricing .enterprise{color:var(--purple)}
+.btn{display:inline-block;padding:8px 20px;border-radius:8px;font-size:.85rem;font-weight:600;text-decoration:none;transition:all .2s}
+.btn:hover{text-decoration:none;transform:translateY(-1px)}
+.btn-green{background:var(--green);color:#000}
+.btn-blue{background:var(--blue);color:#000}
+.btn-purple{background:var(--purple);color:#fff}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:500;margin:2px}
+.tag-blue{background:rgba(88,166,255,.12);border:1px solid rgba(88,166,255,.25);color:var(--blue)}
+.tag-green{background:rgba(63,185,80,.12);border:1px solid rgba(63,185,80,.25);color:var(--green)}
+.tag-purple{background:rgba(163,113,247,.12);border:1px solid rgba(163,113,247,.25);color:var(--purple)}
+.tag-yellow{background:rgba(210,153,34,.12);border:1px solid rgba(210,153,34,.25);color:var(--yellow)}
+.contribs{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.contribs span{font-size:.8rem;padding:4px 12px;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.2);border-radius:20px;color:var(--green)}
+.services{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px}
+.svc{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.svc .icon{font-size:1.8rem;margin-bottom:8px}
+.svc h4{font-size:.95rem;margin-bottom:4px}
+.svc p{font-size:.8rem;color:var(--text2)}
+.cta-box{background:linear-gradient(135deg,rgba(88,166,255,.08),rgba(63,185,80,.08));border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center;margin:40px 0}
+.cta-box h3{font-size:1.3rem;margin-bottom:8px}
+.cta-box p{color:var(--text2);margin-bottom:20px}
+.cta-box .buttons{display:flex;justify-content:center;flex-wrap:wrap;gap:12px}
+footer{text-align:center;padding:40px 20px;border-top:1px solid var(--border);margin-top:40px}
+footer p{color:var(--text2);font-size:.85rem}
+@media(max-width:600px){.hero h1{font-size:2rem}.stats{gap:16px}.stat .num{font-size:1.4rem}.grid{grid-template-columns:1fr}.services{grid-template-columns:1fr 1fr}}
+@media print{body{background:#fff;color:#111}:root{--bg:#fff;--bg2:#f6f8fa;--bg3:#eee;--border:#ddd;--text:#111;--text2:#555}.hero{background:#f6f8fa}.hero h1{-webkit-text-fill-color:#111;color:#111}}
+</style>
+</head>
+<body>
+
+<section class="hero">
+<div class="container">
+    <h1>BAD_ANTICS</h1>
+    <p class="sub">Security Engineering • Custom Tools • Linux Distros • Hardware Hacking • AI Defense</p>
+    <p class="contact">📧 badxantics@gmail.com &nbsp;•&nbsp; 🌐 bad-antics.github.io &nbsp;•&nbsp; 🐙 github.com/bad-antics</p>
+    <div class="stats">
+        <div class="stat"><div class="num">690+</div><div class="label">Repositories</div></div>
+        <div class="stat"><div class="num">290+</div><div class="label">Security Tools</div></div>
+        <div class="stat"><div class="num">111</div><div class="label">PRs Merged</div></div>
+        <div class="stat"><div class="num">1.3M+</div><div class="label">⭐ Reach</div></div>
+        <div class="stat"><div class="num">139</div><div class="label">Followers</div></div>
+    </div>
+    <div class="contribs">
+        <span>h4cker 25k⭐</span>
+        <span>API-Security 25k⭐</span>
+        <span>android-security 9.2k⭐</span>
+        <span>awesome-web-hacking 6.7k⭐</span>
+        <span>awesome-iot 4.6k⭐</span>
+        <span>bashbunny-payloads 2.9k⭐</span>
+        <span>awesome-rootkits 2k⭐</span>
+        <span>OSINT-Everything 2k⭐</span>
+        <span>111 PRs merged into 53 repos (1.3M+ combined ⭐)</span>
+    </div>
+</div>
+</section>
+
+<div class="container">
+
+<h2>💰 Products & Pricing</h2>
+
+<div class="grid">
+    <div class="card" style="border-top:3px solid var(--green)">
+        <h3>🐧 NullSec Linux</h3>
+        <p>Security-focused distribution with 290+ pre-installed tools, AI assistant, and 5 specialized editions.</p>
+        <div><span class="tag tag-green">290+ Tools</span> <span class="tag tag-blue">AI Assistant</span> <span class="tag tag-purple">5 Editions</span></div>
+        <p class="pricing" style="margin-top:12px">
+            <span class="free">Community FREE</span> &nbsp;•&nbsp;
+            <span class="paid">Pro $49/yr</span> &nbsp;•&nbsp;
+            <span class="enterprise">Enterprise $199/yr</span>
+        </p>
+        <a href="https://bad-antics.github.io/nullsec-linux/" class="btn btn-green" style="margin-top:8px">View Plans →</a>
+    </div>
+
+    <div class="card" style="border-top:3px solid var(--blue)">
+        <h3>🌐 Marshall Browser</h3>
+        <p>Privacy-first security browser with Dr. Marshall AI, 23 extensions, threat intel, and Tor integration.</p>
+        <div><span class="tag tag-blue">AI Assistant</span> <span class="tag tag-green">Privacy</span> <span class="tag tag-purple">Rust</span></div>
+        <p class="pricing" style="margin-top:12px">
+            <span class="free">Personal FREE</span> &nbsp;•&nbsp;
+            <span class="paid">Team $9/mo</span> &nbsp;•&nbsp;
+            <span class="enterprise">Enterprise $49/mo</span>
+        </p>
+        <a href="https://bad-antics.github.io/marshall/" class="btn btn-blue" style="margin-top:8px">View Plans →</a>
+    </div>
+
+    <div class="card" style="border-top:3px solid var(--purple)">
+        <h3>🐬 Flipper Zero Suite</h3>
+        <p>430+ files — BadUSB scripts, SubGHz frequencies, IR codes, NFC cards, RFID, custom animations.</p>
+        <div><span class="tag tag-purple">80 BadUSB</span> <span class="tag tag-blue">40 SubGHz</span> <span class="tag tag-green">16 IR</span></div>
+        <p class="pricing" style="margin-top:12px">
+            <span class="free">Community FREE</span> &nbsp;•&nbsp;
+            <span class="paid">Pro $19/mo</span> &nbsp;•&nbsp;
+            <span class="enterprise">Team $99/mo</span>
+        </p>
+        <a href="https://bad-antics.github.io/nullsec-flipper-suite/" class="btn btn-purple" style="margin-top:8px">View Plans →</a>
+    </div>
+
+    <div class="card" style="border-top:3px solid var(--yellow)">
+        <h3>🚗 BlackFlag ECU</h3>
+        <p>Automotive security toolkit — ECU diagnostics, CAN bus analysis, OBD-II research, UDS protocol support.</p>
+        <div><span class="tag tag-yellow">CAN Bus</span> <span class="tag tag-blue">OBD-II</span> <span class="tag tag-green">UDS</span></div>
+        <p class="pricing" style="margin-top:12px">
+            <span class="free">Hobbyist FREE</span> &nbsp;•&nbsp;
+            <span class="paid">Pro $29/mo</span> &nbsp;•&nbsp;
+            <span class="enterprise">Shop $149/mo</span>
+        </p>
+        <a href="https://bad-antics.github.io/blackflag-ecu/" class="btn btn-blue" style="margin-top:8px;background:var(--yellow);color:#000">View Plans →</a>
+    </div>
+
+    <div class="card" style="border-top:3px solid var(--red)">
+        <h3>🛡️ RCE Shield</h3>
+        <p>Real-time RCE prevention with eBPF kernel monitoring, syscall filtering, and behavioral anomaly detection.</p>
+        <div><span class="tag tag-blue">eBPF</span> <span class="tag tag-green">Kernel</span> <span class="tag tag-purple">Real-time</span></div>
+        <p class="pricing" style="margin-top:12px">
+            <span class="free">Gamer FREE</span> &nbsp;•&nbsp;
+            <span class="paid">Pro $9/mo</span> &nbsp;•&nbsp;
+            <span class="enterprise">Esports $49/mo</span>
+        </p>
+        <a href="https://bad-antics.github.io/rce-shield/" class="btn btn-blue" style="margin-top:8px;background:var(--red);color:#fff">View Plans →</a>
+    </div>
+
+    <div class="card" style="border-top:3px solid var(--green)">
+        <h3>🔒 Prompt Armor</h3>
+        <p>LLM prompt injection defense — 8-layer protection detecting 17 attack vectors with zero dependencies.</p>
+        <div><span class="tag tag-green">AI Security</span> <span class="tag tag-purple">Enterprise</span> <span class="tag tag-blue">API</span></div>
+        <p class="pricing" style="margin-top:12px">
+            <span class="enterprise">Enterprise AI Defense</span>
+        </p>
+        <a href="https://bad-antics.github.io/nullsec-prompt-armor/" class="btn btn-green" style="margin-top:8px">View Details →</a>
+    </div>
+</div>
+
+<h2>🛠️ Consulting Services</h2>
+
+<div class="services">
+    <div class="svc"><div class="icon">🔍</div><h4>Penetration Testing</h4><p>Web, API, Network, Wireless, IoT</p></div>
+    <div class="svc"><div class="icon">🛠️</div><h4>Tool Development</h4><p>Python, Rust, Go, C, Julia</p></div>
+    <div class="svc"><div class="icon">🐧</div><h4>Custom Linux</h4><p>Security distros, hardening</p></div>
+    <div class="svc"><div class="icon">📡</div><h4>Hardware Security</h4><p>Flipper, Pineapple, RF, firmware</p></div>
+    <div class="svc"><div class="icon">🤖</div><h4>AI/ML Security</h4><p>LLM red team, adversarial ML</p></div>
+    <div class="svc"><div class="icon">📝</div><h4>Security Auditing</h4><p>CIS, NIST, PCI-DSS, SOC 2</p></div>
+</div>
+
+<table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:.9rem">
+    <tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:10px;font-weight:600">Model</th><th style="text-align:left;padding:10px">Best For</th><th style="text-align:left;padding:10px">Duration</th></tr>
+    <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px"><strong>Project-Based</strong></td><td style="padding:10px;color:var(--text2)">Pentests, tool builds, audits</td><td style="padding:10px;color:var(--text2)">1-4 weeks</td></tr>
+    <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px"><strong>Retainer</strong></td><td style="padding:10px;color:var(--text2)">Ongoing security, maintenance</td><td style="padding:10px;color:var(--text2)">Monthly</td></tr>
+    <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px"><strong>Advisory</strong></td><td style="padding:10px;color:var(--text2)">Architecture review, threat modeling</td><td style="padding:10px;color:var(--text2)">Per session</td></tr>
+    <tr><td style="padding:10px"><strong>Training</strong></td><td style="padding:10px;color:var(--text2)">Team upskilling, workshops</td><td style="padding:10px;color:var(--text2)">1-5 days</td></tr>
+</table>
+
+<div class="cta-box">
+    <h3>Ready to Work Together?</h3>
+    <p>Free initial consultation — let's discuss your security needs</p>
+    <div class="buttons">
+        <a href="mailto:badxantics@gmail.com?subject=Security%20Consulting%20Inquiry" class="btn btn-green">📧 Email Me</a>
+        <a href="https://bad-antics.github.io/services" class="btn btn-blue">🌐 Full Services</a>
+        <a href="https://github.com/bad-antics" class="btn btn-purple">🐙 GitHub</a>
+    </div>
+</div>
+
+</div>
+
+<footer>
+    <p>
+        <a href="https://bad-antics.github.io">Portal</a> •
+        <a href="https://bad-antics.github.io/services">Services</a> •
+        <a href="https://github.com/bad-antics">GitHub</a> •
+        <a href="https://ko-fi.com/badantics">Ko-fi</a> •
+        <a href="https://twitter.com/AnonAntics">Twitter</a>
+    </p>
+    <p style="margin-top:8px">© 2024-2026 bad-antics • Security Engineering & Systems Research</p>
+    <p style="margin-top:4px;color:var(--text2)">badxantics@gmail.com</p>
+</footer>
+
+</body>
+</html>

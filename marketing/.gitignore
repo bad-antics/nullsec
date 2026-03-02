@@ -1,0 +1,6 @@
+# NullSec Marketing — Sensitive files
+.marketing-creds
+reddit-post-log.json
+hn-post-log.json
+*.log
+__pycache__/
