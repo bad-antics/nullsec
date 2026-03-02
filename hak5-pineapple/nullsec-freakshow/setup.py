@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name="nullsec-freakshow",
-    version="1.0.0",
-    description="🎪 The Freakshow Suite — 20 Weird & Creepy Security Tools",
+    version="2.0.0",
+    description="🎪 The Freakshow Suite — 30 Weird & Creepy Security Tools",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="bad-antics",
@@ -33,6 +33,16 @@ setup(
         "nullsec-harbinger>=1.0.0",
         "nullsec-revenant>=1.0.0",
         "nullsec-necronomicon>=1.0.0",
+        "nullsec-chimera>=1.0.0",
+        "nullsec-basilisk>=1.0.0",
+        "nullsec-apparition>=1.0.0",
+        "nullsec-manticore>=1.0.0",
+        "nullsec-ghoul>=1.0.0",
+        "nullsec-lich>=1.0.0",
+        "nullsec-imp>=1.0.0",
+        "nullsec-shade>=1.0.0",
+        "nullsec-djinn>=1.0.0",
+        "nullsec-mothman>=1.0.0",
     ],
     entry_points={
         "console_scripts": [

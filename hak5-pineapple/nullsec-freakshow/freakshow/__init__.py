@@ -1,11 +1,12 @@
 """
 🎪 nullsec-freakshow — The Freakshow Suite
-20 weird & creepy security tools by bad-antics.
+30 weird & creepy security tools by bad-antics.
 """
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 __author__ = "bad-antics"
 
 TOOLS = [
+    # ── Original 20 ──
     {"name": "sigil",        "package": "nullsec-sigil",        "emoji": "🔮", "desc": "Visual hash fingerprinting"},
     {"name": "dead-drop",    "package": "nullsec-dead-drop",    "emoji": "📦", "desc": "LSB steganography"},
     {"name": "miasma",      "package": "nullsec-miasma",      "emoji": "🎲", "desc": "Shannon entropy analyzer"},
@@ -26,6 +27,17 @@ TOOLS = [
     {"name": "harbinger",   "package": "nullsec-harbinger",   "emoji": "🔔", "desc": "Log scream detector"},
     {"name": "revenant",     "package": "nullsec-revenant",     "emoji": "🧟", "desc": "Zombie process hunter"},
     {"name": "necronomicon", "package": "nullsec-necronomicon", "emoji": "📕", "desc": "System dark assessment"},
+    # ── New 10 ──
+    {"name": "chimera",     "package": "nullsec-chimera",     "emoji": "🐉", "desc": "Binary polyglot structure validator"},
+    {"name": "basilisk",    "package": "nullsec-basilisk",    "emoji": "🐍", "desc": "DNS resolver security audit"},
+    {"name": "apparition",  "package": "nullsec-apparition",  "emoji": "👤", "desc": "Environment variable security audit"},
+    {"name": "manticore",   "package": "nullsec-manticore",   "emoji": "🦂", "desc": "TLS/SSL certificate chain analyzer"},
+    {"name": "ghoul",       "package": "nullsec-ghoul",       "emoji": "👹", "desc": "Shared library injection detector"},
+    {"name": "lich",        "package": "nullsec-lich",        "emoji": "💀", "desc": "Kernel module & rootkit scanner"},
+    {"name": "imp",         "package": "nullsec-imp",         "emoji": "😈", "desc": "Shell history auditor"},
+    {"name": "shade",       "package": "nullsec-shade",       "emoji": "🌑", "desc": "File permission anomaly hunter"},
+    {"name": "djinn",       "package": "nullsec-djinn",       "emoji": "🧞", "desc": "Container escape surface analyzer"},
+    {"name": "mothman",     "package": "nullsec-mothman",     "emoji": "🦇", "desc": "Network promiscuity & ARP detector"},
 ]
 
 __all__ = ["TOOLS"]

@@ -10,7 +10,7 @@ BANNER = r"""
   ║                                                      ║
   ║   🎪  T H E   F R E A K S H O W   S U I T E  🎪    ║
   ║                                                      ║
-  ║     20 Weird & Creepy Security Tools                 ║
+  ║     30 Weird & Creepy Security Tools                 ║
   ║     by bad-antics | nullsec@proton.me                ║
   ║                                                      ║
   ╚══════════════════════════════════════════════════════╝
@@ -81,7 +81,7 @@ def check():
 def about():
     """About the freakshow."""
     click.echo(BANNER)
-    click.echo("  The Freakshow Suite is a collection of 20 weird and creepy")
+    click.echo("  The Freakshow Suite is a collection of 30 weird and creepy")
     click.echo("  security tools built by bad-antics for the nullsec project.")
     click.echo()
     click.echo("  Each tool takes a horror/occult theme and applies it to a")
