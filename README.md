@@ -1,7 +1,6 @@
 ```
 # NullSec — Offensive Security Framework
 
-    ╚═╝  ╚═══╝ ╚═════╝ ╚══════╝╚══════╝╚══════╝╚══════╝ ╚═════╝
                     OFFENSIVE SECURITY FRAMEWORK
 ```
 
